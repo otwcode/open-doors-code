@@ -1,0 +1,182 @@
+from HTMLParser import HTMLParser
+import re
+
+import MySQLdb
+import sys
+
+
+class Tags(object):
+
+  def __init__(self, args, db):
+    self.tag_count = 0
+    self.db = db
+    self.cursor = self.db.cursor()
+    self.database = args.db_database
+    self.html_parser = HTMLParser()
+
+    self.tag_export_map = {
+      'original_tagid':       'Original Tag ID',
+      'original_tag':         'Original Tag',
+      'original_parent':      'Original Parent Tag',
+      'original_table':       'Original Tag Type',
+      'original_description': 'Original Tag Description',
+      'ao3_tag':              'Recommended AO3 Tag',
+      'ao3_tag_category':     'Recommended AO3 Category\n(for relationships)',
+      'ao3_tag_type':         'Recommended AO3 Type',
+      'ao3_tag_fandom':       'Related Fandom'
+    }
+
+
+  def create_tags_table(self):
+    try:
+      self.cursor.execute("DROP TABLE {0}.`tags`".format(self.database))
+    except MySQLdb.OperationalError, msg:
+      print "Command skipped: ", msg
+    self.cursor.execute("""
+      CREATE TABLE IF NOT EXISTS {0}.`tags` (
+        `storyid` int(11) DEFAULT NULL,
+        `original_tagid` int(11) DEFAULT NULL,
+        `original_tag` varchar(1024) DEFAULT NULL,
+        `original_column` varchar(255) DEFAULT NULL,
+        `original_parent` varchar(255) DEFAULT NULL,
+        `original_table` varchar(255) DEFAULT NULL,
+        `original_description` varchar(255) DEFAULT NULL,
+        `ao3_tag` varchar(1024) DEFAULT NULL,
+        `ao3_tag_type` VARCHAR(255) DEFAULT NULL,
+        `ao3_tag_category` VARCHAR(255) DEFAULT NULL,
+        `ao3_tag_fandom` VARCHAR(255) DEFAULT NULL
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+    """.format(self.database))
+
+
+  def populate_tag_table(self, database_name, story_id_col_name, table_name, tag_col_lookup):
+    dict_cursor = self.db.cursor(MySQLdb.cursors.DictCursor)
+    dict_cursor.execute('USE {0}'.format(database_name))
+    dict_cursor.execute('TRUNCATE {0}.`tags`'.format(database_name))
+
+    tag_columns = tag_col_lookup.keys() # [d['col'] for d in tag_col_lookup if 'col' in d]
+
+    # Get all values from all tag columns in the stories table and load as denormalised values in `tags` table
+    dict_cursor.execute('SELECT {0}, {1} FROM {2}'.format(story_id_col_name, ', '.join(tag_columns), table_name))
+    data = dict_cursor.fetchall()
+
+    for story_tags_row in data :
+      values = []
+      for col in tag_columns:
+        for val in re.split(r", ?", story_tags_row[col]):
+          if val != '':
+            values.append('({0}, "{1}", "{2}", "{3}")'
+                          .format(story_tags_row[story_id_col_name], val.replace("'", "\'"), col, tag_col_lookup[col]['table_name']))
+
+      self.cursor.execute("""
+           INSERT INTO tags (storyid, original_tag, original_column, original_table) VALUES {0}
+         """.format(', '.join(values)))
+
+    self.db.commit()
+
+
+  def distinct_tags(self):
+    columns = ['{0} as "{1}",'.format(k, v) for k, v in self.tag_export_map.items()]
+    print columns
+    self.cursor.execute("""
+      SELECT DISTINCT
+        original_tagid as "Original Tag ID",
+        original_tag as "Original Tag Name",
+        replace(original_table, 'fanfiction_', '') as "Original Tag Type",
+        original_parent as "Original Parent Tag",
+        ao3_tag_fandom as "Related Fandom",
+        ao3_tag as "Recommended AO3 Tag",
+        ao3_tag_type as "Recommended AO3 Type",
+        ao3_tag_category as "Recommended AO3 Category\n(for relationships)",
+        original_description as "Original Description",
+        '' as "TW Notes" FROM tags
+      """)
+    return self.cursor.fetchall()
+
+
+  def update_tag_row(self, row, table_prefix = None):
+    tag_headers = self.tag_export_map
+    original_table = row[tag_headers['original_table']] if table_prefix is None \
+      else '{0}_{1}'.format(table_prefix, row[tag_headers['original_table']])
+
+    self.cursor.execute("USE {0}".format(self.database))
+    self.cursor.execute("""
+          UPDATE tags
+          SET ao3_tag='{0}', ao3_tag_type='{1}'
+          WHERE original_tagid={2} and original_table='{3}'
+        """.format(row[tag_headers['ao3_tag']],
+                   row[tag_headers['ao3_tag_type']],
+                   row[tag_headers['original_tagid']],
+                   original_table))
+    self.db.commit()
+
+
+  def hydrate_tag_row(self, tag_id, tag_to_look_up, tag, col, table, parent ='', description =''):
+    self.cursor.execute("""
+        UPDATE `tags`
+        SET original_tagid=%s, original_tag=%s, original_parent=%s, original_description=%s, original_table=%s
+        WHERE original_tag=%s and original_column=%s
+      """,
+      (tag_id, self.html_parser.unescape(tag), self.html_parser.unescape(parent), self.html_parser.unescape(description), table, tag_to_look_up, col))
+    self.db.commit()
+
+
+  def hydrate_tags_table(self, col, lookup_data, lookup_ids = False):
+    self.cursor.execute('SELECT DISTINCT original_tag from tags WHERE original_column="{0}"'.format(col))
+    results = self.cursor.fetchall()
+    total = len(results)
+    cur = 0
+    print "{0} tags for column '{1}'".format(total, col)
+
+    for tag_row in results:
+      cur += 1
+      sys.stdout.write('\r{0}/{1}'.format(cur, total))
+      sys.stdout.flush()
+
+      # Get tag data
+      parent = ''
+      extra_column = ', {0} as description'.format(lookup_data['extra_column']) if 'extra_column' in lookup_data else ''
+      lookup_column = ', {0} as parent'.format(lookup_data['lookup_field']) if 'lookup_field' in lookup_data else ''
+      matching_field = lookup_data['id_name'] if lookup_ids else lookup_data['field_name']
+
+      dict_cursor = self.db.cursor(MySQLdb.cursors.DictCursor)
+      dict_cursor.execute("""
+          SELECT {0}, {1}{2}{3} FROM {4} WHERE {5}='{6}'
+        """.format(lookup_data['id_name'], lookup_data['field_name'], lookup_column, extra_column, lookup_data['table_name'], matching_field, tag_row[0]))
+      tag = dict_cursor.fetchone()
+      if tag is not None:
+        # Get parent data
+        if 'lookup_field' in lookup_data:
+          self.cursor.execute("SELECT {0} FROM {1} WHERE {2}='{3}'"
+                            .format(lookup_data['lookup_table_field'],
+                                    lookup_data['lookup_table'],
+                                    lookup_data['lookup_id'],
+                                    tag['parent']))
+          result = self.cursor.fetchone()
+          parent = result[0] if result is not None else ''
+
+        # Update the table
+        description = tag['description'] if 'description' in tag else ''
+        self.hydrate_tag_row(tag_id = tag[lookup_data['id_name']],
+                            tag_to_look_up= tag_row[0],
+                            tag = tag[lookup_data['field_name']],
+                            table = lookup_data['table_name'],
+                            col = col, parent = parent, description = description)
+
+
+  def tags_by_story_id(self):
+    self.cursor.execute("SELECT DISTINCT storyid FROM tags;")
+    storyids = self.cursor.fetchall()
+    cur = 0
+    total = len(storyids)
+
+    dict_cursor = self.db.cursor(MySQLdb.cursors.DictCursor)
+    tags_by_story_id = {}
+    for storyid in storyids:
+      cur += 1
+      sys.stdout.write('\r{0}/{1} stories'.format(cur, total))
+      sys.stdout.flush()
+      dict_cursor.execute("SELECT * FROM tags WHERE storyid={0}".format(storyid[0]))
+      tags = dict_cursor.fetchall()
+      tags_by_story_id[storyid[0]] = tags
+    return tags_by_story_id
