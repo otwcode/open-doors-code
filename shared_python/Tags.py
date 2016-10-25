@@ -4,6 +4,8 @@ import re
 import MySQLdb
 import sys
 
+from shared_python import Common
+
 
 class Tags(object):
 
@@ -66,7 +68,7 @@ class Tags(object):
         for val in re.split(r", ?", story_tags_row[col]):
           if val != '':
             values.append('({0}, "{1}", "{2}", "{3}")'
-                          .format(story_tags_row[story_id_col_name], val.replace("'", "\'"), col, tag_col_lookup[col]['table_name']))
+                          .format(story_tags_row[story_id_col_name], val.replace("'", "\'").strip(), col, tag_col_lookup[col]['table_name']))
 
       self.cursor.execute("""
            INSERT INTO tags (storyid, original_tag, original_column, original_table) VALUES {0}
@@ -77,7 +79,6 @@ class Tags(object):
 
   def distinct_tags(self):
     columns = ['{0} as "{1}",'.format(k, v) for k, v in self.tag_export_map.items()]
-    print columns
     self.cursor.execute("""
       SELECT DISTINCT
         original_tagid as "Original Tag ID",
@@ -102,10 +103,12 @@ class Tags(object):
     self.cursor.execute("USE {0}".format(self.database))
     self.cursor.execute("""
           UPDATE tags
-          SET ao3_tag='{0}', ao3_tag_type='{1}'
-          WHERE original_tagid={2} and original_table='{3}'
+          SET ao3_tag='{0}', ao3_tag_type='{1}', ao3_tag_category='{2}', ao3_tag_fandom='{3}'
+          WHERE original_tagid={4} and original_table='{5}'
         """.format(row[tag_headers['ao3_tag']],
                    row[tag_headers['ao3_tag_type']],
+                   row[tag_headers['ao3_tag_category']],
+                   row[tag_headers['ao3_tag_fandom']],
                    row[tag_headers['original_tagid']],
                    original_table))
     self.db.commit()
@@ -117,7 +120,7 @@ class Tags(object):
         SET original_tagid=%s, original_tag=%s, original_parent=%s, original_description=%s, original_table=%s
         WHERE original_tag=%s and original_column=%s
       """,
-      (tag_id, self.html_parser.unescape(tag), self.html_parser.unescape(parent), self.html_parser.unescape(description), table, tag_to_look_up, col))
+      (tag_id, self.html_parser.unescape(tag.strip()), self.html_parser.unescape(parent.strip()), self.html_parser.unescape(description.strip()), table, tag_to_look_up.strip(), col))
     self.db.commit()
 
 
@@ -129,9 +132,7 @@ class Tags(object):
     print "{0} tags for column '{1}'".format(total, col)
 
     for tag_row in results:
-      cur += 1
-      sys.stdout.write('\r{0}/{1}'.format(cur, total))
-      sys.stdout.flush()
+      cur = Common.print_progress(cur, total)
 
       # Get tag data
       parent = ''
@@ -176,6 +177,7 @@ class Tags(object):
       cur += 1
       sys.stdout.write('\r{0}/{1} stories'.format(cur, total))
       sys.stdout.flush()
+
       dict_cursor.execute("SELECT * FROM tags WHERE storyid={0}".format(storyid[0]))
       tags = dict_cursor.fetchall()
       tags_by_story_id[storyid[0]] = tags

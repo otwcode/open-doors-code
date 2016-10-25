@@ -36,6 +36,10 @@ def _process_args():
   parser.add_argument('-o', '--output_folder', type=str, help='Path for output files')
   parser.add_argument('-t', '--tag_input_file', type=str, help='Path to tag renaming input CSV')
   parser.add_argument('-od', '--output_database', type=str, help='Name of the database the final tables should be created in (default "od_sgf")')
+
+  parser.add_argument('-df', '--default_fandom', type=str, help='Default fandom to use')
+  parser.add_argument('-cp', '--chapters_path', type=str, help='Location of the text files containing the stories')
+  parser.add_argument('-cf', '--chapters_file_extensions', type=str, help='File extension(s) of the text files containing the stories (eg: "txt, html")')
   parser.add_argument('-n', '--archive_name', type=str, help='Name of the original archive (used in the temporary site)')
   parser.add_argument('-p', '--properties_file', type=str, help='Load properties from specified file (ignores all other arguments)')
 
@@ -108,5 +112,20 @@ def args_for_05():
   if args.output_database is None:
     args.output_database = raw_input('Name of the database the final tables should be created in (default "od_sgf"):')
     args.output_database = "od_sgf" if args.output_database is "" else args.output_database
+  if args.chapters_path is None:
+    args.chapters_path = raw_input('Location of the text files containing the stories:')
+  if args.chapters_path is not None and args.chapters_file_extensions is None:
+    args.chapters_file_extensions = raw_input('File extension(s) of the text files containing the stories (eg: "txt, html"):')
+  _print_args(args)
+  return args
+
+def args_for_06():
+  args = _process_args()
+  if args.output_database is None:
+    args.output_database = raw_input('Name of the database the final tables should be created in (default "od_sgf"):')
+  args.output_database = "od_sgf" if args.output_database is "" else args.output_database
+  if args.default_fandom is None:
+    args.default_fandom = raw_input('Default fandom:')
+    args.default_fandom = '' if args.default_fandom is None else args.default_fandom
   _print_args(args)
   return args

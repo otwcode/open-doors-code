@@ -1,0 +1,104 @@
+# -- coding: utf-8 --
+
+import codecs
+import os
+import re
+
+from shared_python import Common
+
+
+class Chapters(object):
+
+  def __init__(self, args, db):
+    self.args = args
+    self.db = db
+    self.cursor = self.db.cursor()
+
+
+  def _ends_with(self, filename, extensions):
+    return any(filename.endswith(ext) for ext in extensions)
+
+
+  def _gather_and_dedupe(self, chapters_path, extensions):
+    extensions = re.split(r", ?", extensions)
+    story_folder = os.walk(chapters_path)
+    file_paths = {}
+    duplicate_chapters = {}
+    error = False
+    messages = []
+    sql_messages = []
+    cur = 0
+    for root, _, filenames in story_folder:
+      total = len(filenames)
+      Common.print_progress(cur, total)
+      for filename in filenames:
+
+        if self._ends_with(filename, extensions):
+          file_path = os.path.join(root, filename)
+          cid = os.path.splitext(filename)[0]
+          if cid not in file_paths.keys():
+            file_paths[cid] = file_path
+          else:
+            duplicate_folder = os.path.split(os.path.split(file_path)[0])[1]
+            messages.append(file_path + " is a duplicate of " + file_paths[cid])
+            sql_messages.append("SELECT * FROM {0}_chapters WHERE id = {1}".format(self.args.db_table_prefix, cid))
+            duplicate_chapters[cid] = [
+              { 'folder_name': os.path.split(os.path.split(file_paths[cid])[0])[1], 'filename': filename, 'path': file_paths[cid] },
+              { 'folder_name': duplicate_folder, 'filename': filename, 'path': file_path }
+            ]
+            error = True
+
+    if error:
+      print '\n'.join(messages + sql_messages)
+      print duplicate_chapters
+      folder_name_type = raw_input("Resolving duplicates: pick the type of the folder name under {0} \n1 = author id\n2 = author name\n"
+                                   .format(chapters_path))
+      if folder_name_type == '1':
+        for cid, duplicate in duplicate_chapters.items():
+          # look up the author id and add that one to the file_names list
+          self.cursor.execute("SELECT authorid FROM {0}_chapters WHERE id = {1}"
+                              .format(self.args.db_table_prefix, cid))
+          sql_author_id = self.cursor.fetchall()
+          if len(sql_author_id) > 0:
+            author_id = sql_author_id[0][0]
+            file_paths[cid] = [dc['path'] for dc in duplicate_chapters[cid] if dc['folder_name'] == str(author_id)][0]
+
+    return file_paths
+
+
+  def populate_chapters(self, folder = None, extensions = None):
+    if folder is None:
+      folder = self.args.chapters_path
+    if extensions is None:
+      extensions = self.args.chapters_file_extensions
+
+    print """
+      Processing chapters...
+    """.replace('    ', '')
+    file_paths = self._gather_and_dedupe(folder, extensions)
+
+    char_encoding = raw_input("""
+      Importing chapters: pick character encoding (check for curly quotes):
+        1 = Windows 1252
+        enter = UTF-8
+    """.replace('      ', ''))
+
+    if char_encoding == '1':
+      char_encoding = 'cp1252'
+    else:
+      char_encoding = 'utf8'
+
+    for cid, chapter_path in file_paths.items():
+
+      with codecs.open(chapter_path, 'r', encoding=char_encoding) as c:
+        try:
+          file_contents = c.read()
+          query = "UPDATE {0}.{1}_chapters SET text=%s WHERE id=%s".format(self.args.output_database, self.args.db_table_prefix)
+          self.cursor.execute(query, (file_contents, int(cid)))
+          self.db.commit()
+        except Exception as e:
+          print("Error = chapter id: {0} - chapter: {1}\n{2}".format(cid, chapter_path, str(e)))
+        finally:
+          pass
+
+    self.db.close()

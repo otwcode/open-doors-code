@@ -18,6 +18,9 @@ databases.
 | -t  | tag_input_file  | Full path to Tag Wrangling CSV |
 | -od | output_database | Name of the database the final tables should be created in (default "od_sgf") |
 | -n  | archive_name    | Name of the original archive (used in export file names) |
+| -cp | chapters_path   | Location of the text files containing the stories. Optional - if no path is specified, the chapter table will be copied over as is. |
+| -cf | chapters_file_extensions |  File extension(s) of the text files containing the stories (eg: "txt, html"). Only required if a chapter path is specified. |
+| -df | default_fandom    | Default fandom to use. Optional - the column will only be populated with fandoms from the TW sheet if this is blank. |
 | -p  | properties_file | Load properties from specified file (ignores all other arguments) |
 
 If the `-p` flag is set, these values will be read from a YAML file in same folder as the script (see `example.yml`
@@ -108,6 +111,8 @@ It relies on the following parameters:
 | flag | Property name    | Description |
 |-----|-------------------|----------------------------------|
 | -od | output_database   | Name of the database the final tables should be created in (default "od_sgf") |
+| -cp | chapters_path     | Location of the text files containing the stories. Optional - if no path is specified, the chapter table will be copied over as is. |
+| -cf | chapters_file_extensions | File extension(s) of the text files containing the stories (eg: "txt, html"). Only required if a chapter path is specified. |
 
 The temporary sites are currently all run off the same database, with the tables prefixed to distinguish them.
 
@@ -123,4 +128,5 @@ It relies on the following parameters:
 | flag | Property name    | Description |
 |-----|-------------------|----------------------------------|
 | -od | output_database   | Name of the database the final tables should be created in (default "od_sgf") |
+| -df | default_fandom    | Default fandom to use. Optional - the column will only be populated with fandoms from the TW sheet if this is blank. |
 

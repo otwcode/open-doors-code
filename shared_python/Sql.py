@@ -26,6 +26,12 @@ class Sql(object):
     return self.cursor.fetchall()
 
 
+  def execute_dict(self, script, parameters = ()):
+    dict_cursor = self.db.cursor(MySQLdb.cursors.DictCursor)
+    dict_cursor.execute(script, parameters)
+    return dict_cursor.fetchall()
+
+
   def run_script_from_file(self, filename, database, prefix):
     # Open and read the file as a single buffer
     print database
