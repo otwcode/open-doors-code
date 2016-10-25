@@ -7,8 +7,14 @@ from shared_python.FinalTables import FinalTables
 from shared_python.Sql import Sql
 from shared_python.Tags import Tags
 
+def valid_tags(key, tag_type_list):
+  return [d[key].strip() for d in tag_type_list
+          if key in d
+          and d[key] is not None
+          and d[key] != '']
+
 if __name__ == "__main__":
-  args = Args.args_for_05() # Not a typo!
+  args = Args.args_for_06()
   sql = Sql(args)
   tags = Tags(args, sql.db)
   final = FinalTables(args, sql.db)
@@ -34,16 +40,23 @@ if __name__ == "__main__":
       # generate and run SQL to populate story table
       from collections import defaultdict
 
-      tags_by_type = defaultdict(list)  # key -> sum
+      tags_by_type = defaultdict(list)
       for tag in tags:
         tags_by_type[tag['ao3_tag_type']].append(tag)
 
-      story_tags = {}
+      story_tags = { 'categories': '', 'fandoms': '' }
+      categories = []
+      fandoms = [args.default_fandom]
       for (tag_type, tag_type_tags) in tags_by_type.items():
-        if tag_type is None:
-          print "\nStory {2} has a None tag type\n {0} -> {1}".format(tag_type, tag_type_tags, id)
+        if tag_type is None or tag_type == '':
+          print "\nStory {2} has a None tag type\n {0} -> {1}".format(tag_type, tag_type_tags, story_id)
         else:
           tag_list = [d['ao3_tag'] for d in tag_type_tags if 'ao3_tag' in d and d['ao3_tag'] is not None]
-          story_tags[tag_type] = ', '.join(tag_list)
+          categories = categories + valid_tags('ao3_tag_category', tag_type_tags)
+          fandoms = fandoms + valid_tags('ao3_tag_fandom', tag_type_tags)
+          story_tags[tag_type] = ', '.join(set(tag_list))
+
+      story_tags['categories'] = ', '.join(set(categories))
+      story_tags['fandoms'] = ', '.join(set(fandoms))
 
       final.populate_story_tags(story_id, args.db_table_prefix + '_stories', story_tags)

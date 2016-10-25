@@ -38,8 +38,9 @@ if __name__ == "__main__":
     author_name = 'name'
     story_id = 'id'
     story_author_col = 'authorId'
+    story_coauthor_col = 'coAuthorId'
     author_id = 'id'
-  if args.archive_type == 'EF':
+  elif args.archive_type == 'EF':
     author_table = '{0}.fanfiction_authors'.format(args.db_database)
     stories_table = '{0}.fanfiction_stories'.format(args.db_database)
     author_name = 'penname'

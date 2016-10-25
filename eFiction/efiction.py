@@ -79,6 +79,7 @@ def story_to_final_without_tags(efiction_story):
     'summary ':      efiction_story['summary'],
     'notes':         efiction_story['storynotes'],
     'authorid':      efiction_story['uid'],
+    'coauthorid':    efiction_story['coauthors'],
     'date':          efiction_story['date'],
     'updated':       efiction_story['updated'],
     'imported':      0,
@@ -96,3 +97,24 @@ def story_to_final_without_tags(efiction_story):
     # 'relationships': efiction_story['characters']
   }
   return final_story
+
+
+def chapter_to_final(efiction_chapter):
+  final_chapter = {
+    'ID':       efiction_chapter['chapid'],
+    'Position': efiction_chapter['inorder'],
+    'Title':    efiction_chapter['title'],
+    'AuthorID': efiction_chapter['uid'],
+    'Text':     efiction_chapter['storytext'],
+    'Date':     None,
+    'StoryID':  efiction_chapter['sid'],
+    'Notes':    efiction_chapter['notes'],
+    'Url':      None
+    # efiction_chapter['endnotes'],
+  }
+  return final_chapter
+
+def add_coauthors_to_stories(db, stories):
+  for story in stories:
+    db.cursor.execute("SELECT * FROM fanfiction_coauthors WHERE sid=%i", stories['sid'])
+  return None

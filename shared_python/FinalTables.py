@@ -15,18 +15,24 @@ class FinalTables(object):
     self.html_parser = HTMLParser()
 
 
-  def original_table(self, table_name):
-    self.cursor.execute("SELECT * FROM `{0}`.`{1}`".format(self.original_database, table_name))
+  def original_table(self, table_name, filter = ''):
+    self.cursor.execute("SELECT * FROM `{0}`.`{1}` {2}".format(self.original_database, table_name, filter))
     return self.cursor.fetchall()
+
+
+  def _escape_unescape(self, item):
+    return self.html_parser.unescape(item).replace('\\', '\\\\').replace('"', '\\"').replace("'", "\\'")
 
 
   def _value(self, row):
     value = []
     for item in row:
       if type(item) is unicode:
-        value.append('"' + item.replace('"', '\\"').replace("'", "\\'") + '"')
+        value.append('"' + self._escape_unescape(item) + '"')
       elif type(item) is datetime.datetime:
         value.append('"' + unicode(item) + '"')
+      elif item is None:
+        value.append('null')
       else:
         value.append(unicode(item))
     return value
@@ -50,8 +56,7 @@ class FinalTables(object):
   def populate_story_tags(self, story_id, output_table_name, story_tags):
     cols_with_tags = []
     for (col, tags) in story_tags.items():
-      cols_with_tags.append(u"{0}='{1}'".format(col, tags))
-    print cols_with_tags
+      cols_with_tags.append(u"{0}='{1}'".format(col, tags.replace("'", "\\'").strip()))
 
     if cols_with_tags:
       self.cursor.execute(u"""
