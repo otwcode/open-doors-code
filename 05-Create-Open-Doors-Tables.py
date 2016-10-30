@@ -42,21 +42,15 @@ if __name__ == "__main__":
       story_exclusion_filter = filter + '(' + line + ')'
 
   # Export tables
-  authors = final.original_table(table_names['authors'])
   stories_without_tags = final.original_table(table_names['stories'], story_exclusion_filter)
   chapters = final.original_table(table_names['chapters'], story_exclusion_filter)
   # there are usually no bookmarks
-
-
-
 
   if args.archive_type == 'AA':
     print 'Not implemented yet'
 
   elif args.archive_type == 'EF':
-    final_authors = [efiction.author_to_final(author) for author in authors]
-    final.insert_into_final(args.db_table_prefix + '_authors', final_authors)
-
+    # STORIES
     final_stories = []
     for story in stories_without_tags:
       if coauthors is not None and coauthors.has_key(story['sid']):
@@ -67,13 +61,22 @@ if __name__ == "__main__":
 
     final.insert_into_final(args.db_table_prefix + '_stories', final_stories)
 
+    # AUTHORS
+    final_authors = []
+    authors = final.original_table(table_names['authors'])
+    for author in authors:
+      if any(story['authorid'] == author['id'] or story['coauthorid'] == author['id'] for story in final_stories):
+        if author['email'] is None or author['email'] == '':
+          author['email'] = '{0}{1}Archive@ao3.org'.format(author['name'], args.archive_name).replace(' ', '').replace("'", "")
+        if author['email'].starts_with('mailto:'):
+          author['email'] = author['email'].replace('mailto:', '')
+      final_authors.append(efiction.author_to_final(author))
+    final.insert_into_final(args.db_table_prefix + '_authors', final_authors)
+
+    # CHAPTERS
     final_chapters = [efiction.chapter_to_final(chapter) for chapter in chapters]
     final.insert_into_final(args.db_table_prefix + '_chapters', final_chapters)
 
     # Run chapter script
     chaps.populate_chapters()
-
-    # TODO: bookmarks
-
-
 
