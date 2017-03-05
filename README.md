@@ -2,6 +2,26 @@
 Scripts and miscellaneous code to aid Open Doors imports. This currently supports Automated Archive and eFiction
 databases.
 
+## High-level process
+
+
+1. Copy the MySQL script and/or site backup to their local machine
+1. Create a MySQL database for the processing stage (we recommend a naming format like **od_archive_name**)
+1. Create an `\<archive_name\>.yml` properties file for the archive including that database name (see `example.yml`)
+1. Run Stage 01 to load the metadata into the MySQL database. Verify that authors, stories and chapters (if applicable) are present. You may need to tweak the scripts of the input files to get the best possible result - don't rush this phase.
+1. Run Stage 02 to extract the tags from the stories. Before you run this script, look at the story table in the database to see what fields contain tags and whether those tags are ids that reference another table, or plain text tags, as the script will prompt you for this information.
+1. Run Stage 03 to export lists of authors with works, and a list of tags. Upload these to Google Spreadsheets in the Google Drive folder for the archive you're importing. These will be used in the following tasks:
+    - **Open Doors** search the Archive for existing works from the list you provided.
+    - **Tag Wrangling** map the tags you extracted from your database to existing approved tags on the Archive.
+1. When the above processes are complete, process the resulting spreadsheets:
+    - Download the Tag Wrangling spreadsheet as a comma-separated file. 
+    - Generate a comma-separated list of story ids for stories which already exist in the Archive. 
+1. Run Stage 04 to map the tags in your database to their AO3 equivalents. The Tag Wrangling spreadsheet is the input for this process - if necessary, amend your properties file to point to the file you downloaded from Google Drive. You may also need to tidy it up manually if tag wranglers have added notes or change column headings.
+1. TBA: DNI removal
+1. Run Stage 05 to create the final table for the import site. This destructively creates new tables in the output database. Note: the stories table will not contain any tags at this point.
+1. Run Stage 06 to update the tags in the output database (stages 04 and 06 can be rerun without running stage 05 if there are problems with the tags).
+
+
 ## Parameters
 
 | flag | Property name    | Description |
