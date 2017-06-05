@@ -13,7 +13,7 @@ class Tags(object):
     self.tag_count = 0
     self.db = db
     self.cursor = self.db.cursor()
-    self.database = args.db_database
+    self.database = args.temp_db_database
     self.html_parser = HTMLParser()
 
     self.tag_export_map = {
@@ -23,7 +23,7 @@ class Tags(object):
       'original_table':       'Original Tag Type',
       'original_description': 'Original Tag Description',
       'ao3_tag':              'Recommended AO3 Tag',
-      'ao3_tag_category':     'Recommended AO3 Category\n(for relationships)',
+      'ao3_tag_category':     'Recommended AO3 Category',
       'ao3_tag_type':         'Recommended AO3 Type',
       'ao3_tag_fandom':       'Related Fandom'
     }
@@ -31,7 +31,7 @@ class Tags(object):
 
   def create_tags_table(self):
     try:
-      self.cursor.execute("DROP TABLE {0}.`tags`".format(self.database))
+      self.cursor.execute("DROP TABLE IF EXISTS {0}.`tags`".format(self.database))
     except MySQLdb.OperationalError, msg:
       print "Command skipped: ", msg
     self.cursor.execute("""
@@ -67,8 +67,14 @@ class Tags(object):
       for col in tag_columns:
         for val in re.split(r", ?", story_tags_row[col]):
           if val != '':
-            values.append('({0}, "{1}", "{2}", "{3}")'
-                          .format(story_tags_row[story_id_col_name], val.replace("'", "\'").strip(), col, tag_col_lookup[col]['table_name']))
+            if type(tag_col_lookup[col]) is str: # Probably AA or a custom archive
+              values.append('({0}, "{1}", "{2}", "{3}")'
+                            .format(story_tags_row[story_id_col_name], val.replace("'", "\'").strip(),
+                                    col, tag_col_lookup[col]))
+            else: # eFiction
+              values.append('({0}, "{1}", "{2}", "{3}")'
+                            .format(story_tags_row[story_id_col_name], val.replace("'", "\'").strip(),
+                                    col, tag_col_lookup[col]['table_name']))
 
       self.cursor.execute("""
            INSERT INTO tags (storyid, original_tag, original_column, original_table) VALUES {0}
@@ -88,7 +94,7 @@ class Tags(object):
         ao3_tag_fandom as "Related Fandom",
         ao3_tag as "Recommended AO3 Tag",
         ao3_tag_type as "Recommended AO3 Type",
-        ao3_tag_category as "Recommended AO3 Category\n(for relationships)",
+        ao3_tag_category as "Recommended AO3 Category",
         original_description as "Original Description",
         '' as "TW Notes" FROM tags
       """)
@@ -100,16 +106,21 @@ class Tags(object):
     original_table = row[tag_headers['original_table']] if table_prefix is None \
       else '{0}_{1}'.format(table_prefix, row[tag_headers['original_table']])
 
+    if row[tag_headers['original_tagid']] == '':
+      tagid_filter = "original_tag = '{0}'".format(unicode(row[tag_headers['original_tag']].replace("'", r"\'"), 'utf-8'))
+    else:
+      tagid_filter = "original_tagid={0}".format(row[tag_headers['original_tagid']])
+
     self.cursor.execute("USE {0}".format(self.database))
     self.cursor.execute("""
           UPDATE tags
           SET ao3_tag='{0}', ao3_tag_type='{1}', ao3_tag_category='{2}', ao3_tag_fandom='{3}'
-          WHERE original_tagid={4} and original_table='{5}'
-        """.format(row[tag_headers['ao3_tag']],
+          WHERE {4} and original_table='{5}'
+        """.format(unicode(row[tag_headers['ao3_tag']].replace("'", r"\'"), 'utf-8'),
                    row[tag_headers['ao3_tag_type']],
                    row[tag_headers['ao3_tag_category']],
                    row[tag_headers['ao3_tag_fandom']],
-                   row[tag_headers['original_tagid']],
+                   tagid_filter,
                    original_table))
     self.db.commit()
 

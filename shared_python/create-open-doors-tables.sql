@@ -15,7 +15,7 @@ CREATE TABLE `$PREFIX$authors` (
 
 DROP TABLE IF EXISTS `$PREFIX$bookmarks`;
 CREATE TABLE `$PREFIX$bookmarks` (
-  `id` int(11) NOT NULL DEFAULT '0',
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `title` varchar(255) CHARACTER SET utf8 NOT NULL DEFAULT '',
   `summary` text,
   `notes` text,
@@ -33,6 +33,8 @@ CREATE TABLE `$PREFIX$bookmarks` (
   `imported` tinyint(1) NOT NULL DEFAULT '0',
   `donotimport` tinyint(1) NOT NULL DEFAULT '0',
   `ao3url` varchar(255) DEFAULT NULL,
+  `brokenlink` tinyint(1) DEFAULT '0',
+  `importnotes` varchar(1024) DEFAULT '',
   PRIMARY KEY (`id`),
   KEY `authorId` (`authorId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -55,7 +57,7 @@ CREATE TABLE `$PREFIX$chapters` (
 
 DROP TABLE IF EXISTS `$PREFIX$stories`;
 CREATE TABLE `$PREFIX$stories` (
-  `id` int(11) NOT NULL DEFAULT '0',
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `title` varchar(255) CHARACTER SET utf8 NOT NULL DEFAULT '',
   `summary` text,
   `notes` text,
@@ -74,6 +76,7 @@ CREATE TABLE `$PREFIX$stories` (
   `imported` tinyint(1) NOT NULL DEFAULT '0',
   `donotimport` tinyint(1) NOT NULL DEFAULT '0',
   `ao3url` varchar(255) DEFAULT NULL,
+  `importnotes` varchar(1024) DEFAULT '',
   PRIMARY KEY (`id`),
   KEY `authorId` (`authorId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

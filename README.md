@@ -4,24 +4,25 @@ databases.
 
 ## Parameters
 
-| flag | Property name    | Description |
-|-----|-------------------|----------------------------------|
-| -h  | help            | show help message and exit
-| -dp | db_password     | MySQL password |
-| -du | db_user         | MySQL user |
-| -dh | db_host         | MySQL host name and port |
-| -dd | db_database     | MySQL temporary database name to use for processing (will be destroyed if it exists) |
-| -dt | db_table_prefix | MySQL prefix for tables |
-| -a  | archive_type    | Type of archive: AA or EF |
-| -i  | db_input_file   | Full path to input file (ARCHIVE_DB.pl for AA, SQL script for eFiction)|
-| -o  | output_folder   | Path for output files |
-| -t  | tag_input_file  | Full path to Tag Wrangling CSV |
-| -od | output_database | Name of the database the final tables should be created in (default "od_sgf") |
-| -n  | archive_name    | Name of the original archive (used in export file names) |
-| -cp | chapters_path   | Location of the text files containing the stories. Optional - if no path is specified, the chapter table will be copied over as is. |
-| -cf | chapters_file_extensions |  File extension(s) of the text files containing the stories (eg: "txt, html"). Only required if a chapter path is specified. |
-| -df | default_fandom    | Default fandom to use. Optional - the column will only be populated with fandoms from the TW sheet if this is blank. |
-| -p  | properties_file | Load properties from specified file (ignores all other arguments) |
+| flag | Property name            | Description |
+|------|--------------------------|----------------------------------|
+| -h   | help                     | show help message and exit
+| -dp  | db_password              | MySQL password |
+| -du  | db_user                  | MySQL user |
+| -dh  | db_host                  | MySQL host name and port |
+| -dd  | temp_db_database              | MySQL temporary database name to use for processing (will be destroyed if it exists) |
+| -dt  | db_table_prefix          | MySQL prefix for tables |
+| -a   | archive_type             | Type of archive: AA or EF |
+| -i   | db_input_file            | Full path to input file (ARCHIVE_DB.pl for AA, SQL script for eFiction)|
+| -o   | output_folder            | Path for output files |
+| -t   | tag_input_file           | Full path to Tag Wrangling CSV |
+| -od  | output_database          | Name of the database the final tables should be created in (default "od_sgf") |
+| -n   | archive_name             | Name of the original archive (used in export file names) |
+| -si  | story_ids_to_remove      | Location of the text file containing the story ids to remove. Optional - if no path is specified, the stories table will be copied over as is. |
+| -cp  | chapters_path            | Location of the text files containing the stories. Optional - if no path is specified, the chapter table will be copied over as is. |
+| -cf  | chapters_file_extensions |  File extension(s) of the text files containing the stories (eg: "txt, html"). Only required if a chapter path is specified. |
+| -df  | default_fandom           | Default fandom to use. Optional - the column will only be populated with fandoms from the TW sheet if this is blank. |
+| -p   | properties_file          | Load properties from specified file (ignores all other arguments) |
 
 If the `-p` flag is set, these values will be read from a YAML file in same folder as the script (see `example.yml`
 in the project root. This is a much simpler way of providing the parameters, but they can also be passed on the
@@ -41,7 +42,7 @@ All the scripts rely on the following properties being set (you will be prompted
 | -dp | db_password     | MySQL password |
 | -du | db_user         | MySQL user |
 | -dh | db_host         | MySQL host name and port |
-| -dd | db_database     | MySQL temporary database name to use for processing (will be destroyed if it exists) |
+| -dd | temp_db_database     | MySQL temporary database name to use for processing (will be destroyed if it exists) |
 | -dt | db_table_prefix | MySQL prefix for tables |
 | -a  | archive_type    | Type of archive: AA or EF |
 
@@ -60,7 +61,7 @@ It relies on the following parameters:
 *eFiction note*: check that the MySQL script you were given doesn't name the database when creating tables -
 otherwise it may recreate the original database on import, or fail to run at all.
 
-Note: this script destroys and recreates the database named in the `db_database` property.
+Note: this script destroys and recreates the database named in the `temp_db_database` property.
 
 ### Stage 02 - Extract tags from the original stories
 This script creates a table called `tags` in the temporary database and denormalises all the tags for each story.
@@ -90,7 +91,9 @@ It relies on the following parameters:
 
 | flag | Property name    | Description |
 |-----|-------------------|----------------------------------|
-| -o  | output_folder   | Path for output files |
+| -o  | output_folder     | Path for output files |
+| -n   | archive_name     | Name of the original archive |
+
 
 ### Stage 04 - Reimport the Tag Wrangling sheet and map the original tags to the new AO3 tags
 When Tag Wrangling have finished mapping the tags in Google Drive, export the spreadsheet as a CSV file. This script
@@ -100,19 +103,19 @@ It relies on the following parameters:
 
 | flag | Property name    | Description |
 |-----|-------------------|----------------------------------|
-| -t  | tag_input_file  | Full path to Tag Wrangling CSV |
+| -t  | tag_input_file    | Full path to Tag Wrangling CSV |
 
 ### Stage 05 - Create the Open Doors tables
-This script creates the tables for the temporary import site and copies in the authors and stories (see below for notes
-on bookmarks and chapters).
+This script creates the tables for the temporary import site. It filters the authors and stories, and also loads in the chapter contents from their original files into the database.
 
 It relies on the following parameters:
 
-| flag | Property name    | Description |
-|-----|-------------------|----------------------------------|
-| -od | output_database   | Name of the database the final tables should be created in (default "od_sgf") |
-| -cp | chapters_path     | Location of the text files containing the stories. Optional - if no path is specified, the chapter table will be copied over as is. |
-| -cf | chapters_file_extensions | File extension(s) of the text files containing the stories (eg: "txt, html"). Only required if a chapter path is specified. |
+| flag | Property name            | Description |
+|-----|---------------------------|----------------------------------|
+| -od | output_database           | Name of the database the final tables should be created in (default "od_sgf") |
+| -si | story_ids_to_remove       | Location of the text file containing the story ids to remove. Optional - if no path is specified, the stories table will be copied over as is. |
+| -cp | chapters_path             | Location of the text files containing the stories. Optional - if no path is specified, the chapter table will be copied over as is. |
+| -cf | chapters_file_extensions  | File extension(s) of the text files containing the stories (eg: "txt, html"). Only required if a chapter path is specified. |
 
 The temporary sites are currently all run off the same database, with the tables prefixed to distinguish them.
 
@@ -130,3 +133,11 @@ It relies on the following parameters:
 | -od | output_database   | Name of the database the final tables should be created in (default "od_sgf") |
 | -df | default_fandom    | Default fandom to use. Optional - the column will only be populated with fandoms from the TW sheet if this is blank. |
 
+## Other Scripts
+
+### Remove DNI from Open Doors tables
+
+Given a comma-separated list of story ids specified in the `story_ids_to_remove` parameter, deletes the corresponding rows from the `table_prefix`_stories table in the final output database.
+
+Syntax:
+    

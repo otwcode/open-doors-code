@@ -4,7 +4,7 @@ import datetime
 import codecs
 import MySQLdb
 import re
-from shared_python import Args
+from shared_python import Args, Common
 from shared_python.Sql import Sql
 
 
@@ -27,11 +27,15 @@ def _clean_file(filepath):
 
   return eval(final_regex)
 
-#
+
+def _has_file_type(record):
+  return record.get('FileType', 'none') != 'none'
+
+
 def _create_mysql(args, FILES):
   db = MySQLdb.connect(args.db_host, args.db_user, args.db_password, "")
   cursor = db.cursor()
-  DATABASE_NAME = args.db_database
+  DATABASE_NAME = args.temp_db_database
   PREFIX = args.db_table_prefix
 
   # Use the database and empty all the tables
@@ -40,59 +44,74 @@ def _create_mysql(args, FILES):
   cursor.execute(u"use {0}".format(DATABASE_NAME))
 
   sql = Sql(args)
-  sql.run_script_from_file('miscellaneous/open-doors-table-schema.sql', args)
+  sql.run_script_from_file('shared_python/create-open-doors-tables.sql', DATABASE_NAME, PREFIX + '_')
   db.commit()
-
 
   authors = [(FILES[i].get('Author', '').strip(), FILES[i].get('Email', '').lower().strip()) for i in FILES]
   auth = u"INSERT INTO {0}_authors (name, email) VALUES(%s, %s);".format(PREFIX)
   cursor.executemany(auth, set(authors))
   db.commit()
 
+  # Authors
   auth = u"SELECT * FROM {0}_authors;".format(PREFIX)
   cursor.execute(auth)
   db_authors = cursor.fetchall()
 
-  stories = [(FILES[i].get('Title', '').replace("'", "\\'"),
+  # Stories and bookmarks
+  print args
+
+  stories = [(i,
+              FILES[i].get('Title', '').replace("'", "\\'"),
               FILES[i].get('Summary', '').replace("'", "\\'"),
               FILES[i].get('Category', '').replace("'", "\\'"),
               FILES[i].get('Characters', '').replace("'", "\\'"),
-              datetime.datetime.strptime(FILES[i].get('PrintTime', str(datetime.datetime.now().strftime('%m/%d/%y'))),
-                                         '%m/%d/%y')
-              .strftime('%Y-%m-%d'),
-              # Some AA archives have a filetype
-              # FILES[i].get('FileType', 'bookmark'),
+              datetime.datetime.strptime(
+                FILES[i].get('PrintTime',
+                             FILES[i].get('DatePrint',
+                                          str(datetime.datetime.now().strftime('%m/%d/%y')))),
+                '%m/%d/%y').strftime('%Y-%m-%d'),
               FILES[i].get('Location', '').replace("'", "\\'"),
-              FILES[i].get('StoryURL', '').replace("'", "\\'"),
+              FILES[i].get('LocationURL', FILES[i].get('StoryURL', '')).replace("'", "\\'"),
               FILES[i].get('Notes', '').replace("'", "\\'"),
               FILES[i].get('Pairing', '').replace("'", "\\'"),  # might be Pairings in some cases
               FILES[i].get('Rating', ''),
               FILES[i].get('Warnings', '').replace("'", "\\'"),
               FILES[i].get('Author', '').strip(),
               FILES[i].get('Email', '').lower().strip(),
+              FILES[i].get('FileType', 'bookmark') if _has_file_type(FILES[i]) else args.chapters_file_extensions,
+              FILES[i].get('CatOther', '') if FILES[i].get('Category', '') == 'Crossover' else '',
               )
              for i in FILES]
-  for (
-  title, summary, category, characters, date, location, url, notes, pairings, rating, warnings, author, email) in set(
-      stories):
-    try:
-      table_name = '{0}_stories'.format(PREFIX)
-      filename = location + '.html'  # not true for all AA archives!
 
+  cur = 0
+  total = len(FILES)
+  for (original_id, title, summary, category, characters, date, location, url, notes, pairings, rating, warnings, author,
+       email, filetype, fandoms) in set(stories):
+
+    cur = Common.print_progress(cur, total)
+    try:
       # For AA archives with external links:
-      # if (filetype != 'bookmark'):
-      #   filename = location + '.' + filetype
-      #   table_name = '{0}_stories'.format(PREFIX)
-      # else:
-      #   filename = url
-      #   table_name = '{0}_bookmarks'.format(PREFIX)
+      if filetype != 'bookmark':
+        filename = location + '.' + filetype
+        table_name = '{0}_stories'.format(PREFIX)
+      else:
+        filename = url
+        table_name = '{0}_bookmarks'.format(PREFIX)
+
+      if location == '8/howmany': print filename
+
+      final_fandoms = args.default_fandom if fandoms == '' \
+        else  args.default_fandom + ', ' + unicode(fandoms.replace("'", r"\'"), 'utf-8')
 
       result = [element for element in db_authors if element[1] == author and element[2] == email]
       authorid = result[0][0]
 
-      stor = u"""INSERT INTO {0} (fandoms, title, summary, tags, characters, date, url, notes, relationships, rating, warnings, authorid)
-      			 VALUES('due South', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}', '{7}', '{8}', '{9}', '{10}', '{11}');\n""" \
+      stor = u"""
+        INSERT INTO {0} (id, fandoms, title, summary, tags, characters, date, url, notes, relationships, rating, warnings, authorid)
+        VALUES({1}, '{2}', '{3}', '{4}', '{5}', '{6}', '{7}', '{8}', '{9}', '{10}', '{11}', '{12}', '{13}');\n""" \
         .format(unicode(table_name),
+                original_id,
+                final_fandoms,
                 unicode(title, 'utf-8'),
                 unicode(summary, 'utf-8'),
                 category,
@@ -112,8 +131,45 @@ def _create_mysql(args, FILES):
 
 
 def clean_and_load_data(args):
-  data = _clean_file(args.input_file)
+  data = _clean_file(args.db_input_file)
   _create_mysql(args, data)
+
+
+def story_to_final_without_tags(story):
+  final_story = {
+    'id':            story['id'],
+    'title':         story['title'],
+    'summary ':      story['summary'],
+    'notes':         story['notes'],
+    'authorid':      story['authorId'],
+    'date':          story['date'],
+    'updated':       story['updated'],
+    'url':           story['url'],
+    'ao3url':        story['ao3url'],
+    'coauthorid':    story['coauthorId'],
+    'imported':      0,
+    'doNotImport':   0,
+  }
+  return final_story
+
+
+def dummy_chapters(stories):
+  return [_dummy_chapter(story) for story in stories]
+
+
+def _dummy_chapter(story):
+  final_chapter = {
+    'id':       story['id'],
+    'position': 1,
+    'title':    story['title'],
+    'authorid': story['authorid'],
+    'text':     '',
+    'date':     story['date'],
+    'storyid':  story['id'],
+    'notes':    story['notes'],
+    'url':      story['url']
+  }
+  return final_chapter
 
 
 if __name__ == "__main__":

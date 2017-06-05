@@ -9,10 +9,10 @@ if __name__ == "__main__":
 
 # eg: python 01-Load-into-Mysql.py -dh localhost -du root -dt dsa -dd temp_python -a AA -f /path/to/ARCHIVE_DB.pl -o .
   if args.archive_type == 'AA':
-    print('--- Loading Automated Archive file "{0}" into database "{1}"'.format(args.db_input_file, args.db_database))
+    print('--- Loading Automated Archive file "{0}" into database "{1}"'.format(args.db_input_file, args.temp_db_database))
     aa.clean_and_load_data(args)
 
 # eg: python 01-Load-into-Mysql.py -dh localhost -du root -dt sd -dd temp_python -a EF -f /path/to/backup-from-efiction.sql -o .
   elif args.archive_type == 'EF':
-    print('Loading eFiction file "{0}" into database "{1}"'.format(args.db_input_file, args.db_database))
-    sql.run_script_from_file(args.db_input_file, database=args.db_database, prefix=args.db_table_prefix)
+    print('Loading eFiction file "{0}" into database "{1}"'.format(args.db_input_file, args.temp_db_database))
+    sql.run_script_from_file(args.db_input_file, database=args.temp_db_database, prefix=args.db_table_prefix)

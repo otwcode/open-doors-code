@@ -13,12 +13,12 @@ class Sql(object):
     cursor = db.cursor()
     from warnings import filterwarnings
     filterwarnings('ignore', category = MySQLdb.Warning)
-    cursor.execute('CREATE DATABASE IF NOT EXISTS {0}'.format(args.db_database))
+    cursor.execute('CREATE DATABASE IF NOT EXISTS {0}'.format(args.temp_db_database))
 
-    self.db = MySQLdb.connect(args.db_host, args.db_user, args.db_password, args.db_database, charset='utf8',
+    self.db = MySQLdb.connect(args.db_host, args.db_user, args.db_password, args.temp_db_database, charset='utf8',
                               use_unicode=True)
     self.cursor = self.db.cursor()
-    self.database = args.db_database
+    self.database = args.temp_db_database
 
 
   def execute(self, script, parameters = ()):

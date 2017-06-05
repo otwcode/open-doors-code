@@ -5,5 +5,5 @@ select "stories" as name,
 UNION ALL
 select "bookmarks" as name,
 (select count(*) from $PREFIX$_bookmarks where imported=1) as "Imported",
-(select count(*) from $PREFIX$_bookmarks where donotimport=1) as "Do not import",
-(select count(*) from $PREFIX$_bookmarks where imported=0 and donotimport=0) as "To be imported";
+(select count(*) from $PREFIX$_bookmarks where donotimport=1 or brokenlink=1) as "Do not import",
+(select count(*) from $PREFIX$_bookmarks where imported=0 and donotimport=0 and brokenlink=0) as "To be imported";

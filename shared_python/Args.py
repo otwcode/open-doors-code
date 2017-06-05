@@ -24,7 +24,7 @@ def _process_args():
     'db_host': 'MySQL host name and port',
     'db_user': 'MySQL user',
     'db_password': 'MySQL password',
-    'db_database': 'MySQL temporary database name to use for processing (will be destroyed if it exists)',
+    'temp_db_database': 'MySQL temporary database name to use for processing (will be destroyed if it exists)',
     'db_table_prefix': 'MySQL prefix for tables'
   }
   parser = argparse.ArgumentParser(description='Process an archive database')
@@ -39,6 +39,7 @@ def _process_args():
 
   parser.add_argument('-df', '--default_fandom', type=str, help='Default fandom to use')
   parser.add_argument('-cp', '--chapters_path', type=str, help='Location of the text files containing the stories')
+  parser.add_argument('-si', '--story_ids_to_remove', type=str, help='Location of the text file containing the story ids to remove')
   parser.add_argument('-cf', '--chapters_file_extensions', type=str, help='File extension(s) of the text files containing the stories (eg: "txt, html")')
   parser.add_argument('-n', '--archive_name', type=str, help='Name of the original archive (used in the temporary site)')
   parser.add_argument('-p', '--properties_file', type=str, help='Load properties from specified file (ignores all other arguments)')
@@ -56,7 +57,7 @@ def _process_args():
   args.db_host = raw_input(argdict['db_host'] + ': ') if args.db_host is None else args.db_host
   args.db_user = raw_input(argdict['db_user'] + ': ') if args.db_user is None else args.db_user
   args.db_password = raw_input(argdict['db_password'] + ': ') if args.db_password is None else args.db_password
-  args.db_database = raw_input(argdict['db_database'] + ': ') if args.db_database is None else args.db_database
+  args.temp_db_database = raw_input(argdict['temp_db_database'] + ': ') if args.temp_db_database is None else args.temp_db_database
   args.db_table_prefix = raw_input(argdict['db_table_prefix'] + ': ') if args.db_table_prefix is None else args.db_table_prefix
   args.archive_name = raw_input('Name of the original archive (used in export file names): ') if args.archive_name is None else args.archive_name
 
@@ -127,5 +128,7 @@ def args_for_06():
   if args.default_fandom is None:
     args.default_fandom = raw_input('Default fandom:')
     args.default_fandom = '' if args.default_fandom is None else args.default_fandom
+  if args.story_ids_to_remove is None:
+    args.story_ids_to_remove = raw_input('Location of the text file containing the story ids to remove:')
   _print_args(args)
   return args

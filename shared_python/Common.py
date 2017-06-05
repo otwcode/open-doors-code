@@ -1,3 +1,5 @@
+# -- coding: utf-8 --
+
 def print_progress(cur, total):
   cur += 1
   import sys

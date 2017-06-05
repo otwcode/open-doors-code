@@ -10,13 +10,14 @@ class FinalTables(object):
     self.args = args
     self.db = db
     self.dict_cursor = self.db.cursor(MySQLdb.cursors.DictCursor)
-    self.original_database = args.db_database
+    self.original_database = args.temp_db_database
     self.final_database = args.output_database
     self.html_parser = HTMLParser()
 
 
   def original_table(self, table_name, filter = ''):
-    self.dict_cursor.execute("SELECT * FROM `{0}`.`{1}` {2}".format(self.original_database, table_name, filter))
+    query = "SELECT * FROM `{0}`.`{1}` {2}".format(self.original_database, table_name, filter)
+    self.dict_cursor.execute(query)
     return self.dict_cursor.fetchall()
 
 
@@ -33,6 +34,8 @@ class FinalTables(object):
         value.append('"' + unicode(item) + '"')
       elif item is None:
         value.append('null')
+      elif item is '':
+        value.append('""')
       else:
         value.append(unicode(item))
     return value

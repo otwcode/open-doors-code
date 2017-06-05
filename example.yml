@@ -1,7 +1,7 @@
 db_password:
 db_user: root
 db_host: localhost
-db_database: temporary_database_name
+temp_db_database: temporary_database_name
 db_table_prefix: prefix_for_final_tables
 archive_type: EF or AA
 db_input_file: /path/to/database_dump.sql
