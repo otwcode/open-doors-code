@@ -23,7 +23,7 @@ class Tags(object):
       'original_table':       'Original Tag Type',
       'original_description': 'Original Tag Description',
       'ao3_tag':              'Recommended AO3 Tag',
-      'ao3_tag_category':     'Recommended AO3 Category',
+      'ao3_tag_category':     'Recommended AO3 Category for relationships',
       'ao3_tag_type':         'Recommended AO3 Type',
       'ao3_tag_fandom':       'Related Fandom'
     }
@@ -51,10 +51,11 @@ class Tags(object):
     """.format(self.database))
 
 
-  def populate_tag_table(self, database_name, story_id_col_name, table_name, tag_col_lookup):
+  def populate_tag_table(self, database_name, story_id_col_name, table_name, tag_col_lookup, truncate = True):
     dict_cursor = self.db.cursor(MySQLdb.cursors.DictCursor)
     dict_cursor.execute('USE {0}'.format(database_name))
-    dict_cursor.execute('TRUNCATE {0}.`tags`'.format(database_name))
+    if truncate:
+      dict_cursor.execute('TRUNCATE {0}.`tags`'.format(database_name))
 
     tag_columns = tag_col_lookup.keys() # [d['col'] for d in tag_col_lookup if 'col' in d]
 

@@ -13,10 +13,9 @@ if __name__ == "__main__":
   args = Args.args_for_02()
   sql = Sql(args)
   tags = Tags(args, sql.db)
-  print('--- Processing tags from stories table in {0}'.format(args.temp_db_database))
+  print('--- Processing tags from stories and bookmarks table in {0}'.format(args.temp_db_database))
   tags.create_tags_table()
 
-# eg: python 01-Load-into-Mysql.py -dh localhost -du root -dt dsa -dd temp_python -a AA -f /Users/emma/OneDrive/DSA/ARCHIVE_DB.pl -o .
   tag_col_list = {}
   stories_id_name = ""
   stories_table_name = ""
@@ -24,16 +23,22 @@ if __name__ == "__main__":
   # AUTOMATED ARCHIVE
   if args.archive_type == 'AA':
 
-    table_name = raw_input('Story table name (default: "{0}_stories"): '.format(args.db_table_prefix))
-    if table_name is None or table_name == '':
-      table_name = '{0}_stories'.format(args.db_table_prefix)
+    story_table_name = raw_input('Story table name (default: "{0}_stories"): '.format(args.db_table_prefix))
+    if story_table_name is None or story_table_name == '':
+      story_table_name = '{0}_stories'.format(args.db_table_prefix)
+
+    bookmark_table_name = raw_input('Bookmark table name (default: "{0}_bookmarks"): '.format(args.db_table_prefix))
+    if bookmark_table_name is None or bookmark_table_name == '':
+      bookmark_table_name = '{0}_bookmarks'.format(args.db_table_prefix)
+
     tag_columns = raw_input('Column names containing tags \n   (delimited by commas - default: "rating, tags, warnings, characters, fandoms, relationships"): ')
     if tag_columns is None or tag_columns == '':
       tag_columns = "rating, tags, warnings, characters, fandoms, relationships"
     # fancy footwork to ensure compatibility with eFiction
     tag_col_list = re.split(r", ?", tag_columns)
     tag_columns_dict = dict(zip(tag_col_list, tag_col_list))
-    tags.populate_tag_table(args.temp_db_database, "id", table_name, tag_columns_dict)
+    tags.populate_tag_table(args.temp_db_database, "id", story_table_name, tag_columns_dict)
+    tags.populate_tag_table(args.temp_db_database, "id", bookmark_table_name, tag_columns_dict, False)
 
   # EFICTION
   elif args.archive_type == 'EF':
@@ -53,3 +58,5 @@ if __name__ == "__main__":
       print "\nProcessing {0}".format(col)
       table = efiction.column_schema(col)
       tags.hydrate_tags_table(col, table, has_ids_in_tags == 'y')
+
+  print('Done\n\n')

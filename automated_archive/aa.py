@@ -4,32 +4,44 @@ import datetime
 import codecs
 import MySQLdb
 import re
+from HTMLParser import HTMLParser
 from shared_python import Args, Common
 from shared_python.Sql import Sql
 
 
-# Convert the Perl hash into a Python dictionary
 def _clean_file(filepath):
+  '''
+  Convert the Perl hash into a Python dictionary
+  :param filepath: Path to ARCHIVE_DB.pl
+  :return: Python dictionary keyed by original story id
+  '''
+  h = HTMLParser()
   archive_db = codecs.open(filepath, 'r', encoding='utf-8').read()
 
-  step1 = (
-    archive_db.replace('%FILES = (\n\n', '{\n"').replace('\n)', '\n}')
+  step1 = h.unescape(archive_db.replace('&#39;', '\\&#39;'))
+
+  # Manually escape single quote entity and reformat file as a Python dictionary
+  step2 = (
+    step1
+      .replace('%FILES = (\n\n', '{\n"').replace('\n)', '\n}')
       .replace('},\n', '},\n"').replace('\t', '    "')
       .replace(' =>', '":').replace(';', ',')
       .replace(',\n"\n},\n1,', '}')
   )
   # Replace line breaks within fields (followed by a character that isn't a space, tab, digit, } or ")
-  step2 = re.sub(r"\n(?=[^ \t\d\}\"])", " ", step1)
+  step3 = re.sub(r"\n(?=[^ \t\d\}\"])", " ", step2)
 
   # Edit these to fix dodgy data specific to this archive
-  final_replace = step2.replace("0,/2,/25", "01/30/00").replace('    "PrintTime": \'P\',\n', "")
+  final_replace = step3.replace("0,/2,/25", "01/30/00").replace('    "PrintTime": \'P\',\n', "")
   final_regex = re.sub(r"00,02,\d(.*?)',", "02/26/00',", final_replace)
 
   return eval(final_regex)
 
 
 def _has_file_type(record):
-  return record.get('FileType', 'none') != 'none'
+  print("FileType: {0}".format(record.get('FileType', 'none') == 'none'))
+  print("LocationURL: {0}".format(record.get('LocationURL', '').startswith('http')))
+  return record.get('FileType', 'none') == 'none' or record.get('LocationURL', '').startswith('http')
 
 
 def _create_mysql(args, FILES):

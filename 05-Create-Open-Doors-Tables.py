@@ -30,10 +30,10 @@ if __name__ == "__main__":
     filter = 'WHERE sid NOT IN '
   else:
     table_names = {
-      'authors': 'dsa_authors',
-      'stories': 'dsa_stories',
-      'chapters': 'dsa_chapters',
-      'bookmarks': 'dsa_bookmarks'
+      'authors': '{0}_authors'.format(args.db_table_prefix),
+      'stories': '{0}_stories'.format(args.db_table_prefix),
+      'chapters': '{0}_chapters'.format(args.db_table_prefix),
+      'bookmarks': '{0}_bookmarks'.format(args.db_table_prefix)
     }
     filter = 'WHERE id NOT IN '
 
@@ -49,6 +49,7 @@ if __name__ == "__main__":
       f.seek(0)
       for line in f:
         story_exclusion_filter = filter + '(' + line + ')'
+
 
   # Export tables
   stories_without_tags = final.original_table(table_names['stories'], story_exclusion_filter)
@@ -138,3 +139,4 @@ if __name__ == "__main__":
     # Run chapter script
     chaps.populate_chapters()
 
+  print('\n')

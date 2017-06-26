@@ -16,10 +16,6 @@ if __name__ == "__main__":
   sql = Sql(args)
   tags = Tags(args, sql.db)
 
-# Input CSV from TW spreadsheet
-# Rename tags in `tags` table, populate ao3_tag_table column
-  # eg: python 04-Rename-Tags.py -dh localhost -du root -dt dsa -dd temp_python -a EF -i path/to/tw-spreadsheet.csv
-
   with open(args.tag_input_file, 'r') as csvfile:
     tw_tags = list(csv.DictReader(csvfile))
     tag_headers = tags.tag_export_map
@@ -31,3 +27,5 @@ if __name__ == "__main__":
 
       prefix = 'fanfiction' if args.archive_type == 'EF' else None
       tags.update_tag_row(row, prefix)
+
+  print('\n')

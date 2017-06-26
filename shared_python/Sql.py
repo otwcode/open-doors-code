@@ -34,7 +34,6 @@ class Sql(object):
 
   def run_script_from_file(self, filename, database, prefix):
     # Open and read the file as a single buffer
-    print database
     self.cursor.execute('USE {0}'.format(database))
     fd = open(filename, 'r')
     sqlFile = fd.read()
