@@ -57,7 +57,8 @@ def table_names():
   table_names = {
     'authors': 'fanfiction_authors',
     'stories': 'fanfiction_stories',
-    'chapters': 'fanfiction_chapters'
+    'chapters': 'fanfiction_chapters',
+    'bookmarks': None
   }
   return table_names
 
@@ -77,7 +78,7 @@ def story_to_final_without_tags(efiction_story):
     'id':            efiction_story['sid'],
     'title':         efiction_story['title'],
     'summary ':      efiction_story['summary'],
-    'notes':         efiction_story['storynotes'],
+    'notes':         efiction_story.get('storynotes', ''),
     'authorid':      efiction_story['uid'],
     'coauthorid':    efiction_story['coauthors'],
     'date':          efiction_story['date'],

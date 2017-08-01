@@ -24,7 +24,7 @@ if __name__ == "__main__":
   }
 
   # Export tables
-  final_stories = final.original_table(table_names['stories'], story_exclusion_filter)
+  final_stories = final.original_table(table_names['stories']) #, story_exclusion_filter)
   chapters = final.original_table(table_names['chapters'], '')
 
   if args.archive_type == 'AA':

@@ -16,6 +16,8 @@ class FinalTables(object):
 
 
   def original_table(self, table_name, filter = ''):
+    if table_name is None:
+      return None
     query = "SELECT * FROM `{0}`.`{1}` {2}".format(self.original_database, table_name, filter)
     self.dict_cursor.execute(query)
     return self.dict_cursor.fetchall()

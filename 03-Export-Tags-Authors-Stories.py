@@ -77,13 +77,13 @@ if __name__ == "__main__":
 
     results = sql.execute("""
       SELECT s.{0} as "Bookmark ID", s.title as "Title", s.summary as "Summary", a.{1} as "Creator", a.email as "Creator Email",
-      url as "URL",
+      s.url as "URL",
       "" as "New Email address", "" as "AO3 Account? (& does email match?)", "" as "Searched/Found", "" as "Work on AO3?",
       "" as "Import status", "" as "importer/inviter", "" as "import/invite date", "" as "AO3 link", "" as "Notes (if any)"
       FROM {2} a join {3} s on s.{4} = a.{5};
     """.format(bookmark_id, author_name, author_table, bookmarks_table, bookmark_author_col, author_id))
     write_csv('{0}/{1} - authors with bookmarks.csv'.format(args.output_folder, args.archive_name),
-              ["Bookmark ID", "Title", "Summary", "Creator", "Creator Email", "New Email address",
+              ["Bookmark ID", "Title", "Summary", "Creator", "Creator Email", "URL", "New Email address",
                "AO3 Account? (& does email match?)", "Searched/Found", "Work on AO3?", "Import status",
                "importer/inviter", "import/invite date", "AO3 link", "Notes (if any)"])
 

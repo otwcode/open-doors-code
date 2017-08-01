@@ -10,11 +10,11 @@ from shared_python.Sql import Sql
 
 
 def _clean_file(filepath):
-  '''
+  """
   Convert the Perl hash into a Python dictionary
   :param filepath: Path to ARCHIVE_DB.pl
   :return: Python dictionary keyed by original story id
-  '''
+  """
   h = HTMLParser()
   archive_db = codecs.open(filepath, 'r', encoding='utf-8').read()
 
@@ -23,9 +23,12 @@ def _clean_file(filepath):
   # Manually escape single quote entity and reformat file as a Python dictionary
   step2 = (
     step1
-      .replace('%FILES = (\n\n', '{\n"').replace('\n)', '\n}')
-      .replace('},\n', '},\n"').replace('\t', '    "')
-      .replace(' =>', '":').replace(';', ',')
+      .replace('%FILES = (\n\n', '{\n"')
+      .replace('\n)', '\n}')
+      .replace('},\n', '},\n"')
+      .replace('\t', '    "') # could be a tab in some files
+      .replace(' =>', '":')
+      .replace(';', ',')
       .replace(',\n"\n},\n1,', '}')
   )
   # Replace line breaks within fields (followed by a character that isn't a space, tab, digit, } or ")
@@ -35,13 +38,30 @@ def _clean_file(filepath):
   final_replace = step3.replace("0,/2,/25", "01/30/00").replace('    "PrintTime": \'P\',\n', "")
   final_regex = re.sub(r"00,02,\d(.*?)',", "02/26/00',", final_replace)
 
+  print final_regex[0:100]
+
   return eval(final_regex)
 
 
-def _has_file_type(record):
-  print("FileType: {0}".format(record.get('FileType', 'none') == 'none'))
-  print("LocationURL: {0}".format(record.get('LocationURL', '').startswith('http')))
-  return record.get('FileType', 'none') == 'none' or record.get('LocationURL', '').startswith('http')
+def _is_external(record):
+  """
+  AA is pretty flexible - define the bookmark criteria here, whatever it is
+  :param record:
+  :return: whether this record is an external link
+  """
+  # Spooky 2003
+  # return record.get('Offsite', 'none') != 'none' \
+  #     or record.get('LocationURL', '').startswith('http')
+  #     # or record.get('FileType', 'none') == 'none' \
+  # Spooky 2004
+  # return record.get('Offsite', 'none') == 'offsite'
+  # Spooky 2005
+  return record.get('LocationURL', '').startswith('http')
+
+
+def _extract_tags(record):
+  tags = FILES[i].get('Category', '').replace("'", "\\'")
+  return tags
 
 
 def _create_mysql(args, FILES):
@@ -59,7 +79,7 @@ def _create_mysql(args, FILES):
   sql.run_script_from_file('shared_python/create-open-doors-tables.sql', DATABASE_NAME, PREFIX + '_')
   db.commit()
 
-  authors = [(FILES[i].get('Author', '').strip(), FILES[i].get('Email', '').lower().strip()) for i in FILES]
+  authors = [(FILES[i].get('Author', '').strip(), FILES[i].get('Email', FILES[i].get('EmailAuthor', '')).lower().strip()) for i in FILES]
   auth = u"INSERT INTO {0}_authors (name, email) VALUES(%s, %s);".format(PREFIX)
   cursor.executemany(auth, set(authors))
   db.commit()
@@ -75,7 +95,7 @@ def _create_mysql(args, FILES):
   stories = [(i,
               FILES[i].get('Title', '').replace("'", "\\'"),
               FILES[i].get('Summary', '').replace("'", "\\'"),
-              FILES[i].get('Category', '').replace("'", "\\'"),
+              _extract_tags,
               FILES[i].get('Characters', '').replace("'", "\\'"),
               datetime.datetime.strptime(
                 FILES[i].get('PrintTime',
@@ -89,8 +109,8 @@ def _create_mysql(args, FILES):
               FILES[i].get('Rating', ''),
               FILES[i].get('Warnings', '').replace("'", "\\'"),
               FILES[i].get('Author', '').strip(),
-              FILES[i].get('Email', '').lower().strip(),
-              FILES[i].get('FileType', 'bookmark') if _has_file_type(FILES[i]) else args.chapters_file_extensions,
+              FILES[i].get('Email', FILES[i].get('EmailAuthor', '')).lower().strip(),
+              FILES[i].get('FileType', args.chapters_file_extensions) if not _is_external(FILES[i]) else 'bookmark',
               FILES[i].get('CatOther', '') if FILES[i].get('Category', '') == 'Crossover' else '',
               )
              for i in FILES]
@@ -98,24 +118,27 @@ def _create_mysql(args, FILES):
   cur = 0
   total = len(FILES)
   for (original_id, title, summary, category, characters, date, location, url, notes, pairings, rating, warnings, author,
-       email, filetype, fandoms) in set(stories):
+       email, filetype, fandoms, tags) in set(stories):
 
     cur = Common.print_progress(cur, total)
     try:
       # For AA archives with external links:
+      print filetype
       if filetype != 'bookmark':
-        filename = location + '.' + filetype
+        if location is '':
+          filename = url
+        else:
+          filename = location + '.' + filetype
         table_name = '{0}_stories'.format(PREFIX)
       else:
         filename = url
         table_name = '{0}_bookmarks'.format(PREFIX)
 
-      if location == '8/howmany': print filename
-
       final_fandoms = args.default_fandom if fandoms == '' \
         else  args.default_fandom + ', ' + unicode(fandoms.replace("'", r"\'"), 'utf-8')
 
       result = [element for element in db_authors if element[1] == author and element[2] == email]
+      print result
       authorid = result[0][0]
 
       stor = u"""
@@ -170,16 +193,17 @@ def dummy_chapters(stories):
 
 
 def _dummy_chapter(story):
+  chapter = {k.lower(): v for k, v in story.iteritems()}
   final_chapter = {
-    'id':       story['id'],
-    'position': 1,
-    'title':    story['title'],
-    'authorid': story['authorid'],
-    'text':     '',
-    'date':     story['date'],
-    'storyid':  story['id'],
-    'notes':    story['notes'],
-    'url':      story['url']
+    'id':       chapter['id'],
+    'position': chapter.get('position', 1),
+    'title':    chapter['title'],
+    'authorid': chapter['authorid'],
+    'text':     chapter.get('text', ''),
+    'date':     chapter['date'],
+    'storyid':  chapter['id'],
+    'notes':    chapter['notes'],
+    'url':      chapter['url']
   }
   return final_chapter
 

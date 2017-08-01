@@ -24,9 +24,12 @@ if __name__ == "__main__":
 
   if args.archive_type == 'EF':
     table_names = efiction.table_names()
-    coauthors_dict = sql.execute_dict("SELECT * FROM fanfiction_coauthors")
-    for coauthor in coauthors_dict:
-      coauthors[coauthor['sid']] = coauthor['uid']
+    has_coauthor_table = raw_input("\nDoes this archive have a coauthors table? Y/N\n")
+    has_coauthors = True if str.lower(has_coauthor_table) == 'y' else False
+    if has_coauthors:
+      coauthors_dict = sql.execute_dict("SELECT * FROM fanfiction_coauthors")
+      for coauthor in coauthors_dict:
+        coauthors[coauthor['sid']] = coauthor['uid']
     filter = 'WHERE sid NOT IN '
   else:
     table_names = {
@@ -67,12 +70,13 @@ if __name__ == "__main__":
     final.insert_into_final(args.db_table_prefix + '_stories', final_stories)
 
     # BOOKMARKS
-    print "Copying bookmarks to final table {0}.{1}_bookmarks...".format(args.output_database, args.db_table_prefix)
-    final_bookmarks = []
-    for bookmark in bookmarks_without_tags:
-      # Add additional bookmark processing here
-      final_bookmarks.append(aa.story_to_final_without_tags(bookmark))
-    if final_bookmarks: final.insert_into_final(args.db_table_prefix + '_bookmarks', final_bookmarks)
+    if bookmarks_without_tags is not None:
+      print "Copying bookmarks to final table {0}.{1}_bookmarks...".format(args.output_database, args.db_table_prefix)
+      final_bookmarks = []
+      for bookmark in bookmarks_without_tags:
+        # Add additional bookmark processing here
+        final_bookmarks.append(aa.story_to_final_without_tags(bookmark))
+      if final_bookmarks: final.insert_into_final(args.db_table_prefix + '_bookmarks', final_bookmarks)
 
     # AUTHORS
     print "Copying authors to final table {0}.{1}_authors...".format(args.output_database, args.db_table_prefix)
@@ -85,15 +89,19 @@ if __name__ == "__main__":
         if final_author['email'].startswith('mailto:'):
           final_author['email'] = final_author['email'].replace('mailto:', '')
       final_authors.append(final_author)
-    final.insert_into_final(args.db_table_prefix + '_authors', final_authors)
+    final.insert_into_final(args.db_table_prefix + '_author'
+                                                   's', final_authors)
 
     # CHAPTERS
     print "Chapters..."
-    final_chapters = aa.dummy_chapters(final_stories)
+    if chapters:
+      final_chapters = aa.dummy_chapters(chapters)
+    else:
+      final_chapters = aa.dummy_chapters(final_stories)
     final.insert_into_final(args.db_table_prefix + '_chapters', final_chapters)
 
-    # Run chapter script
-    chaps.populate_chapters()
+    # # Run chapter script
+    # chaps.populate_chapters()
 
   elif args.archive_type == 'EF':
     # STORIES
@@ -109,12 +117,13 @@ if __name__ == "__main__":
     final.insert_into_final(args.db_table_prefix + '_stories', final_stories)
 
     # TODO: BOOKMARKS
-    print "Copying bookmarks to final table {0}.{1}_bookmarks...".format(args.output_database, args.db_table_prefix)
-    final_bookmarks = []
-    for bookmark in bookmarks_without_tags:
-      # Add additional bookmark processing here
-      final_bookmarks.append(aa.story_to_final_without_tags(bookmark))
-    if final_bookmarks: final.insert_into_final(args.db_table_prefix + '_bookmarks', final_bookmarks)
+    if bookmarks_without_tags is not None:
+      print "Copying bookmarks to final table {0}.{1}_bookmarks...".format(args.output_database, args.db_table_prefix)
+      final_bookmarks = []
+      for bookmark in bookmarks_without_tags:
+        # Add additional bookmark processing here
+        final_bookmarks.append(aa.story_to_final_without_tags(bookmark))
+      if final_bookmarks: final.insert_into_final(args.db_table_prefix + '_bookmarks', final_bookmarks)
 
 
     # AUTHORS
