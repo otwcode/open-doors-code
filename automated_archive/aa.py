@@ -50,18 +50,36 @@ def _is_external(record):
   :return: whether this record is an external link
   """
   # Spooky 2003
-  # return record.get('Offsite', 'none') != 'none' \
-  #     or record.get('LocationURL', '').startswith('http')
-  #     # or record.get('FileType', 'none') == 'none' \
+  # return record.get('Offsite', 'none') != 'none'
+      # or record.get('FileType', 'none') == 'none' \
   # Spooky 2004
   # return record.get('Offsite', 'none') == 'offsite'
   # Spooky 2005
   return record.get('LocationURL', '').startswith('http')
 
 
-def _extract_tags(record):
-  tags = FILES[i].get('Category', '').replace("'", "\\'")
-  return tags
+def _extract_tags(args, record):
+  tags = record.get('Category', '').replace("'", "\\'").replace('"', '\\"') + ', '
+  if args.tag_fields is not None:
+    for tag_field in args.tag_fields.split(', '):
+      tags += record.get(tag_field, '').replace("'", "\\'").replace('"', '\\"') + ', '
+  return tags.strip(', ')
+
+
+def _extract_characters(args, record):
+  tags = record.get('Characters', '').replace("'", "\\'").replace('"', '\\"') + ', '
+  if args.character_fields is not None:
+    for character_field in args.character_fields.split(', '):
+      tags += record.get(character_field, '').replace("'", "\\'").replace('"', '\\"') + ', '
+  return tags.strip(', ')
+
+
+def _extract_relationships(args, record):
+  tags = record.get('Pairing', '').replace("'", "\\'").replace('"', '\\"') + ', '
+  if args.relationship_fields is not None:
+    for relationship_field in args.relationship_fields.split(', '):
+      tags += record.get(relationship_field, '').replace("'", "\\'").replace('"', '\\"') + ', '
+  return tags.strip(', ')
 
 
 def _create_mysql(args, FILES):
@@ -90,13 +108,11 @@ def _create_mysql(args, FILES):
   db_authors = cursor.fetchall()
 
   # Stories and bookmarks
-  print args
-
   stories = [(i,
               FILES[i].get('Title', '').replace("'", "\\'"),
               FILES[i].get('Summary', '').replace("'", "\\'"),
-              _extract_tags,
-              FILES[i].get('Characters', '').replace("'", "\\'"),
+              _extract_tags(args, FILES[i]),
+              _extract_characters(args, FILES[i]),
               datetime.datetime.strptime(
                 FILES[i].get('PrintTime',
                              FILES[i].get('DatePrint',
@@ -105,7 +121,7 @@ def _create_mysql(args, FILES):
               FILES[i].get('Location', '').replace("'", "\\'"),
               FILES[i].get('LocationURL', FILES[i].get('StoryURL', '')).replace("'", "\\'"),
               FILES[i].get('Notes', '').replace("'", "\\'"),
-              FILES[i].get('Pairing', '').replace("'", "\\'"),  # might be Pairings in some cases
+              _extract_relationships(args, FILES[i]),  # might be Pairings in some cases
               FILES[i].get('Rating', ''),
               FILES[i].get('Warnings', '').replace("'", "\\'"),
               FILES[i].get('Author', '').strip(),
@@ -117,13 +133,12 @@ def _create_mysql(args, FILES):
 
   cur = 0
   total = len(FILES)
-  for (original_id, title, summary, category, characters, date, location, url, notes, pairings, rating, warnings, author,
-       email, filetype, fandoms, tags) in set(stories):
+  for (original_id, title, summary, tags, characters, date, location, url, notes, pairings, rating, warnings, author,
+       email, filetype, fandoms) in set(stories):
 
     cur = Common.print_progress(cur, total)
     try:
       # For AA archives with external links:
-      print filetype
       if filetype != 'bookmark':
         if location is '':
           filename = url
@@ -138,7 +153,6 @@ def _create_mysql(args, FILES):
         else  args.default_fandom + ', ' + unicode(fandoms.replace("'", r"\'"), 'utf-8')
 
       result = [element for element in db_authors if element[1] == author and element[2] == email]
-      print result
       authorid = result[0][0]
 
       stor = u"""
@@ -149,7 +163,7 @@ def _create_mysql(args, FILES):
                 final_fandoms,
                 unicode(title, 'utf-8'),
                 unicode(summary, 'utf-8'),
-                category,
+                tags,
                 characters,
                 date,
                 filename,

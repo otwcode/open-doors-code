@@ -17,4 +17,4 @@ if __name__ == "__main__":
     print('Loading eFiction file "{0}" into database "{1}"'.format(args.db_input_file, args.temp_db_database))
     sql.run_script_from_file(args.db_input_file, database=args.temp_db_database, prefix=args.db_table_prefix)
 
-    print('\n')
+  print('\n')

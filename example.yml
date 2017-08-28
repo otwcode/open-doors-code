@@ -1,15 +1,24 @@
+archive_type: EF or AA
+default_fandom: Testing
+archive_name: Archive Display Name
+
+# Database settings
+db_input_file: /path/to/database_dump.sql or /path/to/ARCHIVE_DB.pl
 db_password:
 db_user: root
 db_host: localhost
 temp_db_database: temporary_database_name
 db_table_prefix: prefix_for_final_tables
-archive_type: EF or AA
-db_input_file: /path/to/database_dump.sql
+output_database: final_database_name
+
+# Tag settings
+tag_fields: # don't fill in Category
+relationship_fields: # don't fill in Pairing
+character_fields: # don't fill in Characters
+
 output_folder: /path/to/output/files
 tag_input_file: /path/to/Tags Mapping Guide.csv
-default_fandom: Testing
-output_database: final_database_name
+
 chapters_path: /path/to/chapter/files/stories
 chapters_file_extensions: txt, html
-archive_name: Archive Display Name
 story_ids_to_remove: /path/to/ids to remove.txt

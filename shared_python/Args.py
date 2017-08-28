@@ -20,6 +20,7 @@ def _load_args_from_file(filepath):
 
 
 def _process_args():
+
   argdict = {
     'db_host': 'MySQL host name and port',
     'db_user': 'MySQL user',
@@ -31,18 +32,29 @@ def _process_args():
   for name, helptext in argdict.items():
     parser.add_argument('-d' + name.split('_')[1][0], '--' + name, type=str, help=helptext)
 
-  parser.add_argument('-a', '--archive_type', type=str, choices=['AA', 'EF'], help='Type of archive: AA or EF')
-  parser.add_argument('-i', '--db_input_file', type=str, help='Path to input file (ARCHIVE_DB.pl for AA, SQL script for eFiction)')
-  parser.add_argument('-o', '--output_folder', type=str, help='Path for output files')
-  parser.add_argument('-t', '--tag_input_file', type=str, help='Path to tag renaming input CSV')
-  parser.add_argument('-od', '--output_database', type=str, help='Name of the database the final tables should be created in (default "od_sgf")')
+  # Pass in a file with all the properties
+  parser.add_argument('-p', '--properties_file',           type=str, help='Load properties from specified file (ignores all other arguments)')
 
-  parser.add_argument('-df', '--default_fandom', type=str, help='Default fandom to use')
-  parser.add_argument('-cp', '--chapters_path', type=str, help='Location of the text files containing the stories')
-  parser.add_argument('-si', '--story_ids_to_remove', type=str, help='Location of the text file containing the story ids to remove')
+  # General archive-specific settings
+  parser.add_argument('-a',  '--archive_type',             type=str, choices=['AA', 'EF'], help='Type of archive: AA or EF')
+  parser.add_argument('-df', '--default_fandom',           type=str, help='Default fandom to use')
+  parser.add_argument('-n',  '--archive_name',             type=str, help='Name of the original archive (used in the temporary site)')
+
+  # Database settings
+  parser.add_argument('-i',  '--db_input_file',            type=str, help='Path to input file (ARCHIVE_DB.pl for AA, SQL script for eFiction)')
+  parser.add_argument('-o',  '--output_folder',            type=str, help='Path for output files')
+  parser.add_argument('-od', '--output_database',          type=str, help='Name of the database the final tables should be created in (default "od_sgf")')
+
+  # Tag settings
+  parser.add_argument('-ft', '--tag_fields',               type=str, help='Name of tag fields in original db (comma-delimited)')
+  parser.add_argument('-fc', '--character_fields',         type=str, help='Name of character field in original db (comma-delimited)')
+  parser.add_argument('-fr', '--relationship_fields',      type=str, help='Name of relationship field in original db (comma-delimited)')
+  parser.add_argument('-t',  '--tag_input_file',           type=str, help='Path to tag renaming input CSV')
+
+  # Chapters
+  parser.add_argument('-cp', '--chapters_path',            type=str, help='Location of the text files containing the stories')
+  parser.add_argument('-si', '--story_ids_to_remove',      type=str, help='Location of the text file containing the story ids to remove')
   parser.add_argument('-cf', '--chapters_file_extensions', type=str, help='File extension(s) of the text files containing the stories (eg: "txt, html")')
-  parser.add_argument('-n', '--archive_name', type=str, help='Name of the original archive (used in the temporary site)')
-  parser.add_argument('-p', '--properties_file', type=str, help='Load properties from specified file (ignores all other arguments)')
 
 
   args = parser.parse_args()
@@ -54,12 +66,12 @@ def _process_args():
       else:
         setattr(args, k, v)
 
-  args.db_host = raw_input(argdict['db_host'] + ': ') if args.db_host is None else args.db_host
-  args.db_user = raw_input(argdict['db_user'] + ': ') if args.db_user is None else args.db_user
-  args.db_password = raw_input(argdict['db_password'] + ': ') if args.db_password is None else args.db_password
+  args.db_host =          raw_input(argdict['db_host'] + ': ') if args.db_host is None else args.db_host
+  args.db_user =          raw_input(argdict['db_user'] + ': ') if args.db_user is None else args.db_user
+  args.db_password =      raw_input(argdict['db_password'] + ': ') if args.db_password is None else args.db_password
   args.temp_db_database = raw_input(argdict['temp_db_database'] + ': ') if args.temp_db_database is None else args.temp_db_database
-  args.db_table_prefix = raw_input(argdict['db_table_prefix'] + ': ') if args.db_table_prefix is None else args.db_table_prefix
-  args.archive_name = raw_input('Name of the original archive (used in export file names): ') if args.archive_name is None else args.archive_name
+  args.db_table_prefix =  raw_input(argdict['db_table_prefix'] + ': ') if args.db_table_prefix is None else args.db_table_prefix
+  args.archive_name =     raw_input('Name of the original archive (used in export file names): ') if args.archive_name is None else args.archive_name
 
   while args.archive_type is None or args.archive_type not in ['AA', 'EF']:
     args.archive_type = raw_input('Type of archive (AA or EF): ')

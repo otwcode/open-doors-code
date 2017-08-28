@@ -89,7 +89,7 @@ class Chapters(object):
     has_ids = True if str.lower(filenames_are_ids) == 'y' else False
     file_paths = self._gather_and_dedupe(folder, extensions, has_ids)
 
-    char_encoding = raw_input("Importing chapters: pick character encoding (check for curly quotes):\n"
+    char_encoding = raw_input("\n\nImporting chapters: pick character encoding (check for curly quotes):\n"
                               "1 = Windows 1252\nenter = UTF-8\n")
 
     if char_encoding == '1':
