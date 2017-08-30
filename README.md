@@ -4,10 +4,10 @@ databases.
 
 ## High-level process
 
-
+1. Run `pip install -r requirements.txt` to install required dependencies
 1. Copy the MySQL script and/or site backup to their local machine
 1. Create a MySQL database for the processing stage (we recommend a naming format like **od_archive_name**)
-1. Create an `\<archive_name\>.yml` properties file for the archive including that database name (see `example.yml`)
+1. Create an `<archive_name>.yml` properties file for the archive including that database name (see `example.yml`)
 1. Run Stage 01 to load the metadata into the MySQL database. Verify that authors, stories and chapters (if applicable) are present. You may need to tweak the scripts of the input files to get the best possible result - don't rush this phase.
 1. Run Stage 02 to extract the tags from the stories. Before you run this script, look at the story table in the database to see what fields contain tags and whether those tags are ids that reference another table, or plain text tags, as the script will prompt you for this information.
 1. Run Stage 03 to export lists of authors with works, and a list of tags. Upload these to Google Spreadsheets in the Google Drive folder for the archive you're importing. These will be used in the following tasks:
@@ -17,7 +17,6 @@ databases.
     - Download the Tag Wrangling spreadsheet as a comma-separated file. 
     - Generate a comma-separated list of story ids for stories which already exist in the Archive. 
 1. Run Stage 04 to map the tags in your database to their AO3 equivalents. The Tag Wrangling spreadsheet is the input for this process - if necessary, amend your properties file to point to the file you downloaded from Google Drive. You may also need to tidy it up manually if tag wranglers have added notes or change column headings.
-1. TBA: DNI removal
 1. Run Stage 05 to create the final table for the import site. This destructively creates new tables in the output database. Note: the stories table will not contain any tags at this point.
 1. Run Stage 06 to update the tags in the output database (stages 04 and 06 can be rerun without running stage 05 if there are problems with the tags).
 
@@ -42,13 +41,17 @@ databases.
 | -cp  | chapters_path            | Location of the text files containing the stories. Optional - if no path is specified, the chapter table will be copied over as is. |
 | -cf  | chapters_file_extensions |  File extension(s) of the text files containing the stories (eg: "txt, html"). Only required if a chapter path is specified. |
 | -df  | default_fandom           | Default fandom to use. Optional - the column will only be populated with fandoms from the TW sheet if this is blank. |
+| -ft  | tag_fields               | Name of tag field(s) in original db (comma-delimited) |
+| -fc  | character_fields         | Name of character field(s) in original db (comma-delimited) |   
+| -fr  | relationship_fields      | Name of relationship field(s) in original db (comma-delimited) |
+| -ff  | fandom_fields            | Name of fandom field(s) in original db (comma-delimited) |     
 | -p   | properties_file          | Load properties from specified file (ignores all other arguments) |
 
 If the `-p` flag is set, these values will be read from a YAML file in same folder as the script (see `example.yml`
 in the project root. This is a much simpler way of providing the parameters, but they can also be passed on the
 command line using the flags specified. For example:
 
-    python 01-Load-into-Mysql.py -dd localhost -du root -dd od_dsa -a AA -i /Users/me/Documents/ARCHIVE_DB.pl
+    python 01-Load-into-Mysql.py -dh localhost -du root -dd od_dsa -a AA -i /Users/me/Documents/ARCHIVE_DB.pl
 
 
 ## Scripts

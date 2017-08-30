@@ -82,6 +82,15 @@ def _extract_relationships(args, record):
   return tags.strip(', ')
 
 
+def _extract_fandoms(args, record):
+  catother = record.get('CatOther', '') if record.get('Category', '') == 'Crossover' else ''
+  tags = catother.replace("'", "\\'").replace('"', '\\"') + ', '
+  if args.fandom_fields is not None:
+    for fandom_field in args.fandom_fields.split(', '):
+      tags += record.get(fandom_field, '').replace("'", "\\'").replace('"', '\\"') + ', '
+  return tags.strip(', ')
+
+
 def _create_mysql(args, FILES):
   db = MySQLdb.connect(args.db_host, args.db_user, args.db_password, "")
   cursor = db.cursor()
@@ -121,13 +130,13 @@ def _create_mysql(args, FILES):
               FILES[i].get('Location', '').replace("'", "\\'"),
               FILES[i].get('LocationURL', FILES[i].get('StoryURL', '')).replace("'", "\\'"),
               FILES[i].get('Notes', '').replace("'", "\\'"),
-              _extract_relationships(args, FILES[i]),  # might be Pairings in some cases
+              _extract_relationships(args, FILES[i]),
               FILES[i].get('Rating', ''),
               FILES[i].get('Warnings', '').replace("'", "\\'"),
               FILES[i].get('Author', '').strip(),
               FILES[i].get('Email', FILES[i].get('EmailAuthor', '')).lower().strip(),
               FILES[i].get('FileType', args.chapters_file_extensions) if not _is_external(FILES[i]) else 'bookmark',
-              FILES[i].get('CatOther', '') if FILES[i].get('Category', '') == 'Crossover' else '',
+              _extract_fandoms(args, FILES[i]),
               )
              for i in FILES]
 

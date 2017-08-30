@@ -46,9 +46,10 @@ def _process_args():
   parser.add_argument('-od', '--output_database',          type=str, help='Name of the database the final tables should be created in (default "od_sgf")')
 
   # Tag settings
-  parser.add_argument('-ft', '--tag_fields',               type=str, help='Name of tag fields in original db (comma-delimited)')
-  parser.add_argument('-fc', '--character_fields',         type=str, help='Name of character field in original db (comma-delimited)')
-  parser.add_argument('-fr', '--relationship_fields',      type=str, help='Name of relationship field in original db (comma-delimited)')
+  parser.add_argument('-ft', '--tag_fields',               type=str, help='Name of tag field(s) in original db (comma-delimited)')
+  parser.add_argument('-fc', '--character_fields',         type=str, help='Name of character field(s) in original db (comma-delimited)')
+  parser.add_argument('-fr', '--relationship_fields',      type=str, help='Name of relationship field(s) in original db (comma-delimited)')
+  parser.add_argument('-ff', '--fandom_fields',            type=str, help='Name of fandom field(s) in original db (comma-delimited)')
   parser.add_argument('-t',  '--tag_input_file',           type=str, help='Path to tag renaming input CSV')
 
   # Chapters
