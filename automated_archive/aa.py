@@ -183,7 +183,7 @@ def _create_mysql(args, FILES):
                 authorid)
       cursor.execute(stor)
     except:
-      print(title, summary, category, characters, date, location, url)
+      print(title, summary, tags, characters, date, location, url)
       raise
   db.commit()
 
