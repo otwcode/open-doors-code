@@ -26,24 +26,19 @@ if __name__ == "__main__":
   # Export tables
   final_stories = final.original_table(table_names['stories']) #, story_exclusion_filter)
   chapters = final.original_table(table_names['chapters'], '')
+  final_chapters = []
+
+  print "Loading chapters..."
 
   if args.archive_type == 'AA':
-    # CHAPTERS
-    print "Chapters..."
     final_chapters = aa.dummy_chapters(final_stories)
-    final.insert_into_final(args.db_table_prefix + '_chapters', final_chapters)
-
-    # Run chapter script
-    chaps.populate_chapters()
 
   elif args.archive_type == 'EF':
-
-    # CHAPTERS
-    print "Chapters..."
     final_chapters = [efiction.chapter_to_final(chapter) for chapter in chapters]
-    final.insert_into_final(args.db_table_prefix + '_chapters', final_chapters)
 
-    # Run chapter script
-    chaps.populate_chapters()
+  final.insert_into_final(args.db_table_prefix + '_chapters', final_chapters)
+
+  # Run chapter script
+  chaps.populate_chapters()
 
   print('\n')

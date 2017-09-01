@@ -13,6 +13,7 @@ def valid_tags(key, tag_type_list):
           and d[key] is not None
           and d[key] != '']
 
+
 if __name__ == "__main__":
   args = Args.args_for_06()
   sql = Sql(args)

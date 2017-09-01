@@ -18,15 +18,18 @@ def _clean_file(filepath):
   h = HTMLParser()
   archive_db = codecs.open(filepath, 'r', encoding='utf-8').read()
 
+  # Manually escape single quote entity and reformat file as a Python dictionary
   step1 = h.unescape(archive_db.replace('&#39;', '\\&#39;'))
 
-  # Manually escape single quote entity and reformat file as a Python dictionary
+  # Indent the file with a single tab instead of whatever is currently used
+  step15 = re.sub(r"^\s+", "\t", step1)
+
   step2 = (
-    step1
+    step15
       .replace('%FILES = (\n\n', '{\n"')
       .replace('\n)', '\n}')
       .replace('},\n', '},\n"')
-      .replace('\t', '    "') # could be a tab in some files
+      .replace('\t', '\t"')
       .replace(' =>', '":')
       .replace(';', ',')
       .replace(',\n"\n},\n1,', '}')
@@ -35,7 +38,7 @@ def _clean_file(filepath):
   step3 = re.sub(r"\n(?=[^ \t\d\}\"])", " ", step2)
 
   # Edit these to fix dodgy data specific to this archive
-  final_replace = step3.replace("0,/2,/25", "01/30/00").replace('    "PrintTime": \'P\',\n', "")
+  final_replace = step3.replace("0,/2,/25", "01/30/00").replace('\t"PrintTime": \'P\',\n', "")
   final_regex = re.sub(r"00,02,\d(.*?)',", "02/26/00',", final_replace)
 
   print final_regex[0:100]

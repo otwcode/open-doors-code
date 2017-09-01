@@ -12,9 +12,10 @@ db_table_prefix: prefix_for_final_tables
 output_database: final_database_name
 
 # Tag settings
-tag_fields: # don't fill in Category
-relationship_fields: # don't fill in Pairing
-character_fields: # don't fill in Characters
+tag_fields: # don't include Category, which is assumed by default
+relationship_fields: # don't include Pairing
+character_fields: # don't include Characters
+fandom_fields: # don't fill in CatOther
 
 output_folder: /path/to/output/files
 tag_input_file: /path/to/Tags Mapping Guide.csv
