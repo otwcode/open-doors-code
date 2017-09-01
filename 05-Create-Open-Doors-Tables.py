@@ -1,5 +1,4 @@
 # encoding: utf-8
-import csv
 import os
 
 from automated_archive import aa
@@ -9,6 +8,17 @@ from shared_python.Chapters import Chapters
 from shared_python.FinalTables import FinalTables
 from shared_python.Sql import Sql
 from shared_python.Tags import Tags
+
+
+def _clean_email(author):
+  email = author['email']
+  if author['email'] is None or author['email'] == '':
+    email = u'{0}{1}Archive@ao3.org'.format(author['name'], args.archive_name)\
+      .replace(' ', '').replace("'", "")
+  if author['email'].startswith('mailto:'):
+    email = author['email'].replace('mailto:', '')
+  return email
+
 
 if __name__ == "__main__":
   args = Args.args_for_05()
@@ -84,13 +94,9 @@ if __name__ == "__main__":
     authors = final.original_table(table_names['authors'])
     for final_author in authors:
       if any(story['authorid'] == final_author['id'] or story['coauthorid'] == final_author['id'] for story in final_stories):
-        if final_author['email'] is None or final_author['email'] == '':
-          final_author['email'] = u'{0}{1}Archive@ao3.org'.format(final_author['name'], args.archive_name).replace(' ', '').replace("'", "")
-        if final_author['email'].startswith('mailto:'):
-          final_author['email'] = final_author['email'].replace('mailto:', '')
+        final_author['email'] = _clean_email(final_author)
       final_authors.append(final_author)
-    final.insert_into_final(args.db_table_prefix + '_author'
-                                                   's', final_authors)
+    final.insert_into_final(args.db_table_prefix + '_authors', final_authors)
 
     # CHAPTERS
     print "Chapters..."
@@ -133,10 +139,7 @@ if __name__ == "__main__":
     for author in authors:
       final_author = efiction.author_to_final(author)
       if any(story['authorid'] == final_author['id'] or story['coauthorid'] == final_author['id'] for story in final_stories):
-        if final_author['email'] is None or final_author['email'] == '':
-          final_author['email'] = u'{0}{1}Archive@ao3.org'.format(final_author['name'], args.archive_name).replace(' ', '').replace("'", "")
-        if final_author['email'].startswith('mailto:'):
-          final_author['email'] = final_author['email'].replace('mailto:', '')
+        final_author['email'] = _clean_email(final_author)
       final_authors.append(final_author)
     final.insert_into_final(args.db_table_prefix + '_authors', final_authors)
 

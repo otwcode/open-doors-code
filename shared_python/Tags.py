@@ -69,23 +69,25 @@ class Tags(object):
         for val in re.split(r", ?", story_tags_row[col]):
           if val != '':
             if type(tag_col_lookup[col]) is str: # Probably AA or a custom archive
-              values.append('({0}, "{1}", "{2}", "{3}")'
-                            .format(story_tags_row[story_id_col_name], val.replace("'", "\'").strip(),
-                                    col, tag_col_lookup[col]))
+              values.append('({0}, "{1}", "{2}", "{3}", "{4}")'
+                            .format(story_tags_row[story_id_col_name],
+                                    val.replace("'", "\'").strip(),
+                                    col,
+                                    tag_col_lookup[col],
+                                    tag_col_lookup['fandom']))
             else: # eFiction
-              values.append('({0}, "{1}", "{2}", "{3}")'
+              values.append('({0}, "{1}", "{2}", "{3}", "")'
                             .format(story_tags_row[story_id_col_name], val.replace("'", "\'").strip(),
                                     col, tag_col_lookup[col]['table_name']))
 
       self.cursor.execute("""
-           INSERT INTO tags (storyid, original_tag, original_column, original_table) VALUES {0}
+           INSERT INTO tags (storyid, original_tag, original_column, original_table, ao3_tag_fandom) VALUES {0}
          """.format(', '.join(values)))
 
     self.db.commit()
 
 
   def distinct_tags(self):
-    columns = ['{0} as "{1}",'.format(k, v) for k, v in self.tag_export_map.items()]
     self.cursor.execute("""
       SELECT DISTINCT
         original_tagid as "Original Tag ID",
