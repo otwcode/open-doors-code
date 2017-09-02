@@ -23,12 +23,12 @@ if __name__ == "__main__":
   sql = Sql(args)
   chaps = Chapters(args, sql.db)
 
-  table_names = {
-    'authors': '{0}_authors'.format(args.db_table_prefix),
-    'stories': '{0}_stories'.format(args.db_table_prefix),
-    'chapters': '{0}_chapters'.format(args.db_table_prefix),
-    'bookmarks': '{0}_bookmarks'.format(args.db_table_prefix)
-  }
+  # table_names = {
+  #   'authors': '{0}_authors'.format(args.db_table_prefix),
+  #   'stories': '{0}_stories'.format(args.db_table_prefix),
+  #   'chapters': '{0}_chapters'.format(args.db_table_prefix),
+  #   'bookmarks': '{0}_bookmarks'.format(args.db_table_prefix)
+  # }
 
   print "Loading chapters from {0}...".format(args.chapters_path)
 
