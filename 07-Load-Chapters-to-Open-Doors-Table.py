@@ -8,12 +8,19 @@ from shared_python import Args
 from shared_python.Chapters import Chapters
 from shared_python.FinalTables import FinalTables
 from shared_python.Sql import Sql
-from shared_python.Tags import Tags
+
+
+# Given an existing final chapter table, this will use the URL field and chapter location to load the chapter contents
+def __current_table(table_name, db):
+  query = "SELECT * FROM `{0}`.`{1}`".format(args.output_database, table_name)
+  dict_cursor = db.cursor(MySQLdb.cursors.DictCursor)
+  dict_cursor.execute(query)
+  return dict_cursor.fetchall()
+
 
 if __name__ == "__main__":
   args = Args.args_for_05()
   sql = Sql(args)
-  final = FinalTables(args, sql.db)
   chaps = Chapters(args, sql.db)
 
   table_names = {
@@ -23,22 +30,11 @@ if __name__ == "__main__":
     'bookmarks': '{0}_bookmarks'.format(args.db_table_prefix)
   }
 
-  # Export tables
-  final_stories = final.original_table(table_names['stories']) #, story_exclusion_filter)
-  chapters = final.original_table(table_names['chapters'], '')
-  final_chapters = []
+  print "Loading chapters from {0}...".format(args.chapters_path)
 
-  print "Loading chapters..."
+  # Current table contents
+#  chapters = __current_table(table_names['chapters'], sql.db)
 
-  if args.archive_type == 'AA':
-    final_chapters = aa.dummy_chapters(final_stories)
-
-  elif args.archive_type == 'EF':
-    final_chapters = [efiction.chapter_to_final(chapter) for chapter in chapters]
-
-  final.insert_into_final(args.db_table_prefix + '_chapters', final_chapters)
-
-  # Run chapter script
   chaps.populate_chapters()
 
   print('\n')
