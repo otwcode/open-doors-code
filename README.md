@@ -175,7 +175,7 @@ that unlike the other scripts, this one does not destroy any databases or tables
 fields in the `stories` or `bookmarks` databases.
 
 
-### Stage 07 - Load Chapters into the Open Doors chapters table
+### Step 07 - Load Chapters into the Open Doors chapters table
 
     python 07-Load-Chapters-to-Open-Doors-Table.py -p <archive name>.yml
 
