@@ -70,6 +70,10 @@ if __name__ == "__main__":
   chapters = final.original_table(table_names['chapters'], '')
   bookmarks_without_tags = final.original_table(table_names['bookmarks'], story_exclusion_filter)
 
+
+  # ----------------------
+  # AA and custom archives
+  # ----------------------
   if args.archive_type == 'AA':
     # STORIES
     print "Copying stories to final table {0}.{1}_stories...".format(args.output_database, args.db_table_prefix)
@@ -89,7 +93,7 @@ if __name__ == "__main__":
       if final_bookmarks: final.insert_into_final(args.db_table_prefix + '_bookmarks', final_bookmarks)
 
     # AUTHORS
-    print "Copying authors to final table {0}.{1}_authors...".format(args.output_database, args.db_table_prefix)
+    print "Copying authors to final table {0}.{1}_authors, cleaning emails and removing authors with no works...".format(args.output_database, args.db_table_prefix)
     final_authors = []
     authors = final.original_table(table_names['authors'])
     for final_author in authors:
@@ -99,16 +103,18 @@ if __name__ == "__main__":
     final.insert_into_final(args.db_table_prefix + '_authors', final_authors)
 
     # CHAPTERS
-    print "Chapters..."
     if chapters:
+      print "Creating chapters table {0}.{1}_chapters from source chapters table...".format(args.output_database, args.db_table_prefix)
       final_chapters = aa.dummy_chapters(chapters)
     else:
+      print "Creating chapters table {0}.{1}_chapters from source stories table...".format(args.output_database, args.db_table_prefix)
       final_chapters = aa.dummy_chapters(final_stories)
     final.insert_into_final(args.db_table_prefix + '_chapters', final_chapters)
 
-    # # Run chapter script
-    # chaps.populate_chapters()
 
+  # ----------------------
+  # eFiction
+  # ----------------------
   elif args.archive_type == 'EF':
     # STORIES
     print "Copying stories to final table {0}.{1}_stories...".format(args.output_database, args.db_table_prefix)
@@ -122,7 +128,7 @@ if __name__ == "__main__":
 
     final.insert_into_final(args.db_table_prefix + '_stories', final_stories)
 
-    # TODO: BOOKMARKS
+    # BOOKMARKS
     if bookmarks_without_tags is not None:
       print "Copying bookmarks to final table {0}.{1}_bookmarks...".format(args.output_database, args.db_table_prefix)
       final_bookmarks = []
@@ -131,9 +137,8 @@ if __name__ == "__main__":
         final_bookmarks.append(aa.story_to_final_without_tags(bookmark))
       if final_bookmarks: final.insert_into_final(args.db_table_prefix + '_bookmarks', final_bookmarks)
 
-
     # AUTHORS
-    print "Authors..."
+    print "Copying authors from original eFiction source, cleaning emails and removing authors with no works..."
     final_authors = []
     authors = final.original_table(table_names['authors'])
     for author in authors:
@@ -144,11 +149,8 @@ if __name__ == "__main__":
     final.insert_into_final(args.db_table_prefix + '_authors', final_authors)
 
     # CHAPTERS
-    print "Chapters..."
+    print "Copying chapters from original eFiction source..."
     final_chapters = [efiction.chapter_to_final(chapter) for chapter in chapters]
     final.insert_into_final(args.db_table_prefix + '_chapters', final_chapters)
-
-    # Run chapter script
-    chaps.populate_chapters()
 
   print('\n')

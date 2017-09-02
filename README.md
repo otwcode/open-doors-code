@@ -133,15 +133,17 @@ the prefix to use in `db_table_prefix`.
 This script will destroy the prefixed tables for this archive before recreating them, so do not edit them manually
 until you are sure you are finished with this stage.
 
-*Note*: The `stories` and `bookmarks` tables will not contain any tags at all after this stage. These aren't added
+*Notes*: 
+- The `stories` and `bookmarks` tables will not contain any tags at all after this stage. These aren't added
 until you run step 06.
+- The `chapters` table will not contain the story contents, which are loaded in step 07.
 
 
 ### Step 06 - Copy AO3 tags into the stories table
 
     python 06-Update-Tags-In-Story-Table.py -p <archive name>.yml
 
-This script matches up the AO3 tags, fandoms and categories from the `tags` table with the corresponding stories. Note
+This script matches up the AO3 tags from the `tags` table with the corresponding stories. Note
 that unlike the other scripts, this one does not destroy any databases or tables, though it does overwrite the tag 
 fields in the `stories` or `bookmarks` databases.
 
@@ -150,7 +152,25 @@ fields in the `stories` or `bookmarks` databases.
 
     python 07-Load-Chapters-to-Open-Doors-Table.py -p <archive name>.yml
 
-Loads the chapter contents in the output database (this can be run at any point after stage 05).
+Loads the chapter contents in the output database (this can be run at any point after stage 05). It does this by going
+through all the files in the `chapters_path` and trying to find an entry in the chapters table that has the same
+`url`. It then copied the contents of the file into the `text` column for that row.
+
+If there are duplicate chapters (for example if co-authored stories were listed under each author), the script will
+try to deduplicate them by only keeping the duplicate whose `authorid` is the same as the `authorid` in the `story` table.
+It will list duplicates it has found in the console output. 
+
+Common problems to look out for when processing chapters:
+- Email addresses in story files. These should be removed to protect the authors, but check for any stories that include 
+fictional email conversations between the characters.
+- Navigation for the original site should be removed. (This is not typically a problem for eFiction sites)
+- Encoding problems - these result in curly quotes and accented characters being replaced by rubbish characters. Trying 
+"Windows 1252" instead of "UTF-8" when prompted may solve this, or you might have to edit-replace the broken characters
+in the affected story files.
+- In some cases, a story file might contain a character that prevents it from being copied to the MySQL table. Edit the 
+story manually to resolve.
+- Missing stories - sometimes the url in the database doesn't exactly match the path to the story. You should check for
+empty chapters after this step and look for their corresponding chapter files manually.
 
 
 ## Other Scripts
