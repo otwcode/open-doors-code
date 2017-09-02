@@ -2,6 +2,33 @@
 Scripts and miscellaneous code to aid Open Doors imports. This currently supports Automated Archive (AA) and eFiction (EF)
 databases, and with some manual work, can also be used to process any type of archive.
 
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [open-doors-code](#open-doors-code)
+  - [Process](#process)
+    - [Set up your system and the Open Doors scripts](#set-up-your-system-and-the-open-doors-scripts)
+    - [Prepare the archive backup for local processing](#prepare-the-archive-backup-for-local-processing)
+    - [Step 01 - Load the original database into MySQL](#step-01---load-the-original-database-into-mysql)
+      - [Notes on specific archives](#notes-on-specific-archives)
+        - [eFiction](#efiction)
+        - [Automated Archive](#automated-archive)
+        - [Custom archives](#custom-archives)
+    - [Step 02 - Extract tags from the original stories](#step-02---extract-tags-from-the-original-stories)
+      - [Notes on specific archives](#notes-on-specific-archives-1)
+        - [eFiction](#efiction-1)
+    - [Step 03 - Export tags, authors and stories](#step-03---export-tags-authors-and-stories)
+    - [Step 04 - Reimport the Tag Wrangling sheet and map the original tags to the new AO3 tags](#step-04---reimport-the-tag-wrangling-sheet-and-map-the-original-tags-to-the-new-ao3-tags)
+    - [Step 05 - Create the Open Doors tables](#step-05---create-the-open-doors-tables)
+    - [Step 06 - Copy AO3 tags into the stories table](#step-06---copy-ao3-tags-into-the-stories-table)
+    - [Stage 07 - Load Chapters into the Open Doors chapters table](#stage-07---load-chapters-into-the-open-doors-chapters-table)
+  - [Other Scripts](#other-scripts)
+    - [Remove DNI from Open Doors tables](#remove-dni-from-open-doors-tables)
+  - [Parameters](#parameters)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## Process
 
 ### Set up your system and the Open Doors scripts
