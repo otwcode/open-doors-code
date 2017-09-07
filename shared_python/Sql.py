@@ -32,14 +32,14 @@ class Sql(object):
     return dict_cursor.fetchall()
 
 
-  def run_script_from_file(self, filename, database, prefix):
+  def run_script_from_file(self, filename, database, prefix, initial_load = False):
     # Open and read the file as a single buffer
     self.cursor.execute('USE {0}'.format(database))
     fd = open(filename, 'r')
     sqlFile = fd.read()
     fd.close()
 
-    # all SQL commands (split on ';')
+    # strip comments, replace placeholders and return all SQL commands (split on ';')
     sqlCommands = sqlFile.replace('$DATABASE$', database).replace('$PREFIX$', prefix).split(';\n')
 
     # Execute every command from the input file
@@ -48,9 +48,14 @@ class Sql(object):
       # For example, if the tables do not yet exist, this will skip over
       # the DROP TABLE commands
       try:
-        self.cursor.execute(command)
+        end_command = re.sub(r'--.*?\n', '', command)
+        lc_command = end_command.lower().strip().replace("\n", "")
+        if initial_load and (lc_command.startswith("create database") or lc_command.startswith("use ")):
+          print "Skipping command - {0}".format(lc_command)
+        else:
+          self.cursor.execute(command)
       except MySQLdb.OperationalError, msg:
-        print "Command skipped: ", msg
+        print "Command skipped: {0} [{1}]".format(command, msg)
 
     self.db.commit()
 

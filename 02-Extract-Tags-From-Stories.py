@@ -13,7 +13,7 @@ if __name__ == "__main__":
   args = Args.args_for_02()
   sql = Sql(args)
   tags = Tags(args, sql.db)
-  print('--- Processing tags from stories and bookmarks table in {0}'.format(args.temp_db_database))
+  print('---\n Processing tags from stories and bookmarks table in {0}'.format(args.temp_db_database))
   tags.create_tags_table()
 
   tag_col_list = {}
