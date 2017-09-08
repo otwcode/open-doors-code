@@ -63,7 +63,7 @@ operating systems)
     
 1. Make a copy of `example.yml`, give it a simple name related to the archive you're processing, and fill it in. 
 See [Parameters](#parameters) for the list of properties. You will be prompted for any property you didn't include in 
-the file if it needed for a given stage.
+the file if it is needed for a given stage.
 
 
 ### Step 01 - Load the original database into MySQL
@@ -76,8 +76,7 @@ every time you run the script, so you can safely rerun it as often as needed.
 
 #### Notes on specific archives
 ##### eFiction
-Dumps from eFiction sometimes include commands to recreate and use the database name from the original archive. 
-If you want to use this database name, make sure to edit `temp_db_database` to match as later steps will fail otherwise.
+Dumps from eFiction sometimes include commands to recreate and use the database name from the original archive. This script should skip the command to use the original's archive name, but if it doesn't, make sure to edit `temp_db_database` to match the original archive's database name as later steps will fail otherwise.
 
 ##### Automated Archive
 *Import problems*: Some ARCHIVE_DB.pl files contain formatting that breaks the import. Common problems include, but are not limited to:
@@ -118,9 +117,7 @@ will need to replace those commas with another character and let Tag Wrangling k
 #### Notes on specific archives
 ##### eFiction
 Some eFiction versions have comma-delimited ids in the story tag fields instead of the name of the tag. You will need
-to inspect the `fanfiction_stories` table to determine if this is the case before running step 02. The script will 
-prompt you to say if this is the case for the database you are processing. If so, it will look up the 
-tag text in the original tag table.
+to inspect the `fanfiction_stories` table to determine if this is the case before running step 02. The script will ask you if all the tag fields contain ids (rather than text). If they do, answer y, and it will look up the tag text in the original tag table.
 
 
 ### Step 03 - Export tags, authors and stories
