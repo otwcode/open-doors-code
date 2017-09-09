@@ -51,7 +51,7 @@ class Tags(object):
     """.format(self.database))
 
 
-  def populate_tag_table(self, database_name, story_id_col_name, table_name, tag_col_lookup, truncate = True):
+  def populate_tag_table(self, database_name, story_id_col_name, table_name, tag_col_lookup, tags_with_fandoms, truncate = True):
     dict_cursor = self.db.cursor(MySQLdb.cursors.DictCursor)
     dict_cursor.execute('USE {0}'.format(database_name))
     if truncate:
@@ -66,6 +66,7 @@ class Tags(object):
     for story_tags_row in data :
       values = []
       for col in tag_columns:
+        needs_fandom = col in tags_with_fandoms
         for val in re.split(r", ?", story_tags_row[col]):
           if val != '':
             if type(tag_col_lookup[col]) is str: # Probably AA or a custom archive
@@ -74,7 +75,7 @@ class Tags(object):
                                     val.replace("'", "\'").strip(),
                                     col,
                                     tag_col_lookup[col],
-                                    story_tags_row['fandoms']))
+                                    story_tags_row['fandoms'] if needs_fandom else ''))
             else: # eFiction
               values.append('({0}, "{1}", "{2}", "{3}", "")'
                             .format(story_tags_row[story_id_col_name], val.replace("'", "\'").strip(),
