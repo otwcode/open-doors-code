@@ -41,9 +41,12 @@ def _clean_file(filepath):
   final_replace = step3.replace("0,/2,/25", "01/30/00").replace('\t"PrintTime": \'P\',\n', "")
   final_regex = re.sub(r"00,02,\d(.*?)',", "02/26/00',", final_replace)
 
-  print final_regex[0:100]
+  archive_db_python = eval(final_regex)
+  keys = [dict.keys() for dict in archive_db_python.values()]
+  unique_keys = set([val for sublist in keys for val in sublist])
+  print "Fields in ARCHIVE_DB.pl: {0}".format(", ".join(str(e) for e in unique_keys))
 
-  return eval(final_regex)
+  return archive_db_python
 
 
 def _is_external(record):
@@ -62,7 +65,7 @@ def _is_external(record):
 
 
 def _extract_tags(args, record):
-  tags = record.get('Category', '').replace("'", "\\'").replace('"', '\\"') + ', '
+  tags = ""
   if args.tag_fields is not None:
     for tag_field in args.tag_fields.split(', '):
       tags += record.get(tag_field, '').replace("'", "\\'").replace('"', '\\"') + ', '
@@ -70,7 +73,7 @@ def _extract_tags(args, record):
 
 
 def _extract_characters(args, record):
-  tags = record.get('Characters', '').replace("'", "\\'").replace('"', '\\"') + ', '
+  tags = ""
   if args.character_fields is not None:
     for character_field in args.character_fields.split(', '):
       tags += record.get(character_field, '').replace("'", "\\'").replace('"', '\\"') + ', '
@@ -78,7 +81,7 @@ def _extract_characters(args, record):
 
 
 def _extract_relationships(args, record):
-  tags = record.get('Pairing', '').replace("'", "\\'").replace('"', '\\"') + ', '
+  tags = ""
   if args.relationship_fields is not None:
     for relationship_field in args.relationship_fields.split(', '):
       tags += record.get(relationship_field, '').replace("'", "\\'").replace('"', '\\"') + ', '
@@ -86,8 +89,7 @@ def _extract_relationships(args, record):
 
 
 def _extract_fandoms(args, record):
-  catother = record.get('CatOther', '') if record.get('Category', '') == 'Crossover' else ''
-  tags = catother.replace("'", "\\'").replace('"', '\\"') + ', '
+  tags = ""
   if args.fandom_fields is not None:
     for fandom_field in args.fandom_fields.split(', '):
       tags += record.get(fandom_field, '').replace("'", "\\'").replace('"', '\\"') + ', '
@@ -161,8 +163,10 @@ def _create_mysql(args, FILES):
         filename = url
         table_name = '{0}_bookmarks'.format(PREFIX)
 
-      final_fandoms = args.default_fandom if fandoms == '' \
-        else  args.default_fandom + ', ' + unicode(fandoms.replace("'", r"\'"), 'utf-8')
+      # Clean up fandoms and add default fandom if it exists
+      final_fandoms = unicode(fandoms.replace("'", r"\'"), 'utf-8')
+      if args.default_fandom is not None:
+        final_fandoms = args.default_fandom if fandoms == '' else args.default_fandom + ', ' + final_fandoms
 
       result = [element for element in db_authors if element[1] == author and element[2] == email]
       authorid = result[0][0]
