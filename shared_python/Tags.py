@@ -74,7 +74,7 @@ class Tags(object):
                                     val.replace("'", "\'").strip(),
                                     col,
                                     tag_col_lookup[col],
-                                    tag_col_lookup['fandom']))
+                                    story_tags_row['fandoms']))
             else: # eFiction
               values.append('({0}, "{1}", "{2}", "{3}", "")'
                             .format(story_tags_row[story_id_col_name], val.replace("'", "\'").strip(),
