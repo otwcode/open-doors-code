@@ -85,17 +85,18 @@ Dumps from eFiction sometimes include commands to recreate and use the database 
 - line breaks within fields
 - characters incompatible with UTF-8
 - HTML entities
+
 You will get a Python error when something breaks the import; this will include a snippet of the record that could not 
 be processed, so use that to find the record in the ARCHIVE_DB.pl and look for problems like the above. You will have 
 to manually edit the file in your text editor to resolve these issues.
 
 *Tag fields*: As the metadata in AA files is customisable, you can use the `tag_fields`, `character_fields`,
-`relationship_fields` and `fandom_fields` properties to map fields in the ARCHIVE_DB.pl to the right columns in the 
+`relationship_fields` and `fandom_fields` properties to map fields in the ARCHIVE_DB.pl to the right tag columns in the 
 temporary database table. 
 
 ##### Custom archives
-The step 01 script can't be used with archive which do not use Automated Archive or eFiction. The metadata for custom 
-archives which are needs to be loaded manually or using custom scripts into `authors`, `bookmarks`, `chapters` 
+The step 01 script can't be used with archives which do not use Automated Archive or eFiction. The metadata for custom 
+archives needs to be loaded manually or using custom scripts into `authors`, `bookmarks`, `chapters` 
 and `stories` tables matching [the Open Doors table schema](shared_python/create-open-doors-tables.sql) in the 
 `temp_db_database`. 
 
@@ -106,7 +107,7 @@ These archives are then treated as Automated Archive archives by all the scripts
 
     python 02-Extract-Tags-From-Stories.py -p <archive name>.yml
 
-This script creates a table called `tags` in the temporary database and denormalises all the tags for every story.
+This script creates a table called `tags` in the temporary database and denormalises all the tags for every story and story link.
 This table is the basis for the Tag Wrangling sheet and is used to map the tags back to the story when the final
 tables are created. Do not edit the `tags` table manually - it will be destroyed and recreated every time you run this 
 script.
@@ -115,6 +116,11 @@ script.
 will need to replace those commas with another character and let Tag Wrangling know this is what you've done. 
 
 #### Notes on specific archives
+
+##### Automated Archive
+For multi-fandom archives that specify the fandoms for each story, the `fields_with_fandom` parameter can be used to
+specify that tags from the listed columns should be exported with the fandom.
+
 ##### eFiction
 Some eFiction versions have comma-delimited ids in the story tag fields instead of the name of the tag. You will need
 to inspect the `fanfiction_stories` table to determine if this is the case before running step 02. The script will ask you if all the tag fields contain ids (rather than text). If they do, answer y, and it will look up the tag text in the original tag table.
