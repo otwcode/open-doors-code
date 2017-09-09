@@ -52,6 +52,8 @@ class Sql(object):
         lc_command = end_command.lower().strip().replace("\n", "")
         if initial_load and (lc_command.startswith("create database") or lc_command.startswith("use ")):
           print "Skipping command - {0}".format(lc_command)
+        elif lc_command is None or lc_command == '':
+          print lc_command
         else:
           self.cursor.execute(command)
       except MySQLdb.OperationalError, msg:
