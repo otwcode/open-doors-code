@@ -42,6 +42,8 @@ def _clean_file(filepath):
   final_regex = re.sub(r"00,02,\d(.*?)',", "02/26/00',", final_replace)
 
   archive_db_python = eval(final_regex)
+
+  # List fields in AA db file
   keys = [dict.keys() for dict in archive_db_python.values()]
   unique_keys = set([val for sublist in keys for val in sublist])
   print "Fields in ARCHIVE_DB.pl: {0}".format(", ".join(str(e) for e in unique_keys))
@@ -166,7 +168,10 @@ def _create_mysql(args, FILES):
       # Clean up fandoms and add default fandom if it exists
       final_fandoms = unicode(fandoms.replace("'", r"\'"), 'utf-8')
       if args.default_fandom is not None:
-        final_fandoms = args.default_fandom if fandoms == '' else args.default_fandom + ', ' + final_fandoms
+        if final_fandoms == '' or final_fandoms == args.default_fandom
+          final_fandoms = args.default_fandom
+        else:
+          final_fandoms = args.default_fandom + ', ' + final_fandoms
 
       result = [element for element in db_authors if element[1] == author and element[2] == email]
       authorid = result[0][0]

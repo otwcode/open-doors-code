@@ -90,6 +90,9 @@ You will get a Python error when something breaks the import; this will include 
 be processed, so use that to find the record in the ARCHIVE_DB.pl and look for problems like the above. You will have 
 to manually edit the file in your text editor to resolve these issues.
 
+*Fields*: All the field names found in the file will be listed in the console output when you run this step, allowing you 
+to populate the tag fields (see below) with all the relevant fields in the ARCHIVE_DB.pl file.
+
 *Tag fields*: As the metadata in AA files is customisable, you can use the `tag_fields`, `character_fields`,
 `relationship_fields` and `fandom_fields` properties to map fields in the ARCHIVE_DB.pl to the right tag columns in the 
 temporary database table. 

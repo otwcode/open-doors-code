@@ -37,7 +37,7 @@ if __name__ == "__main__":
     # fancy footwork to ensure compatibility with eFiction
     tag_col_list = re.split(r", ?", tag_columns)
     tag_columns_dict = dict(zip(tag_col_list, tag_col_list))
-    fields_with_fandom = args.fields_with_fandom.split(", ")
+    fields_with_fandom = args.fields_with_fandom.split(", ") if args.fields_with_fandom is not None else []
     tags.populate_tag_table(args.temp_db_database, "id", story_table_name, tag_columns_dict, fields_with_fandom)
     tags.populate_tag_table(args.temp_db_database, "id", bookmark_table_name, tag_columns_dict, fields_with_fandom, False)
 
