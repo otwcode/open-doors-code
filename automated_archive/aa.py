@@ -168,7 +168,7 @@ def _create_mysql(args, FILES):
       # Clean up fandoms and add default fandom if it exists
       final_fandoms = unicode(fandoms.replace("'", r"\'"), 'utf-8')
       if args.default_fandom is not None:
-        if final_fandoms == '' or final_fandoms == args.default_fandom
+        if final_fandoms == '' or final_fandoms == args.default_fandom:
           final_fandoms = args.default_fandom
         else:
           final_fandoms = args.default_fandom + ', ' + final_fandoms

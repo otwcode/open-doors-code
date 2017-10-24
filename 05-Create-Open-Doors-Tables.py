@@ -104,12 +104,17 @@ if __name__ == "__main__":
 
     # CHAPTERS
     if chapters:
-      print "Creating chapters table {0}.{1}_chapters from source chapters table...".format(args.output_database, args.db_table_prefix)
-      final_chapters = aa.dummy_chapters(chapters)
+      print "Copying chapters table {0}.{1}_chapters from source chapters table...".format(args.output_database, args.db_table_prefix)
+      truncate_and_insert = "truncate {0}.{1}; insert into {0}.{1} select * from {2}.{3};".format(
+        args.output_database,
+        table_names['chapters'],
+        args.temp_db_database,
+        table_names['chapters'])
+      sql.execute(truncate_and_insert)
     else:
       print "Creating chapters table {0}.{1}_chapters from source stories table...".format(args.output_database, args.db_table_prefix)
       final_chapters = aa.dummy_chapters(final_stories)
-    final.insert_into_final(args.db_table_prefix + '_chapters', final_chapters)
+      final.insert_into_final(args.db_table_prefix + '_chapters', final_chapters)
 
 
   # ----------------------
