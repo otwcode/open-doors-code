@@ -29,6 +29,7 @@ def _clean_file(filepath):
       .replace('%FILES = (\n\n', '{\n"')
       .replace('\n)', '\n}')
       .replace('},\n', '},\n"')
+      .replace('\t\n', '')
       .replace('\t', '\t"')
       .replace(' =>', '":')
       .replace(';', ',')
