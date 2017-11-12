@@ -120,10 +120,10 @@ class Tags(object):
           UPDATE tags
           SET ao3_tag='{0}', ao3_tag_type='{1}', ao3_tag_category='{2}', ao3_tag_fandom='{3}'
           WHERE {4} and original_table='{5}'
-        """.format(unicode(row[tag_headers['ao3_tag']].replace("'", r"\'"), 'utf-8'),
+        """.format(unicode(row[tag_headers['ao3_tag']].replace("'", r"\'"), 'utf-8').encode('utf-8'),
                    row[tag_headers['ao3_tag_type']],
                    row[tag_headers['ao3_tag_category']],
-                   row[tag_headers['ao3_tag_fandom']],
+                   row[tag_headers['ao3_tag_fandom']].replace("'", r"\'"),
                    tagid_filter,
                    original_table))
     self.db.commit()
