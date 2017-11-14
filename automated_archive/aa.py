@@ -34,7 +34,7 @@ def _clean_file(filepath):
       .replace('\t\n', '')
       .replace('\t', '\t"')
       .replace(' =>', '":')
-      .replace(';', ',')
+      .replace(';\n', ',\n')
       .replace(',\n"\n},\n1,', '}')
   )
   # Replace line breaks within fields (followed by a character that isn't a space, tab, digit, } or ")
