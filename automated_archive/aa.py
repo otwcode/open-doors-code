@@ -8,6 +8,8 @@ from HTMLParser import HTMLParser
 from shared_python import Args, Common
 from shared_python.Sql import Sql
 
+def _escape_quote(text):
+  return text.replace("(?<!\\)'", "\\'")
 
 def _clean_file(filepath):
   """
@@ -182,8 +184,8 @@ def _create_mysql(args, FILES):
         VALUES({1}, '{2}', '{3}', '{4}', '{5}', '{6}', '{7}', '{8}', '{9}', '{10}', '{11}', '{12}', '{13}');\n""" \
         .format(unicode(table_name),
                 original_id,
-                final_fandoms,
-                unicode(title, 'utf-8'),
+                final_fandoms.replace(r"\\", "\\"),
+                unicode(title.replace(r"\\", "\\"), 'utf-8'),
                 unicode(summary, 'utf-8'),
                 tags,
                 characters,
@@ -196,7 +198,23 @@ def _create_mysql(args, FILES):
                 authorid)
       cursor.execute(stor)
     except:
-      print(title, summary, tags, characters, date, location, url)
+      print "table name: {0}\noriginal id: {1}\nfinal fandoms: '{2}'\ntitle: '{3}'\nsummary: '{4}'\ntags: '{5}'" \
+            "\ncharacters: '{6}'\ndate: '{7}'\nfilename: '{8}'\nnotes: '{9}'\npairings: '{10}'\nrating: '{11}'" \
+            "\nwarnings: '{12}'\nauthor id: '{13}'"\
+        .format(unicode(table_name),
+            original_id,
+            final_fandoms,
+            unicode(title, 'utf-8'),
+            unicode(summary, 'utf-8'),
+            tags,
+            characters,
+            date,
+            filename,
+            unicode(notes, 'utf-8'),
+            pairings,
+            rating,
+            warnings,
+            authorid)
       raise
   db.commit()
 
