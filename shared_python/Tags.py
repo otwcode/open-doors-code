@@ -23,7 +23,7 @@ class Tags(object):
       'original_table':       'Original Tag Type',
       'original_description': 'Original Tag Description',
       'ao3_tag':              'Recommended AO3 Tag',
-      'ao3_tag_category':     'Recommended AO3 Category (for relationships)',
+      'ao3_tag_category':     'Recommended AO3 Category for relationships',
       'ao3_tag_type':         'Recommended AO3 Type',
       'ao3_tag_fandom':       'Related Fandom'
     }
@@ -120,37 +120,42 @@ class Tags(object):
 
     ao3_tags = unicode(row[tag_headers['ao3_tag']].replace("'", r"\'"), 'utf-8').encode('utf-8').split(",")
     ao3_tag_types = row[tag_headers['ao3_tag_type']].split(",")
+    number_types = len(ao3_tag_types)
 
-    # If tags length >= types length -> there are remapped tags
+    # If tags length > types length -> there are remapped tags
     for idx, ao3_tag in enumerate(ao3_tags):
       ao3_tag = ao3_tag.strip()
+      print '[{2}] - Index: {0} - Types: {1}'.format(idx, number_types, ao3_tag)
 
-      if len(ao3_tag_types) > idx + 1:
-        ao3_tag_type = ao3_tag_types[idx]
+      if number_types >= idx + 1:
+        ao3_tag_type = ao3_tag_types[idx].strip()
       else:
-        ao3_tag_type = ao3_tag_types[0]
+        ao3_tag_type = ao3_tag_types[0].strip()
 
       self.cursor.execute("USE {0}".format(self.database))
       if idx > 0:
         self.cursor.execute("""
-              SELECT story_id from tags
+              SELECT storyid from tags
               WHERE {0} and original_table='{1}'
             """.format(tagid_filter,
                        original_table))
         story_ids = self.cursor.fetchall()
+
         for story_id in story_ids:
           self.cursor.execute("""
-                INSERT INTO tags (ao3_tag, ao3_tag_type, ao3_tag_category, ao3_tag_fandom, original_table, story_id, original_tag, original_tagid)
-                VALUES ('{0}', '{1}', '{2}', '{3}', '{5}', {6}, '{7}', {8})
+                INSERT INTO tags (ao3_tag, ao3_tag_type, ao3_tag_category, ao3_tag_fandom, original_table, storyid, 
+                original_tag, original_tagid, original_column)
+                VALUES ('{0}', '{1}', '{2}', '{3}', '{5}', {6}, '{7}', {8}, '{9}')
               """.format(ao3_tag,
                          ao3_tag_type,
                          row[tag_headers['ao3_tag_category']],
                          row[tag_headers['ao3_tag_fandom']].replace("'", r"\'"),
                          tagid_filter,
                          original_table,
-                         story_id,
+                         story_id[0],
                          tag,
-                         row[tag_headers['original_tagid']]))
+                         row[tag_headers['original_tagid']] or 'null',
+                         original_table))
       else:
         self.cursor.execute("""
               UPDATE tags

@@ -224,7 +224,7 @@ def clean_and_load_data(args):
   _create_mysql(args, data)
 
 
-def story_to_final_without_tags(story):
+def story_to_final_without_tags(story, is_story = True):
   final_story = {
     'id':            story['id'],
     'title':         story['title'],
@@ -235,10 +235,11 @@ def story_to_final_without_tags(story):
     'updated':       story['updated'],
     'url':           story['url'],
     'ao3url':        story['ao3url'],
-    'coauthorid':    story['coauthorId'],
     'imported':      0,
     'doNotImport':   0,
   }
+  if is_story:
+    final_story['coauthorid'] = story['coauthorId']
   return final_story
 
 

@@ -89,7 +89,7 @@ if __name__ == "__main__":
       final_bookmarks = []
       for bookmark in bookmarks_without_tags:
         # Add additional bookmark processing here
-        final_bookmarks.append(aa.story_to_final_without_tags(bookmark))
+        final_bookmarks.append(aa.story_to_final_without_tags(bookmark, False))
       if final_bookmarks: final.insert_into_final(args.db_table_prefix + '_bookmarks', final_bookmarks)
 
     # AUTHORS
