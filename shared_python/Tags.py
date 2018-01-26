@@ -51,7 +51,7 @@ class Tags(object):
     """.format(self.database))
 
 
-  def populate_tag_table(self, database_name, story_id_col_name, table_name, tag_col_lookup, truncate = True):
+  def populate_tag_table(self, database_name, story_id_col_name, table_name, tag_col_lookup, tags_with_fandoms, truncate = True):
     dict_cursor = self.db.cursor(MySQLdb.cursors.DictCursor)
     dict_cursor.execute('USE {0}'.format(database_name))
     if truncate:
@@ -66,15 +66,18 @@ class Tags(object):
     for story_tags_row in data :
       values = []
       for col in tag_columns:
+        needs_fandom = col in tags_with_fandoms
         for val in re.split(r", ?", story_tags_row[col]):
           if val != '':
             if type(tag_col_lookup[col]) is str: # Probably AA or a custom archive
+              cleaned_tag = unicode(val).encode('utf-8').replace("'", "\'").strip()
+
               values.append('({0}, "{1}", "{2}", "{3}", "{4}")'
                             .format(story_tags_row[story_id_col_name],
-                                    val.replace("'", "\'").strip(),
+                                    re.sub(r'(?<!\\)"', '\\"', cleaned_tag),
                                     col,
                                     tag_col_lookup[col],
-                                    tag_col_lookup['fandom']))
+                                    story_tags_row['fandoms'] if needs_fandom else ''))
             else: # eFiction
               values.append('({0}, "{1}", "{2}", "{3}", "")'
                             .format(story_tags_row[story_id_col_name], val.replace("'", "\'").strip(),
@@ -108,24 +111,63 @@ class Tags(object):
     tag_headers = self.tag_export_map
     original_table = row[tag_headers['original_table']] if table_prefix is None \
       else '{0}_{1}'.format(table_prefix, row[tag_headers['original_table']])
+    tag = unicode(row[tag_headers['original_tag']].replace("'", r"\'"), 'utf-8')
 
     if row[tag_headers['original_tagid']] == '':
-      tagid_filter = "original_tag = '{0}'".format(unicode(row[tag_headers['original_tag']].replace("'", r"\'"), 'utf-8'))
+      tagid_filter = "original_tag = '{0}'".format(tag)
     else:
       tagid_filter = "original_tagid={0}".format(row[tag_headers['original_tagid']])
 
-    self.cursor.execute("USE {0}".format(self.database))
-    self.cursor.execute("""
-          UPDATE tags
-          SET ao3_tag='{0}', ao3_tag_type='{1}', ao3_tag_category='{2}', ao3_tag_fandom='{3}'
-          WHERE {4} and original_table='{5}'
-        """.format(unicode(row[tag_headers['ao3_tag']].replace("'", r"\'"), 'utf-8'),
-                   row[tag_headers['ao3_tag_type']],
-                   row[tag_headers['ao3_tag_category']],
-                   row[tag_headers['ao3_tag_fandom']],
-                   tagid_filter,
-                   original_table))
-    self.db.commit()
+    ao3_tags = unicode(row[tag_headers['ao3_tag']].replace("'", r"\'"), 'utf-8').encode('utf-8').split(",")
+    ao3_tag_types = row[tag_headers['ao3_tag_type']].split(",")
+    number_types = len(ao3_tag_types)
+
+    # If tags length > types length -> there are remapped tags
+    for idx, ao3_tag in enumerate(ao3_tags):
+      ao3_tag = ao3_tag.strip()
+      print '[{2}] - Index: {0} - Types: {1}'.format(idx, number_types, ao3_tag)
+
+      if number_types >= idx + 1:
+        ao3_tag_type = ao3_tag_types[idx].strip()
+      else:
+        ao3_tag_type = ao3_tag_types[0].strip()
+
+      self.cursor.execute("USE {0}".format(self.database))
+      if idx > 0:
+        self.cursor.execute("""
+              SELECT storyid from tags
+              WHERE {0} and original_table='{1}'
+            """.format(tagid_filter,
+                       original_table))
+        story_ids = self.cursor.fetchall()
+
+        for story_id in story_ids:
+          self.cursor.execute("""
+                INSERT INTO tags (ao3_tag, ao3_tag_type, ao3_tag_category, ao3_tag_fandom, original_table, storyid, 
+                original_tag, original_tagid, original_column)
+                VALUES ('{0}', '{1}', '{2}', '{3}', '{5}', {6}, '{7}', {8}, '{9}')
+              """.format(ao3_tag,
+                         ao3_tag_type,
+                         row[tag_headers['ao3_tag_category']],
+                         row[tag_headers['ao3_tag_fandom']].replace("'", r"\'"),
+                         tagid_filter,
+                         original_table,
+                         story_id[0],
+                         tag,
+                         row[tag_headers['original_tagid']] or 'null',
+                         original_table))
+      else:
+        self.cursor.execute("""
+              UPDATE tags
+              SET ao3_tag='{0}', ao3_tag_type='{1}', ao3_tag_category='{2}', ao3_tag_fandom='{3}'
+              WHERE {4} and original_table='{5}'
+            """.format(ao3_tag,
+                       ao3_tag_type,
+                       row[tag_headers['ao3_tag_category']],
+                       row[tag_headers['ao3_tag_fandom']].replace("'", r"\'"),
+                       tagid_filter,
+                       original_table))
+      self.db.commit()
 
 
   def hydrate_tag_row(self, tag_id, tag_to_look_up, tag, col, table, parent ='', description =''):

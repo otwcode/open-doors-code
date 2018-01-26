@@ -46,15 +46,18 @@ def _process_args():
   parser.add_argument('-od', '--output_database',          type=str, help='Name of the database the final tables should be created in (default "od_sgf")')
 
   # Tag settings
-  parser.add_argument('-ft', '--tag_fields',               type=str, help='Name of tag field(s) in original db (comma-delimited)')
-  parser.add_argument('-fc', '--character_fields',         type=str, help='Name of character field(s) in original db (comma-delimited)')
-  parser.add_argument('-fr', '--relationship_fields',      type=str, help='Name of relationship field(s) in original db (comma-delimited)')
-  parser.add_argument('-ff', '--fandom_fields',            type=str, help='Name of fandom field(s) in original db (comma-delimited)')
+  parser.add_argument('-ft', '--tag_fields',               type=str, help='List of tag field(s) in original db (comma-delimited)')
+  parser.add_argument('-fc', '--character_fields',         type=str, help='List of character field(s) in original db (comma-delimited)')
+  parser.add_argument('-fr', '--relationship_fields',      type=str, help='List of relationship field(s) in original db (comma-delimited)')
+  parser.add_argument('-ff', '--fandom_fields',            type=str, help='List of fandom field(s) in original db (comma-delimited)')
+  parser.add_argument('-wf', '--fields_with_fandom',       type=str, help='List of output tag fields where the fandom should be listed too (comma-delimited)')
+
+  # Wrangling and search processing
   parser.add_argument('-t',  '--tag_input_file',           type=str, help='Path to tag renaming input CSV')
+  parser.add_argument('-si', '--story_ids_to_remove',      type=str, help='Location of the text file containing the story ids to remove')
 
   # Chapters
   parser.add_argument('-cp', '--chapters_path',            type=str, help='Location of the text files containing the stories')
-  parser.add_argument('-si', '--story_ids_to_remove',      type=str, help='Location of the text file containing the story ids to remove')
   parser.add_argument('-cf', '--chapters_file_extensions', type=str, help='File extension(s) of the text files containing the stories (eg: "txt, html")')
 
 

@@ -50,7 +50,11 @@ if __name__ == "__main__":
       else:
         tag_list = [d['ao3_tag'] for d in tag_type_tags if 'ao3_tag' in d and d['ao3_tag'] is not None]
         categories += valid_tags('ao3_tag_category', tag_type_tags)
-        fandoms += valid_tags('ao3_tag_fandom', tag_type_tags)
+        if tag_type == 'fandoms':
+          fandoms += tag_list
+        # Don't add the related fandom for this tag
+        # else:
+        #   fandoms += valid_tags('ao3_tag_fandom', tag_type_tags)
         story_tags[tag_type] = ', '.join(set(tag_list))
 
     story_tags['categories'] = ', '.join(set(categories))

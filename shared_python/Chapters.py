@@ -20,7 +20,7 @@ class Chapters(object):
 
 
   def _gather_and_dedupe(self, chapters_path, extensions, has_ids = False):
-    print "Finding chapters and identifying duplicates"
+    print "\nFinding chapters and identifying duplicates"
     extensions = re.split(r", ?", extensions)
     story_folder = os.walk(chapters_path)
     file_paths = {}
@@ -81,9 +81,7 @@ class Chapters(object):
     if extensions is None:
       extensions = self.args.chapters_file_extensions
 
-    print """
-      Processing chapters...
-    """.replace('    ', '')
+    print "\nProcessing chapters...\n"
 
     filenames_are_ids = raw_input("\nChapter file names are chapter ids? Y/N\n")
     has_ids = True if str.lower(filenames_are_ids) == 'y' else False

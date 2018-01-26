@@ -63,7 +63,7 @@ operating systems)
     
 1. Make a copy of `example.yml`, give it a simple name related to the archive you're processing, and fill it in. 
 See [Parameters](#parameters) for the list of properties. You will be prompted for any property you didn't include in 
-the file if it needed for a given stage.
+the file if it is needed for a given stage.
 
 
 ### Step 01 - Load the original database into MySQL
@@ -76,8 +76,7 @@ every time you run the script, so you can safely rerun it as often as needed.
 
 #### Notes on specific archives
 ##### eFiction
-Dumps from eFiction sometimes include commands to recreate and use the database name from the original archive. 
-If you want to use this database name, make sure to edit `temp_db_database` to match as later steps will fail otherwise.
+Dumps from eFiction sometimes include commands to recreate and use the database name from the original archive. This script should skip the command to use the original's archive name, but if it doesn't, make sure to edit `temp_db_database` to match the original archive's database name as later steps will fail otherwise.
 
 ##### Automated Archive
 *Import problems*: Some ARCHIVE_DB.pl files contain formatting that breaks the import. Common problems include, but are not limited to:
@@ -86,17 +85,21 @@ If you want to use this database name, make sure to edit `temp_db_database` to m
 - line breaks within fields
 - characters incompatible with UTF-8
 - HTML entities
+
 You will get a Python error when something breaks the import; this will include a snippet of the record that could not 
 be processed, so use that to find the record in the ARCHIVE_DB.pl and look for problems like the above. You will have 
 to manually edit the file in your text editor to resolve these issues.
 
+*Fields*: All the field names found in the file will be listed in the console output when you run this step, allowing you 
+to populate the tag fields (see below) with all the relevant fields in the ARCHIVE_DB.pl file.
+
 *Tag fields*: As the metadata in AA files is customisable, you can use the `tag_fields`, `character_fields`,
-`relationship_fields` and `fandom_fields` properties to map fields in the ARCHIVE_DB.pl to the right columns in the 
+`relationship_fields` and `fandom_fields` properties to map fields in the ARCHIVE_DB.pl to the right tag columns in the 
 temporary database table. 
 
 ##### Custom archives
-The step 01 script can't be used with archive which do not use Automated Archive or eFiction. The metadata for custom 
-archives which are needs to be loaded manually or using custom scripts into `authors`, `bookmarks`, `chapters` 
+The step 01 script can't be used with archives which do not use Automated Archive or eFiction. The metadata for custom 
+archives needs to be loaded manually or using custom scripts into `authors`, `bookmarks`, `chapters` 
 and `stories` tables matching [the Open Doors table schema](shared_python/create-open-doors-tables.sql) in the 
 `temp_db_database`. 
 
@@ -107,7 +110,7 @@ These archives are then treated as Automated Archive archives by all the scripts
 
     python 02-Extract-Tags-From-Stories.py -p <archive name>.yml
 
-This script creates a table called `tags` in the temporary database and denormalises all the tags for every story.
+This script creates a table called `tags` in the temporary database and denormalises all the tags for every story and story link.
 This table is the basis for the Tag Wrangling sheet and is used to map the tags back to the story when the final
 tables are created. Do not edit the `tags` table manually - it will be destroyed and recreated every time you run this 
 script.
@@ -116,11 +119,14 @@ script.
 will need to replace those commas with another character and let Tag Wrangling know this is what you've done. 
 
 #### Notes on specific archives
+
+##### Automated Archive
+For multi-fandom archives that specify the fandoms for each story, the `fields_with_fandom` parameter can be used to
+specify that tags from the listed columns should be exported with the fandom.
+
 ##### eFiction
 Some eFiction versions have comma-delimited ids in the story tag fields instead of the name of the tag. You will need
-to inspect the `fanfiction_stories` table to determine if this is the case before running step 02. The script will 
-prompt you to say if this is the case for the database you are processing. If so, it will look up the 
-tag text in the original tag table.
+to inspect the `fanfiction_stories` table to determine if this is the case before running step 02. The script will ask you if all the tag fields contain ids (rather than text). If they do, answer y, and it will look up the tag text in the original tag table.
 
 
 ### Step 03 - Export tags, authors and stories
