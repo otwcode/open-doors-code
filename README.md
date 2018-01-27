@@ -157,16 +157,18 @@ sure its path is specified in `tag_input_file`. This script then copies the AO3 
     python 05-Create-Open-Doors-Tables.py -p <archive name>.yml
 
 This script creates the tables for the temporary import site and populates them based on the data in the temporary
-database. It also filters out authors without stories, and if a file of comma-separated ids is specified in 
-the `story_ids_to_remove` property, it will also filter out any stories in the list.
+database. It also filters out authors without stories, and if a .txt file of comma-separated ids (no final comma) is specified in
+the `story_ids_to_remove` property, it will also filter out any stories in the list. DNI Bookmarks will have to be removed manually.
 
-The temporary sites are currently all run off the same database, with the tables prefixed to distinguish them - specify 
+You will need to create an empty database (eg in Sequel) for the new tables to be inserted into if you haven't already made a generic one for a previous site. Include it as property `output_database` in your yml file.
+
+The temporary sites are currently all run off the same database, with the tables prefixed to distinguish them - specify
 the prefix to use in `db_table_prefix`.
 
 This script will destroy the prefixed tables for this archive before recreating them, so do not edit them manually
 until you are sure you are finished with this stage.
 
-*Notes*: 
+*Notes*:
 - The `stories` and `bookmarks` tables will not contain any tags at all after this stage. These aren't added
 until you run step 06.
 - The `chapters` table will not contain the story contents, which are loaded in step 07.
@@ -180,6 +182,9 @@ This script matches up the AO3 tags from the `tags` table with the corresponding
 that unlike the other scripts, this one does not destroy any databases or tables, though it does overwrite the tag 
 fields in the `stories` or `bookmarks` databases.
 
+*Notes*:
+- The output for this command  (eg "Getting all tags per story...429/429 stories") will report the number of stories in the tag table, which may be more than the number of stories you have after removing DNI in the previous stage.
+
 
 ### Step 07 - Load Chapters into the Open Doors chapters table
 
@@ -189,21 +194,35 @@ Loads the chapter contents in the output database (this can be run at any point 
 through all the files in the `chapters_path` and trying to find an entry in the chapters table that has the same
 `url`. It then copied the contents of the file into the `text` column for that row.
 
+You will be prompted to answer two questions:
+
+Chapter file names are chapter ids? Y/N
+
+Look at the file names in `chapters_path`  and compare against the `chapterid` column in the database. For efiction, these are most likely to be the same (ie Y) , but for AA or other databases they probably are more likely to be a human readable name instead (N).
+
+Importing chapters: pick character encoding (check for curly quotes):
+1 = Windows 1252
+enter = UTF-8
+See note below about encoding problems.
+
 If there are duplicate chapters (for example if co-authored stories were listed under each author), the script will
 try to deduplicate them by only keeping the duplicate whose `authorid` is the same as the `authorid` in the `story` table.
-It will list duplicates it has found in the console output. 
+It will list duplicates it has found in the console output.
 
 Common problems to look out for when processing chapters:
-- Email addresses in story files. These should be removed to protect the authors, but check for any stories that include 
-fictional email conversations between the characters.
+- Email addresses in story files. These should be removed to protect the authors, but check for any stories that include
+fictional email conversations between the characters. Use a text editor that can find and replace across multipe files using Regular expressions (regex). To find email addresses try:  `.*(\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b).*`
 - Navigation for the original site should be removed. (This is not typically a problem for eFiction sites)
-- Encoding problems - these result in curly quotes and accented characters being replaced by rubbish characters. Trying 
+- Other links may need to be removed depending on where they linked to. (If they are relative links they definitely should be removed). Regex to find opening and closing <a> tags : `</?a(?:(?= )[^>]*)?>`
+- Encoding problems - these result in curly quotes and accented characters being replaced by rubbish characters. Trying
 "Windows 1252" instead of "UTF-8" when prompted may solve this, or you might have to edit-replace the broken characters
 in the affected story files.
-- In some cases, a story file might contain a character that prevents it from being copied to the MySQL table. Edit the 
+- In some cases, a story file might contain a character that prevents it from being copied to the MySQL table. Edit the
 story manually to resolve.
 - Missing stories - sometimes the url in the database doesn't exactly match the path to the story. You should check for
-empty chapters after this step and look for their corresponding chapter files manually.
+empty chapters after this step and look for their corresponding chapter files manually. If found, paste the HTML of the story into the empty `text` column for that row.
+- If the authors table has co-authors listed with 2 email addresses in an entry, create a new line in the authors table for the second author, amend the first author, then put the 2nd author ID into the `coauthorid` column of the stories table
+- The author table may need to be de-duped
 
 
 ## Other Scripts
