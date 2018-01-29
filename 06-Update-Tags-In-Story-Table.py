@@ -61,5 +61,6 @@ if __name__ == "__main__":
     story_tags['fandoms'] = ', '.join(set(fandoms))
 
     final.populate_story_tags(story_id, args.db_table_prefix + '_stories', story_tags)
+    final.populate_story_tags(story_id, args.db_table_prefix + '_bookmarks', story_tags)
 
   print('\n')
