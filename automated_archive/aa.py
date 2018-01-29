@@ -135,7 +135,8 @@ def _create_mysql(args, FILES):
               datetime.datetime.strptime(
                 FILES[i].get('PrintTime',
                              FILES[i].get('DatePrint',
-                                          str(datetime.datetime.now().strftime('%m/%d/%y')))),
+                                          FILES[i].get('Date',
+                                          str(datetime.datetime.now().strftime('%m/%d/%y'))))),
                 '%m/%d/%y').strftime('%Y-%m-%d'),
               FILES[i].get('Location', '').replace("'", "\\'"),
               FILES[i].get('LocationURL', FILES[i].get('StoryURL', '')).replace("'", "\\'"),
