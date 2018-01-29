@@ -12,10 +12,10 @@ from shared_python.Tags import Tags
 
 def _clean_email(author):
   email = author['email']
-  if author['email'] is None or author['email'] == '':
+  if email is None or email == '':
     email = u'{0}{1}Archive@ao3.org'.format(author['name'], args.archive_name)\
       .replace(' ', '').replace("'", "")
-  if author['email'].startswith('mailto:'):
+  if email.startswith('mailto:'):
     email = author['email'].replace('mailto:', '')
   return email
 
@@ -97,9 +97,10 @@ if __name__ == "__main__":
     final_authors = []
     authors = final.original_table(table_names['authors'])
     for final_author in authors:
-      if any(story['authorid'] == final_author['id'] or story['coauthorid'] == final_author['id'] for story in final_stories):
+      if any(story['authorid'] == final_author['id'] or story['coauthorid'] == final_author['id'] for story in final_stories)\
+          or any(bookmark['authorid'] == final_author['id'] or bookmark['coauthorid'] == final_author['id'] for bookmark in final_bookmarks):
         final_author['email'] = _clean_email(final_author)
-      final_authors.append(final_author)
+        final_authors.append(final_author)
     final.insert_into_final(args.db_table_prefix + '_authors', final_authors)
 
     # CHAPTERS

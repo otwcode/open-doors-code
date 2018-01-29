@@ -1,5 +1,5 @@
 -- CREATE DESTINATION TABLES
-
+CREATE DATABASE IF NOT EXISTS `$DATABASE$`;
 USE `$DATABASE$`;
 
 DROP TABLE IF EXISTS `$PREFIX$authors`;
@@ -21,7 +21,7 @@ CREATE TABLE `$PREFIX$bookmarks` (
   `notes` text,
   `authorId` int(11) DEFAULT '0',
   `rating` varchar(255) CHARACTER SET utf8 NOT NULL DEFAULT '',
-  `date` date DEFAULT NULL,
+  `date` datetime DEFAULT NULL,
   `updated` datetime DEFAULT NULL,
   `categories` varchar(45) DEFAULT '',
   `tags` varchar(1024) NOT NULL DEFAULT '',
