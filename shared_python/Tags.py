@@ -23,7 +23,7 @@ class Tags(object):
       'original_table':       'Original Tag Type',
       'original_description': 'Original Tag Description',
       'ao3_tag':              'Recommended AO3 Tag',
-      'ao3_tag_category':     'Recommended AO3 Category for relationships',
+      'ao3_tag_category':     'Recommended AO3 Category (for relationships)',
       'ao3_tag_type':         'Recommended AO3 Type',
       'ao3_tag_fandom':       'Related Fandom'
     }
@@ -67,21 +67,22 @@ class Tags(object):
       values = []
       for col in tag_columns:
         needs_fandom = col in tags_with_fandoms
-        for val in re.split(r", ?", story_tags_row[col]):
-          if val != '':
-            if type(tag_col_lookup[col]) is str: # Probably AA or a custom archive
-              cleaned_tag = unicode(val).encode('utf-8').replace("'", "\'").strip()
+        if story_tags_row[col] is not None:
+          for val in re.split(r", ?", story_tags_row[col]):
+            if val != '':
+              if type(tag_col_lookup[col]) is str: # Probably AA or a custom archive
+                cleaned_tag = unicode(val).encode('utf-8').replace("'", "\'").strip()
 
-              values.append('({0}, "{1}", "{2}", "{3}", "{4}")'
-                            .format(story_tags_row[story_id_col_name],
-                                    re.sub(r'(?<!\\)"', '\\"', cleaned_tag),
-                                    col,
-                                    tag_col_lookup[col],
-                                    story_tags_row['fandoms'] if needs_fandom else ''))
-            else: # eFiction
-              values.append('({0}, "{1}", "{2}", "{3}", "")'
-                            .format(story_tags_row[story_id_col_name], val.replace("'", "\'").strip(),
-                                    col, tag_col_lookup[col]['table_name']))
+                values.append('({0}, "{1}", "{2}", "{3}", "{4}")'
+                              .format(story_tags_row[story_id_col_name],
+                                      re.sub(r'(?<!\\)"', '\\"', cleaned_tag),
+                                      col,
+                                      tag_col_lookup[col],
+                                      story_tags_row['fandoms'] if needs_fandom else ''))
+              else: # eFiction
+                values.append('({0}, "{1}", "{2}", "{3}", "")'
+                              .format(story_tags_row[story_id_col_name], val.replace("'", "\'").strip(),
+                                      col, tag_col_lookup[col]['table_name']))
 
       self.cursor.execute("""
            INSERT INTO tags (storyid, original_tag, original_column, original_table, ao3_tag_fandom) VALUES {0}
@@ -113,7 +114,7 @@ class Tags(object):
       else '{0}_{1}'.format(table_prefix, row[tag_headers['original_table']])
     tag = unicode(row[tag_headers['original_tag']].replace("'", r"\'"), 'utf-8')
 
-    if row[tag_headers['original_tagid']] == '':
+    if row[tag_headers['original_tagid']] == '' or row[tag_headers['original_tagid']] is None:
       tagid_filter = "original_tag = '{0}'".format(tag)
     else:
       tagid_filter = "original_tagid={0}".format(row[tag_headers['original_tagid']])
@@ -125,7 +126,6 @@ class Tags(object):
     # If tags length > types length -> there are remapped tags
     for idx, ao3_tag in enumerate(ao3_tags):
       ao3_tag = ao3_tag.strip()
-      print '[{2}] - Index: {0} - Types: {1}'.format(idx, number_types, ao3_tag)
 
       if number_types >= idx + 1:
         ao3_tag_type = ao3_tag_types[idx].strip()
@@ -231,7 +231,7 @@ class Tags(object):
     tags_by_story_id = {}
     for storyid in storyids:
       cur += 1
-      sys.stdout.write('\r{0}/{1} stories'.format(cur, total))
+      sys.stdout.write('\rCollecting tags for {0}/{1} stories and bookmarks (including DNI)'.format(cur, total))
       sys.stdout.flush()
 
       dict_cursor.execute("SELECT * FROM tags WHERE storyid={0}".format(storyid[0]))

@@ -58,17 +58,28 @@ if __name__ == "__main__":
   # Filter out DNI stories - story_ids_to_remove must be comma-separated list of DNI ids
   if os.path.exists(args.story_ids_to_remove):
     with open(args.story_ids_to_remove, "rt") as f:
-      print "Removing {0} Do Not Import stories...".format(sum(line.count(",") for line in f))
+      print "Removing {0} Do Not Import stories...".format(sum(line.count(",") for line in f) + 1)
       f.seek(0)
       for line in f:
         story_exclusion_filter = filter + '(' + line + ')'
 
+  bookmark_exclusion_filter = ''
+  # Filter out DNI stories - bookmark_ids_to_remove must be comma-separated list of DNI ids
+  if os.path.exists(args.bookmark_ids_to_remove):
+    with open(args.bookmark_ids_to_remove, "rt") as f:
+      print "Removing {0} Do Not Import bookmarks...".format(sum(line.count(",") for line in f) + 1)
+      f.seek(0)
+      for line in f:
+        bookmark_exclusion_filter = filter + '(' + line + ')'
+
 
   # Export tables
   stories_without_tags = final.original_table(table_names['stories'], story_exclusion_filter)
-  print "Stories without tags: {0}".format(len(stories_without_tags))
+  print "Stories without tags after removing DNI: {0}".format(len(stories_without_tags))
+  bookmarks_without_tags = final.original_table(table_names['bookmarks'], bookmark_exclusion_filter)
+  print "Bookmarks without tags after removing DNI: {0}".format(len(bookmarks_without_tags))
+
   chapters = final.original_table(table_names['chapters'], '')
-  bookmarks_without_tags = final.original_table(table_names['bookmarks'], story_exclusion_filter)
 
 
   # ----------------------
@@ -98,17 +109,19 @@ if __name__ == "__main__":
     authors = final.original_table(table_names['authors'])
     for final_author in authors:
       if any(story['authorid'] == final_author['id'] or story['coauthorid'] == final_author['id'] for story in final_stories)\
-          or any(bookmark['authorid'] == final_author['id'] or bookmark['coauthorid'] == final_author['id'] for bookmark in final_bookmarks):
+          or any(bookmark['authorid'] == final_author['id'] for bookmark in final_bookmarks):
         final_author['email'] = _clean_email(final_author)
         final_authors.append(final_author)
     final.insert_into_final(args.db_table_prefix + '_authors', final_authors)
 
     # CHAPTERS
     if chapters:
-      print "Copying chapters table {0}.{1}_chapters from source chapters table...".format(args.output_database, args.db_table_prefix)
-      truncate_and_insert = "truncate {0}.{1}; insert into {0}.{1} select * from {2}.{3};".format(
-        args.output_database,
-        table_names['chapters'],
+      dest_chapter_table = "{0}.{1}".format(args.output_database, table_names['chapters'])
+      print "Copying chapters table {0} from source chapters table...".format(dest_chapter_table)
+      sql.execute("drop table if exists {0}".format(dest_chapter_table))
+
+      truncate_and_insert = "create table {0} select * from {1}.{2}".format(
+        dest_chapter_table,
         args.temp_db_database,
         table_names['chapters'])
       sql.execute(truncate_and_insert)

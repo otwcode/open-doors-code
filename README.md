@@ -157,10 +157,10 @@ sure its path is specified in `tag_input_file`. This script then copies the AO3 
     python 05-Create-Open-Doors-Tables.py -p <archive name>.yml
 
 This script creates the tables for the temporary import site and populates them based on the data in the temporary
-database. It also filters out authors without stories, and if a .txt file of comma-separated ids (no final comma) is specified in
-the `story_ids_to_remove` property, it will also filter out any stories in the list. DNI Bookmarks will have to be removed manually.
+database. It also filters out authors without stories, and if .txt files of comma-separated ids (no final comma) are specified in
+the `story_ids_to_remove` or `bookmark_ids_to_remove` properties, it will also filter out any stories or bookmarks in the list.
 
-You will need to create an empty database (eg in Sequel) for the new tables to be inserted into if you haven't already made a generic one for a previous site. Include it as property `output_database` in your yml file.
+You will need to create an empty database (eg in Sequel Pro) for the new tables to be inserted into if you haven't already made a generic one for a previous site. Include it as property `output_database` in your yml file.
 
 The temporary sites are currently all run off the same database, with the tables prefixed to distinguish them - specify
 the prefix to use in `db_table_prefix`.
@@ -250,6 +250,7 @@ rows from the `table_prefix`_stories table in the final output database.
 | -o   | output_folder            | Path for output files (creator works, and tag spreadsheets) |
 | -df  | default_fandom           | Default fandom to use. Optional - the column will only be populated with fandoms from the TW sheet if this is blank. |
 | -si  | story_ids_to_remove      | Location of the text file containing the story ids to remove. Optional - if no path is specified, the stories table will be copied over as is. |
+| -bi  | bookmark_ids_to_remove   | Location of the text file containing the bookmark ids to remove. Optional - if no path is specified, the bookmark table will be copied over as is. |
 | *Databases* |
 | -i   | db_input_file            | Full path to input file (ARCHIVE_DB.pl for AA, SQL script for eFiction)|
 | -dd  | temp_db_database         | MySQL temporary database name to use for processing (will be destroyed in step 1 if it exists) |

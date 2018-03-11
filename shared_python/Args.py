@@ -55,6 +55,7 @@ def _process_args():
   # Wrangling and search processing
   parser.add_argument('-t',  '--tag_input_file',           type=str, help='Path to tag renaming input CSV')
   parser.add_argument('-si', '--story_ids_to_remove',      type=str, help='Location of the text file containing the story ids to remove')
+  parser.add_argument('-bi', '--bookmark_ids_to_remove',   type=str, help='Location of the text file containing the bookmark ids to remove')
 
   # Chapters
   parser.add_argument('-cp', '--chapters_path',            type=str, help='Location of the text files containing the stories')
@@ -70,11 +71,10 @@ def _process_args():
       else:
         setattr(args, k, v)
 
-  args.db_host =          raw_input(argdict['db_host'] + ': ') if args.db_host is None else args.db_host
-  args.db_user =          raw_input(argdict['db_user'] + ': ') if args.db_user is None else args.db_user
-  args.db_password =      raw_input(argdict['db_password'] + ': ') if args.db_password is None else args.db_password
-  args.temp_db_database = raw_input(argdict['temp_db_database'] + ': ') if args.temp_db_database is None else args.temp_db_database
-  args.db_table_prefix =  raw_input(argdict['db_table_prefix'] + ': ') if args.db_table_prefix is None else args.db_table_prefix
+  for arg_name in argdict.keys():
+    if getattr(args, arg_name) is None:
+      setattr(args, arg_name, raw_input(argdict[arg_name] + ': '))
+
   args.archive_name =     raw_input('Name of the original archive (used in export file names): ') if args.archive_name is None else args.archive_name
 
   while args.archive_type is None or args.archive_type not in ['AA', 'EF']:
