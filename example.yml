@@ -24,6 +24,7 @@ fields_with_fandom:
 output_folder: /path/to/output/files
 tag_input_file: /path/to/Tags Mapping Guide.csv
 story_ids_to_remove: /path/to/ids to remove.txt
+bookmark_ids_to_remove: /path/to/ids to remove.txt
 
 # Chapter file location
 chapters_path: /path/to/chapter/files/stories
