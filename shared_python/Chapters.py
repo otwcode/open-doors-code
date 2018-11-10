@@ -1,11 +1,13 @@
 # -- coding: utf-8 --
 
 import codecs
+import logging
 import os
 import re
 
 from shared_python import Common
 
+log = logging.getLogger()
 
 class Chapters(object):
 
@@ -20,7 +22,7 @@ class Chapters(object):
 
 
   def _gather_and_dedupe(self, chapters_path, extensions, has_ids = False):
-    print "\nFinding chapters and identifying duplicates"
+    log.info("\nFinding chapters and identifying duplicates")
     extensions = re.split(r", ?", extensions)
     story_folder = os.walk(chapters_path)
     file_paths = {}
@@ -55,8 +57,8 @@ class Chapters(object):
           file_paths[name] = file_path
 
     if has_duplicates:
-      print '\n'.join(messages + sql_messages)
-      print duplicate_chapters
+      log.warn('\n'.join(messages + sql_messages))
+      log.warn(duplicate_chapters)
       folder_name_type = raw_input("Resolving duplicates: pick the type of the folder name under {0} "
                                    "\n1 = author id\n2 = author name\n3 = skip duplicates check\n"
                                    .format(chapters_path))
@@ -70,7 +72,7 @@ class Chapters(object):
             author_id = sql_author_id[0][0]
             file_paths[cid] = [dc['path'] for dc in duplicate_chapters[cid] if dc['folder_name'] == str(author_id)][0]
       elif folder_name_type == '2':
-        print "Not implemented"
+        log.warn("Not implemented")
 
     return file_paths
 
@@ -81,7 +83,7 @@ class Chapters(object):
     if extensions is None:
       extensions = self.args.chapters_file_extensions
 
-    print "\nProcessing chapters...\n"
+    log.info("Processing chapters...")
 
     filenames_are_ids = raw_input("\nChapter file names are chapter ids? Y/N\n")
     has_ids = True if str.lower(filenames_are_ids) == 'y' else False
@@ -108,7 +110,7 @@ class Chapters(object):
             self.cursor.execute(query, (file_contents, int(cid)))
             self.db.commit()
           except Exception as e:
-            print("Error = chapter id: {0} - chapter: {1}\n{2}".format(cid, chapter_path, str(e)))
+            log.error("Error = chapter id: {0} - chapter: {1}\n{2}".format(cid, chapter_path, str(e)))
           finally:
             pass
     else:
@@ -122,7 +124,7 @@ class Chapters(object):
             self.cursor.execute(query, (file_contents, path))
             self.db.commit()
           except Exception as e:
-            print("Error = chapter id: {0} - chapter: {1}\n{2}".format(path, chapter_path, str(e)))
+            log.error("Error = chapter id: {0} - chapter: {1}\n{2}".format(path, chapter_path, str(e)))
           finally:
             pass
 

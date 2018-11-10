@@ -5,6 +5,10 @@ from HTMLParser import HTMLParser
 
 from shared_python.Tags import Tags
 
+import logging
+import sys
+logging.basicConfig(stream=sys.stdout,level=logging.DEBUG)
+log = logging.getLogger()
 
 def write_csv(filename, columns):
   html_parser = HTMLParser()
@@ -28,7 +32,7 @@ if __name__ == "__main__":
   sql = Sql(args)
   tags = Tags(args, sql.db)
 
-  print('Exporting tags from {0} to {1}'.format(args.temp_db_database, args.output_folder))
+  log.info('Exporting tags from {0} to {1}'.format(args.temp_db_database, args.output_folder))
   cols = tags.tag_export_map
   results = tags.distinct_tags()
   write_csv('{0}/{1} - tags.csv'.format(args.output_folder, args.archive_name),
@@ -36,7 +40,7 @@ if __name__ == "__main__":
              cols['ao3_tag_fandom'], cols['ao3_tag'], cols['ao3_tag_type'], cols['ao3_tag_category'],
              cols['original_description'], "TW Notes"])
 
-  print('Exporting authors with stories from {0} to {1}'.format(args.temp_db_database, args.output_folder))
+  log.debug('Exporting authors with stories from {0} to {1}'.format(args.temp_db_database, args.output_folder))
   if args.archive_type == 'AA':
     author_table = '{0}.{1}_authors'.format(args.temp_db_database, args.db_table_prefix)
     stories_table = '{0}.{1}_stories'.format(args.temp_db_database, args.db_table_prefix)
@@ -66,7 +70,7 @@ if __name__ == "__main__":
 
 
   if args.archive_type == 'AA':
-    print('Exporting authors with bookmarks from {0} to {1}'.format(args.temp_db_database, args.output_folder))
+    log.debug('Exporting authors with bookmarks from {0} to {1}'.format(args.temp_db_database, args.output_folder))
     author_table = '{0}.{1}_authors'.format(args.temp_db_database, args.db_table_prefix)
     bookmarks_table = '{0}.{1}_bookmarks'.format(args.temp_db_database, args.db_table_prefix)
     author_name = 'name'
@@ -86,5 +90,3 @@ if __name__ == "__main__":
               ["Bookmark ID", "Title", "Summary", "Creator", "Creator Email", "URL", "New Email address",
                "AO3 Account? (& does email match?)", "Searched/Found", "Work on AO3?", "Import status",
                "importer/inviter", "import/invite date", "AO3 link", "Notes (if any)"])
-
-  print('\n')

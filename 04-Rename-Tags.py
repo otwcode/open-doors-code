@@ -4,8 +4,13 @@ import csv
 import sys
 
 from shared_python import Args
+from shared_python.Common import print_progress
 from shared_python.Sql import Sql
 from shared_python.Tags import Tags
+
+import logging
+logging.basicConfig(stream=sys.stdout,level=logging.DEBUG)
+log = logging.getLogger()
 
 if __name__ == "__main__":
   """
@@ -22,10 +27,7 @@ if __name__ == "__main__":
     total = len(tw_tags)
 
     for cur, row in enumerate(tw_tags):
-      sys.stdout.write('\r{0}/{1} tags to map'.format(cur + 1, total))
-      sys.stdout.flush()
+      print_progress(cur + 1, total, "tags")
 
       prefix = 'fanfiction' if args.archive_type == 'EF' else None
       tags.update_tag_row(row, prefix)
-
-  print('\n')
