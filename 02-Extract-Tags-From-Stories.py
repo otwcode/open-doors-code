@@ -1,8 +1,13 @@
+import logging
 import re
+import sys
 
 from shared_python import Args
 from shared_python.Sql import Sql
 from shared_python.Tags import Tags
+
+logging.basicConfig(stream=sys.stdout,level=logging.DEBUG)
+log = logging.getLogger()
 
 if __name__ == "__main__":
   """
@@ -13,7 +18,7 @@ if __name__ == "__main__":
   args = Args.args_for_02()
   sql = Sql(args)
   tags = Tags(args, sql.db)
-  print('---\n Processing tags from stories and bookmarks table in {0}'.format(args.temp_db_database))
+  log.info('Processing tags from stories and bookmarks table in {0}'.format(args.temp_db_database))
   tags.create_tags_table()
 
   tag_col_list = {}
@@ -56,8 +61,8 @@ if __name__ == "__main__":
 
     has_ids_in_tags = raw_input('Do all the tag fields contain ids? (y, n) ')
     for col in tag_col_list.keys():
-      print "\nProcessing {0}".format(col)
+      log.debug("Processing {0}".format(col))
       table = efiction.column_schema(col)
       tags.hydrate_tags_table(col, table, has_ids_in_tags == 'y')
 
-  print('Done\n\n')
+  log.info("Done extracting tags.")

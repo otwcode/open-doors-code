@@ -6,6 +6,10 @@ from shared_python import Args
 from shared_python.Chapters import Chapters
 from shared_python.Sql import Sql
 
+import logging
+import sys
+logging.basicConfig(stream=sys.stdout,level=logging.DEBUG)
+log = logging.getLogger()
 
 # Given an existing final chapter table, this will use the URL field and chapter location to load the chapter contents
 def __current_table(table_name, db):
@@ -21,7 +25,5 @@ if __name__ == "__main__":
   chaps = Chapters(args, sql.db)
 
 
-  print "Loading chapters from {0}...".format(args.chapters_path)
+  log.info("Loading chapters from {0}...".format(args.chapters_path))
   chaps.populate_chapters()
-
-  print('\n')

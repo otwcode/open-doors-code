@@ -1,11 +1,12 @@
 from HTMLParser import HTMLParser
 import re
-
+import logging
 import MySQLdb
 import sys
 
 from shared_python import Common
 
+log = logging.getLogger()
 
 class Tags(object):
 
@@ -33,7 +34,7 @@ class Tags(object):
     try:
       self.cursor.execute("DROP TABLE IF EXISTS {0}.`tags`".format(self.database))
     except MySQLdb.OperationalError, msg:
-      print "Command skipped: ", msg
+      log.info("Command skipped: {}".format(msg))
     self.cursor.execute("""
       CREATE TABLE IF NOT EXISTS {0}.`tags` (
         `storyid` int(11) DEFAULT NULL,
@@ -143,7 +144,7 @@ class Tags(object):
 
         for story_id in story_ids:
           self.cursor.execute("""
-                INSERT INTO tags (ao3_tag, ao3_tag_type, ao3_tag_category, ao3_tag_fandom, original_table, storyid, 
+                INSERT INTO tags (ao3_tag, ao3_tag_type, ao3_tag_category, ao3_tag_fandom, original_table, storyid,
                 original_tag, original_tagid, original_column)
                 VALUES ('{0}', '{1}', '{2}', '{3}', '{5}', {6}, '{7}', {8}, '{9}')
               """.format(ao3_tag,
@@ -185,7 +186,7 @@ class Tags(object):
     results = self.cursor.fetchall()
     total = len(results)
     cur = 0
-    print "{0} tags for column '{1}'".format(total, col)
+    log.info("{0} tags for column '{1}'".format(total, col))
 
     for tag_row in results:
       cur = Common.print_progress(cur, total)

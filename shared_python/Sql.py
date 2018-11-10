@@ -1,9 +1,11 @@
 from HTMLParser import HTMLParser
+import logging
 import re
 
 import MySQLdb
 import sys
 
+log = logging.getLogger()
 
 class Sql(object):
 
@@ -51,13 +53,13 @@ class Sql(object):
         end_command = re.sub(r'--.*?\n', '', command)
         lc_command = end_command.lower().strip().replace("\n", "")
         if initial_load and (lc_command.startswith("create database") or lc_command.startswith("use ")):
-          print "Skipping command - {0}".format(lc_command)
+          log.info("Skipping command - {0}".format(lc_command))
         elif lc_command is None or lc_command == '':
-          print lc_command
+          log.info(lc_command)
         else:
           self.cursor.execute(command)
       except MySQLdb.OperationalError, msg:
-        print "Command skipped: {0} [{1}]".format(command, msg)
+        log.info("Command skipped: {0} [{1}]".format(command, msg))
 
     self.db.commit()
 

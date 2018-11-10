@@ -7,6 +7,11 @@ from shared_python.FinalTables import FinalTables
 from shared_python.Sql import Sql
 from shared_python.Tags import Tags
 
+import logging
+import sys
+logging.basicConfig(stream=sys.stdout,level=logging.DEBUG)
+log = logging.getLogger()
+
 def valid_tags(key, tag_type_list):
   return [d[key].strip() for d in tag_type_list
           if key in d
@@ -29,7 +34,7 @@ if __name__ == "__main__":
       'chapters': 'chapters'
     }
 
-  print "Getting all tags per story..."
+  log.info("Getting all tags per story...")
   tags_by_story_id = tags.tags_by_story_id()
   for (story_id, tags) in tags_by_story_id.items():
 
@@ -46,7 +51,7 @@ if __name__ == "__main__":
     fandoms = [args.default_fandom]
     for (tag_type, tag_type_tags) in tags_by_type.items():
       if tag_type is None or tag_type == '':
-        print "\nStory {2} has a None tag type\n {0} -> {1}".format(tag_type, tag_type_tags, story_id)
+        log.warn("\nStory {2} has a None tag type\n {0} -> {1}".format(tag_type, tag_type_tags, story_id))
       else:
         tag_list = [d['ao3_tag'] for d in tag_type_tags if 'ao3_tag' in d and d['ao3_tag'] is not None]
         categories += valid_tags('ao3_tag_category', tag_type_tags)
@@ -62,5 +67,3 @@ if __name__ == "__main__":
 
     final.populate_story_tags(story_id, args.db_table_prefix + '_stories', story_tags)
     final.populate_story_tags(story_id, args.db_table_prefix + '_bookmarks', story_tags)
-
-  print('\n')

@@ -1,6 +1,8 @@
+import logging
 import os
 import argparse
 
+log = logging.getLogger()
 
 def _load_args_from_file(filepath):
   """
@@ -84,10 +86,10 @@ def _process_args():
 
 
 def _print_args(args):
-  print '----------- Open Door Archive Import Parameters --------------'
+  log.info('----------- Open Door Archive Import Parameters --------------')
   for arg in vars(args):
-    print '{0} = {1}'.format(arg, getattr(args, arg))
-  print '--------------------------------------------------------------\n'
+    log.info('{0} = {1}'.format(arg, getattr(args, arg)))
+  log.info('--------------------------------------------------------------')
 
 
 def args_for_01():

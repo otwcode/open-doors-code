@@ -2,11 +2,14 @@
 
 import datetime
 import codecs
+import logging
 import MySQLdb
 import re
 from HTMLParser import HTMLParser
 from shared_python import Args, Common
 from shared_python.Sql import Sql
+
+log = logging.getLogger()
 
 def _escape_quote(text):
   return text.replace("(?<!\\)'", "\\'")
@@ -49,7 +52,7 @@ def _clean_file(filepath):
   # List fields in AA db file
   keys = [dict.keys() for dict in archive_db_python.values()]
   unique_keys = set([val for sublist in keys for val in sublist])
-  print "Fields in ARCHIVE_DB.pl: {0}".format(", ".join(str(e) for e in unique_keys))
+  log.info("Fields in ARCHIVE_DB.pl: {0}".format(", ".join(str(e) for e in unique_keys)))
 
   return archive_db_python
 
@@ -199,7 +202,7 @@ def _create_mysql(args, FILES):
                 authorid)
       cursor.execute(stor)
     except:
-      print "table name: {0}\noriginal id: {1}\nfinal fandoms: '{2}'\ntitle: '{3}'\nsummary: '{4}'\ntags: '{5}'" \
+      log.error("table name: {0}\noriginal id: {1}\nfinal fandoms: '{2}'\ntitle: '{3}'\nsummary: '{4}'\ntags: '{5}'" \
             "\ncharacters: '{6}'\ndate: '{7}'\nfilename: '{8}'\nnotes: '{9}'\npairings: '{10}'\nrating: '{11}'" \
             "\nwarnings: '{12}'\nauthor id: '{13}'"\
         .format(unicode(table_name),
@@ -215,7 +218,7 @@ def _create_mysql(args, FILES):
             pairings,
             rating,
             warnings,
-            authorid)
+            authorid))
       raise
   db.commit()
 
@@ -267,4 +270,3 @@ def _dummy_chapter(story):
 if __name__ == "__main__":
   args = Args.process_args()
   data = _clean_file(args.filepath)
-
