@@ -1,6 +1,7 @@
 import logging
 import os
 import argparse
+import yaml
 
 log = logging.getLogger()
 
@@ -11,15 +12,11 @@ def _load_args_from_file(filepath):
   props = {}
   sep = ':'
   with open(filepath, "rt") as f:
-    for line in f:
-      l = line.strip()
-      if l:
-        key_value = l.split(sep)
-        key = key_value[0].strip()
-        value = sep.join(key_value[1:]).strip().strip('"')
-        props[key] = value
-  return props
-
+    try:
+      x = yaml.safe_load(f)
+      return x
+    except yaml.YAMLError as exc:
+      log.error("YAML parsing failure: {}".format(exc))
 
 def _process_args():
 
