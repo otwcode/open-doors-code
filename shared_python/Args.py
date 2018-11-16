@@ -9,14 +9,8 @@ def _load_args_from_file(filepath):
   """
   Read the file passed as parameter as a properties file.
   """
-  props = {}
-  sep = ':'
   with open(filepath, "rt") as f:
-    try:
-      x = yaml.safe_load(f)
-      return x
-    except yaml.YAMLError as exc:
-      log.error("YAML parsing failure: {}".format(exc))
+    return yaml.safe_load(f)
 
 def _process_args():
 
