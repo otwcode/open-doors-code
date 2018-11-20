@@ -13,12 +13,10 @@ class Sql(object):
     self.tag_count = 0
     db = MySQLdb.connect(args.db_host, args.db_user, args.db_password)
     cursor = db.cursor()
-    from warnings import filterwarnings
-    filterwarnings('ignore', category = MySQLdb.Warning)
     cursor.execute('CREATE DATABASE IF NOT EXISTS {0}'.format(args.temp_db_database))
 
     self.db = MySQLdb.connect(args.db_host, args.db_user, args.db_password, args.temp_db_database, charset='utf8',
-                              use_unicode=True)
+                              use_unicode=True, autocommit=True)
     self.cursor = self.db.cursor()
     self.database = args.temp_db_database
 
@@ -43,6 +41,9 @@ class Sql(object):
 
     # strip comments, replace placeholders and return all SQL commands (split on ';')
     sqlCommands = sqlFile.replace('$DATABASE$', database).replace('$PREFIX$', prefix).split(';\n')
+
+    # Start a transaction
+    self.db.start_transaction()
 
     # Execute every command from the input file
     for command in sqlCommands:
