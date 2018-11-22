@@ -43,7 +43,7 @@ class Sql(object):
     sqlCommands = sqlFile.replace('$DATABASE$', database).replace('$PREFIX$', prefix).split(';\n')
 
     # Start a transaction
-    self.db.start_transaction()
+    self.cursor.execute("START TRANSACTION")
 
     # Execute every command from the input file
     for command in sqlCommands:
