@@ -184,7 +184,7 @@ def _create_mysql(args, FILES):
       authorid = result[0][0]
 
       stor = u"""
-        INSERT INTO {0} (id, fandoms, title, summary, tags, characters, date, url, notes, relationships, rating, warnings, authorid)
+        INSERT INTO {0} (id, fandoms, title, summary, tags, characters, date, url, notes, relationships, rating, warnings, author_id)
         VALUES({1}, '{2}', '{3}', '{4}', '{5}', '{6}', '{7}', '{8}', '{9}', '{10}', '{11}', '{12}', '{13}');\n""" \
         .format(unicode(table_name),
                 original_id,
@@ -234,7 +234,7 @@ def story_to_final_without_tags(story, is_story = True):
     'title':         story['title'],
     'summary ':      story['summary'],
     'notes':         story['notes'],
-    'authorid':      story['authorId'],
+    'author_id':      story['author_id'],
     'date':          story['date'],
     'updated':       story['updated'],
     'url':           story['url'],
@@ -243,7 +243,7 @@ def story_to_final_without_tags(story, is_story = True):
     'doNotImport':   0,
   }
   if is_story:
-    final_story['coauthorid'] = story['coauthorId']
+    final_story['coauthor_id'] = story['coauthor_id']
   return final_story
 
 
@@ -257,7 +257,7 @@ def _dummy_chapter(story):
     'id':       chapter['id'],
     'position': chapter.get('position', 1),
     'title':    chapter['title'],
-    'authorid': chapter['authorid'],
+    'author_id': chapter['author_id'],
     'text':     chapter.get('text', ''),
     'date':     chapter['date'],
     'storyid':  chapter['id'],
