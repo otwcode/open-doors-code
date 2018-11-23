@@ -46,8 +46,8 @@ if __name__ == "__main__":
     stories_table = '{0}.{1}_stories'.format(args.temp_db_database, args.db_table_prefix)
     author_name = 'name'
     story_id = 'id'
-    story_author_col = 'authorId'
-    story_coauthor_col = 'coAuthorId'
+    story_author_col = 'author_id'
+    story_coauthor_col = 'coauthor_id'
     author_id = 'id'
   elif args.archive_type == 'EF':
     author_table = '{0}.fanfiction_authors'.format(args.temp_db_database)
@@ -72,11 +72,11 @@ if __name__ == "__main__":
   if args.archive_type == 'AA':
     log.debug('Exporting authors with bookmarks from {0} to {1}'.format(args.temp_db_database, args.output_folder))
     author_table = '{0}.{1}_authors'.format(args.temp_db_database, args.db_table_prefix)
-    bookmarks_table = '{0}.{1}_bookmarks'.format(args.temp_db_database, args.db_table_prefix)
+    bookmarks_table = '{0}.{1}_story_links'.format(args.temp_db_database, args.db_table_prefix)
     author_name = 'name'
     bookmark_id = 'id'
-    bookmark_author_col = 'authorId'
-    bookmark_coauthor_col = 'coAuthorId'
+    bookmark_author_col = 'author_id'
+    bookmark_coauthor_col = 'coauthor_id'
     author_id = 'id'
 
     results = sql.execute("""
