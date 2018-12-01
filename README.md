@@ -33,7 +33,7 @@ databases, and with some manual work, can also be used to process any type of ar
 
 ### Set up your system and the Open Doors scripts
 
-You will need the following installed before you start (consult the tools' documentation for installation instructions 
+You will need the following installed before you start (consult the tools' documentation for installation instructions
 for your operating system):
 - MySQL server 5.7 or higher
 - Python 2.7 (the scripts have not been tested with Python 3)
@@ -41,36 +41,36 @@ for your operating system):
 Some general tools you will find useful:
 - A text editor which can open and save files with different encodings, and perform regular expression replacing across
 files in a directory. For example: Sublime Text (on MacOS) or Notepad++ (on Windows)
-- A MySQL client that allows you to view tables side-by-side. For example: Sequel Pro (MacOS) or MySQL Workbench (all 
-operating systems) 
+- A MySQL client that allows you to view tables side-by-side. For example: Sequel Pro (MacOS) or MySQL Workbench (all
+operating systems)
 
-1. Either clone the repository at https://github.com/otwcode/open-doors-code, or download the code as a zip file. 
-(Note that if you download the code, you will need to download it again when changes are made) 
+1. Either clone the repository at https://github.com/otwcode/open-doors-code, or download the code as a zip file.
+(Note that if you download the code, you will need to download it again when changes are made)
 1. Run `pip install -r requirements.txt` from the root folder of the project to install required dependencies
 
 
 ### Prepare the archive backup for local processing
 1. Copy the archive backup to your local machine. You will need the following files:
     1. The story metadata (authors, titles, summaries, tags etc.)
-        - For Automated Archive, this is in a Perl file called ARCHIVE_DB.pl. 
-        - For eFiction, it will typically be a MySQL dump in a `.sql` file. 
-        - Other archive types may store their metadata in a custom database, or in flat HTML files. These archives will 
-        need bespoke handling for step 01, but are handled as AA from step 02 onward. 
-    1. The story files. 
-        - For AA, this is usually in a folder called `archive`. 
+        - For Automated Archive, this is in a Perl file called ARCHIVE_DB.pl.
+        - For eFiction, it will typically be a MySQL dump in a `.sql` file.
+        - Other archive types may store their metadata in a custom database, or in flat HTML files. These archives will
+        need bespoke handling for step 01, but are handled as AA from step 02 onward.
+    1. The story files.
+        - For AA, this is usually in a folder called `archive`.
         - For EF, the folder is usually called `stories`.
         - Other archives may store their story contents elsewhere, for instance, in the database itself or as flat HTML files.
-    
-1. Make a copy of `example.yml`, give it a simple name related to the archive you're processing, and fill it in. 
-See [Parameters](#parameters) for the list of properties. You will be prompted for any property you didn't include in 
+
+1. Make a copy of `example.yml`, give it a simple name related to the archive you're processing, and fill it in.
+See [Parameters](#parameters) for the list of properties. You will be prompted for any property you didn't include in
 the file if it is needed for a given stage.
 
 
 ### Step 01 - Load the original database into MySQL
 
     python 01-Load-into-Mysql.py -p <archive name>.yml
-   
-This imports the database file specified in the `db_input_file` into the `temp_db_database` on your MySQL server 
+
+This imports the database file specified in the `db_input_file` into the `temp_db_database` on your MySQL server
 using the `db_host`, `db_user` and `db_password` properties. The destination database will be destroyed and recreated
 every time you run the script, so you can safely rerun it as often as needed.
 
@@ -86,24 +86,24 @@ Dumps from eFiction sometimes include commands to recreate and use the database 
 - characters incompatible with UTF-8
 - HTML entities
 
-You will get a Python error when something breaks the import; this will include a snippet of the record that could not 
-be processed, so use that to find the record in the ARCHIVE_DB.pl and look for problems like the above. You will have 
+You will get a Python error when something breaks the import; this will include a snippet of the record that could not
+be processed, so use that to find the record in the ARCHIVE_DB.pl and look for problems like the above. You will have
 to manually edit the file in your text editor to resolve these issues.
 
-*Fields*: All the field names found in the file will be listed in the console output when you run this step, allowing you 
+*Fields*: All the field names found in the file will be listed in the console output when you run this step, allowing you
 to populate the tag fields (see below) with all the relevant fields in the ARCHIVE_DB.pl file.
 
 *Tag fields*: As the metadata in AA files is customisable, you can use the `tag_fields`, `character_fields`,
-`relationship_fields` and `fandom_fields` properties to map fields in the ARCHIVE_DB.pl to the right tag columns in the 
-temporary database table. 
+`relationship_fields` and `fandom_fields` properties to map fields in the ARCHIVE_DB.pl to the right tag columns in the
+temporary database table.
 
 ##### Custom archives
-The step 01 script can't be used with archives which do not use Automated Archive or eFiction. The metadata for custom 
-archives needs to be loaded manually or using custom scripts into `authors`, `bookmarks`, `chapters` 
-and `stories` tables matching [the Open Doors table schema](shared_python/create-open-doors-tables.sql) in the 
-`temp_db_database`. 
+The step 01 script can't be used with archives which do not use Automated Archive or eFiction. The metadata for custom
+archives needs to be loaded manually or using custom scripts into `authors`, `bookmarks`, `chapters`
+and `stories` tables matching [the Open Doors table schema](shared_python/create-open-doors-tables.sql) in the
+`temp_db_database`.
 
-These archives are then treated as Automated Archive archives by all the scripts from step 02 onward. 
+These archives are then treated as Automated Archive archives by all the scripts from step 02 onward.
 
 
 ### Step 02 - Extract tags from the original stories
@@ -112,11 +112,11 @@ These archives are then treated as Automated Archive archives by all the scripts
 
 This script creates a table called `tags` in the temporary database and denormalises all the tags for every story and story link.
 This table is the basis for the Tag Wrangling sheet and is used to map the tags back to the story when the final
-tables are created. Do not edit the `tags` table manually - it will be destroyed and recreated every time you run this 
+tables are created. Do not edit the `tags` table manually - it will be destroyed and recreated every time you run this
 script.
 
 *Note*: This step splits the tag fields on commas. If the archive you are processing allowed commas in tag names, you
-will need to replace those commas with another character and let Tag Wrangling know this is what you've done. 
+will need to replace those commas with another character and let Tag Wrangling know this is what you've done.
 
 #### Notes on specific archives
 
@@ -148,7 +148,7 @@ This step exports those two CSV files which you then have to import into Google 
     python 04-Rename-Tags.py -p <archive name>.yml
 
 When Tag Wrangling have finished mapping the tags in Google Drive, export the Google spreadsheet as a CSV file and make
-sure its path is specified in `tag_input_file`. This script then copies the AO3 tags from that file into the 
+sure its path is specified in `tag_input_file`. This script then copies the AO3 tags from that file into the
 `tags` table in the temporary database.
 
 
@@ -162,10 +162,7 @@ the `story_ids_to_remove` or `bookmark_ids_to_remove` properties, it will also f
 
 You will need to create an empty database (eg in Sequel Pro) for the new tables to be inserted into if you haven't already made a generic one for a previous site. Include it as property `output_database` in your yml file.
 
-The temporary sites are currently all run off the same database, with the tables prefixed to distinguish them - specify
-the prefix to use in `db_table_prefix`.
-
-This script will destroy the prefixed tables for this archive before recreating them, so do not edit them manually
+This script will destroy the temp database before recreating it, so do not edit them manually
 until you are sure you are finished with this stage.
 
 *Notes*:
@@ -179,7 +176,7 @@ until you run step 06.
     python 06-Update-Tags-In-Story-Table.py -p <archive name>.yml
 
 This script matches up the AO3 tags from the `tags` table with the corresponding stories. Note
-that unlike the other scripts, this one does not destroy any databases or tables, though it does overwrite the tag 
+that unlike the other scripts, this one does not destroy any databases or tables, though it does overwrite the tag
 fields in the `stories` or `bookmarks` databases.
 
 *Notes*:
@@ -229,8 +226,8 @@ empty chapters after this step and look for their corresponding chapter files ma
 
 ### Remove DNI from Open Doors tables
 
-Given a comma-separated list of story ids specified in the `story_ids_to_remove` parameter, deletes the corresponding 
-rows from the `table_prefix`_stories table in the final output database.
+Given a comma-separated list of story ids specified in the `story_ids_to_remove` parameter, deletes the corresponding
+rows from the stories table in the final output database.
 
 
 
@@ -254,15 +251,14 @@ rows from the `table_prefix`_stories table in the final output database.
 | *Databases* |
 | -i   | db_input_file            | Full path to input file (ARCHIVE_DB.pl for AA, SQL script for eFiction)|
 | -dd  | temp_db_database         | MySQL temporary database name to use for processing (will be destroyed in step 1 if it exists) |
-| -dt  | db_table_prefix          | MySQL prefix for tables eg: "isf" for Ink Stained Fingers, "hex" for The Hex Files and so on. |
 | -od  | output_database          | Name of the database the final tables should be created in (default "od_sgf") |
 | *Tags* |
 | -t   | tag_input_file           | Full path to Tag Wrangling CSV |
 | -n   | archive_name             | Name of the original archive (used in export file names) |
 | -ft  | tag_fields               | Name of tag field(s) in original db (comma-delimited) |
-| -fc  | character_fields         | Name of character field(s) in original db (comma-delimited) |   
+| -fc  | character_fields         | Name of character field(s) in original db (comma-delimited) |
 | -fr  | relationship_fields      | Name of relationship field(s) in original db (comma-delimited) |
-| -ff  | fandom_fields            | Name of fandom field(s) in original db (comma-delimited) |     
+| -ff  | fandom_fields            | Name of fandom field(s) in original db (comma-delimited) |
 | *Chapters* |
 | -cp  | chapters_path            | Location of the text files containing the stories. Optional - if no path is specified, the chapter table will be copied over as is. |
 | -cf  | chapters_file_extensions | File extension(s) of the text files containing the stories (eg: "txt, html"). Only required if a chapter path is specified. |
@@ -272,10 +268,5 @@ in the project root). This is a much simpler way of providing the parameters, bu
 command line using the flags specified. For example:
 
     python 01-Load-into-Mysql.py -dh localhost -du root -dd od_dsa -a AA -i /Users/me/Documents/ARCHIVE_DB.pl
-    
+
 You will be prompted for any missing settings when you run each stage.
-
-
-
-
-    

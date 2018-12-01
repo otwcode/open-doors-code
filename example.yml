@@ -8,7 +8,6 @@ db_password:
 db_user: root
 db_host: localhost
 temp_db_database: temporary_database_name
-db_table_prefix: prefix_for_final_tables
 output_database: final_database_name
 
 # Tag settings (AA only)

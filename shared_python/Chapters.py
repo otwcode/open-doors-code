@@ -45,7 +45,7 @@ class Chapters(object):
           else:
             duplicate_folder = os.path.split(os.path.split(file_path)[0])[1]
             messages.append(file_path + " is a duplicate of " + file_paths[cid])
-            sql_messages.append("SELECT * FROM {0}_chapters WHERE id = {1}".format(self.args.db_table_prefix, cid))
+            sql_messages.append("SELECT * FROM chapters WHERE id = {1}".format(cid))
             duplicate_chapters[cid] = [
               { 'folder_name': os.path.split(os.path.split(file_paths[cid])[0])[1], 'filename': filename, 'path': file_paths[cid] },
               { 'folder_name': duplicate_folder, 'filename': filename, 'path': file_path }
@@ -65,8 +65,8 @@ class Chapters(object):
       if folder_name_type == '1':
         for cid, duplicate in duplicate_chapters.items():
           # look up the author id and add that one to the file_names list
-          self.cursor.execute("SELECT authorid FROM {0}_chapters WHERE id = {1}"
-                              .format(self.args.db_table_prefix, cid))
+          self.cursor.execute("SELECT authorid FROM chapters WHERE id = {1}"
+                              .format(cid))
           sql_author_id = self.cursor.fetchall()
           if len(sql_author_id) > 0:
             author_id = sql_author_id[0][0]
@@ -106,7 +106,7 @@ class Chapters(object):
           try:
             cur = Common.print_progress(cur, total)
             file_contents = c.read()
-            query = "UPDATE {0}.{1}_chapters SET text=%s WHERE id=%s".format(self.args.output_database, self.args.db_table_prefix)
+            query = "UPDATE {0}.chapters SET text=%s WHERE id=%s".format(self.args.output_database)
             self.cursor.execute(query, (file_contents, int(cid)))
             self.db.commit()
           except Exception as e:
@@ -120,7 +120,7 @@ class Chapters(object):
           try:
             cur = Common.print_progress(cur, total)
             file_contents = c.read()
-            query = "UPDATE {0}.{1}_chapters SET text=%s WHERE url=%s".format(self.args.output_database, self.args.db_table_prefix)
+            query = "UPDATE {0}.chapters SET text=%s WHERE url=%s".format(self.args.output_database)
             self.cursor.execute(query, (file_contents, path))
             self.db.commit()
           except Exception as e:

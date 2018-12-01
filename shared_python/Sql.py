@@ -32,7 +32,7 @@ class Sql(object):
     return dict_cursor.fetchall()
 
 
-  def run_script_from_file(self, filename, database, prefix, initial_load = False):
+  def run_script_from_file(self, filename, database, initial_load = False):
     # Open and read the file as a single buffer
     self.cursor.execute('USE {0}'.format(database))
     fd = open(filename, 'r')
@@ -40,7 +40,7 @@ class Sql(object):
     fd.close()
 
     # strip comments, replace placeholders and return all SQL commands (split on ';')
-    sqlCommands = sqlFile.replace('$DATABASE$', database).replace('$PREFIX$', prefix).split(';\n')
+    sqlCommands = sqlFile.replace('$DATABASE$', database).split(';\n')
 
     # Start a transaction
     self.db.start_transaction()

@@ -29,5 +29,4 @@ if __name__ == "__main__":
     for cur, row in enumerate(tw_tags):
       print_progress(cur + 1, total, "tags")
 
-      prefix = 'fanfiction' if args.archive_type == 'EF' else None
-      tags.update_tag_row(row, prefix)
+      tags.update_tag_row(row)

@@ -108,7 +108,6 @@ def _create_mysql(args, FILES):
   db = MySQLdb.connect(args.db_host, args.db_user, args.db_password, "")
   cursor = db.cursor()
   DATABASE_NAME = args.temp_db_database
-  PREFIX = args.db_table_prefix
 
   # Use the database and empty all the tables
   cursor.execute(u"drop database if exists {0};".format(DATABASE_NAME))
@@ -116,16 +115,16 @@ def _create_mysql(args, FILES):
   cursor.execute(u"use {0}".format(DATABASE_NAME))
 
   sql = Sql(args)
-  sql.run_script_from_file('shared_python/create-open-doors-tables.sql', DATABASE_NAME, PREFIX + '_')
+  sql.run_script_from_file('shared_python/create-open-doors-tables.sql', DATABASE_NAME)
   db.commit()
 
   authors = [(FILES[i].get('Author', '').strip(), FILES[i].get('Email', FILES[i].get('EmailAuthor', '')).lower().strip()) for i in FILES]
-  auth = u"INSERT INTO {0}_authors (name, email) VALUES(%s, %s);".format(PREFIX)
+  auth = u"INSERT INTO authors (name, email) VALUES(%s, %s);"
   cursor.executemany(auth, set(authors))
   db.commit()
 
   # Authors
-  auth = u"SELECT * FROM {0}_authors;".format(PREFIX)
+  auth = u"SELECT * FROM authors;"
   cursor.execute(auth)
   db_authors = cursor.fetchall()
 
@@ -167,10 +166,10 @@ def _create_mysql(args, FILES):
           filename = url
         else:
           filename = location + '.' + filetype
-        table_name = '{0}_stories'.format(PREFIX)
+        table_name = 'stories'
       else:
         filename = url
-        table_name = '{0}_bookmarks'.format(PREFIX)
+        table_name = 'bookmarks'
 
       # Clean up fandoms and add default fandom if it exists
       final_fandoms = unicode(fandoms.replace("'", r"\'"), 'utf-8')

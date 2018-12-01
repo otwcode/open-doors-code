@@ -109,10 +109,9 @@ class Tags(object):
     return self.cursor.fetchall()
 
 
-  def update_tag_row(self, row, table_prefix = None):
+  def update_tag_row(self, row):
     tag_headers = self.tag_export_map
-    original_table = row[tag_headers['original_table']] if table_prefix is None \
-      else '{0}_{1}'.format(table_prefix, row[tag_headers['original_table']])
+    original_table = row[tag_headers['original_table']]
     tag = unicode(row[tag_headers['original_tag']].replace("'", r"\'"), 'utf-8')
 
     if row[tag_headers['original_tagid']] == '' or row[tag_headers['original_tagid']] is None:

@@ -42,8 +42,8 @@ if __name__ == "__main__":
 
   log.debug('Exporting authors with stories from {0} to {1}'.format(args.temp_db_database, args.output_folder))
   if args.archive_type == 'AA':
-    author_table = '{0}.{1}_authors'.format(args.temp_db_database, args.db_table_prefix)
-    stories_table = '{0}.{1}_stories'.format(args.temp_db_database, args.db_table_prefix)
+    author_table = '{0}.authors'.format(args.temp_db_database)
+    stories_table = '{0}.stories'.format(args.temp_db_database)
     author_name = 'name'
     story_id = 'id'
     story_author_col = 'author_id'
@@ -71,8 +71,8 @@ if __name__ == "__main__":
 
   if args.archive_type == 'AA':
     log.debug('Exporting authors with bookmarks from {0} to {1}'.format(args.temp_db_database, args.output_folder))
-    author_table = '{0}.{1}_authors'.format(args.temp_db_database, args.db_table_prefix)
-    bookmarks_table = '{0}.{1}_story_links'.format(args.temp_db_database, args.db_table_prefix)
+    author_table = '{0}.authors'.format(args.temp_db_database)
+    bookmarks_table = '{0}.story_links'.format(args.temp_db_database)
     author_name = 'name'
     bookmark_id = 'id'
     bookmark_author_col = 'author_id'
