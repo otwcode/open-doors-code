@@ -19,7 +19,6 @@ def _process_args():
     'db_user': 'MySQL user',
     'db_password': 'MySQL password',
     'temp_db_database': 'MySQL temporary database name to use for processing (will be destroyed if it exists)',
-    'db_table_prefix': 'MySQL prefix for tables'
   }
   parser = argparse.ArgumentParser(description='Process an archive database')
   for name, helptext in argdict.items():

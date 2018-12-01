@@ -28,13 +28,13 @@ if __name__ == "__main__":
   # AUTOMATED ARCHIVE
   if args.archive_type == 'AA':
 
-    story_table_name = raw_input('Story table name (default: "{0}_stories"): '.format(args.db_table_prefix))
+    story_table_name = raw_input('Story table name (default: "stories"): '
     if story_table_name is None or story_table_name == '':
-      story_table_name = '{0}_stories'.format(args.db_table_prefix)
+      story_table_name = 'stories'
 
-    bookmark_table_name = raw_input('Bookmark table name (default: "{0}_bookmarks"): '.format(args.db_table_prefix))
+    bookmark_table_name = raw_input('Bookmark table name (default: "bookmarks"): '
     if bookmark_table_name is None or bookmark_table_name == '':
-      bookmark_table_name = '{0}_bookmarks'.format(args.db_table_prefix)
+      bookmark_table_name = 'bookmarks'
 
     tag_columns = raw_input('Column names containing tags \n   (delimited by commas - default: "rating, tags, warnings, characters, fandoms, relationships"): ')
     if tag_columns is None or tag_columns == '':

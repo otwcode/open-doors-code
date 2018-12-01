@@ -47,16 +47,16 @@ if __name__ == "__main__":
     filter = 'WHERE sid NOT IN '
   else:
     table_names = {
-      'authors': '{0}_authors'.format(args.db_table_prefix),
-      'stories': '{0}_stories'.format(args.db_table_prefix),
-      'chapters': '{0}_chapters'.format(args.db_table_prefix),
-      'bookmarks': '{0}_bookmarks'.format(args.db_table_prefix)
+      'authors': 'authors'
+      'stories': 'stories'
+      'chapters': 'chapters'
+      'bookmarks': 'bookmarks'
     }
     filter = 'WHERE id NOT IN '
 
   sql.run_script_from_file('shared_python/create-open-doors-tables.sql',
-                           database=args.output_database,
-                           prefix=args.db_table_prefix + '_')
+                           database=args.output_database)
+
 
   story_exclusion_filter = ''
   # Filter out DNI stories - story_ids_to_remove must be comma-separated list of DNI ids
@@ -91,24 +91,24 @@ if __name__ == "__main__":
   # ----------------------
   if args.archive_type == 'AA':
     # STORIES
-    log.info("Copying stories to final table {0}.{1}_stories...".format(args.output_database, args.db_table_prefix))
+    log.info("Copying stories to final table {0}.stories...".format(args.output_database))
     final_stories = []
     for story in stories_without_tags:
       # Add additional story processing here
       final_stories.append(aa.story_to_final_without_tags(story))
-    final.insert_into_final(args.db_table_prefix + '_stories', final_stories)
+    final.insert_into_final('stories', final_stories)
 
     # BOOKMARKS
     if bookmarks_without_tags is not None:
-      log.info("Copying bookmarks to final table {0}.{1}_bookmarks...".format(args.output_database, args.db_table_prefix))
+      log.info("Copying bookmarks to final table {0}.bookmarks...".format(args.output_database))
       final_bookmarks = []
       for bookmark in bookmarks_without_tags:
         # Add additional bookmark processing here
         final_bookmarks.append(aa.story_to_final_without_tags(bookmark, False))
-      if final_bookmarks: final.insert_into_final(args.db_table_prefix + '_bookmarks', final_bookmarks)
+      if final_bookmarks: final.insert_into_final('bookmarks', final_bookmarks)
 
     # AUTHORS
-    log.info("Copying authors to final table {0}.{1}_authors, cleaning emails and removing authors with no works...".format(args.output_database, args.db_table_prefix))
+    log.info("Copying authors to final table {0}.authors, cleaning emails and removing authors with no works...".format(args.output_database))
     final_authors = []
     authors = final.original_table(table_names['authors'])
     for final_author in authors:
@@ -116,7 +116,7 @@ if __name__ == "__main__":
           or any(bookmark['authorid'] == final_author['id'] for bookmark in final_bookmarks):
         final_author['email'] = _clean_email(final_author)
         final_authors.append(final_author)
-    final.insert_into_final(args.db_table_prefix + '_authors', final_authors)
+    final.insert_into_final('authors', final_authors)
 
     # CHAPTERS
     if chapters:
@@ -130,9 +130,9 @@ if __name__ == "__main__":
         table_names['chapters'])
       sql.execute(truncate_and_insert)
     else:
-      log.info("Creating chapters table {0}.{1}_chapters from source stories table...".format(args.output_database, args.db_table_prefix))
+      log.info("Creating chapters table {0}.chapters from source stories table...".format(args.output_database))
       final_chapters = aa.dummy_chapters(final_stories)
-      final.insert_into_final(args.db_table_prefix + '_chapters', final_chapters)
+      final.insert_into_final('chapters', final_chapters)
 
 
   # ----------------------
@@ -140,7 +140,7 @@ if __name__ == "__main__":
   # ----------------------
   elif args.archive_type == 'EF':
     # STORIES
-    log.info("Copying stories to final table {0}.{1}_stories...".format(args.output_database, args.db_table_prefix))
+    log.info("Copying stories to final table {0}.stories...".format(args.output_database))
     final_stories = []
     for story in stories_without_tags:
       if coauthors is not None and coauthors.has_key(story['sid']):
@@ -149,16 +149,16 @@ if __name__ == "__main__":
         story['coauthors'] = None
       final_stories.append(efiction.story_to_final_without_tags(story))
 
-    final.insert_into_final(args.db_table_prefix + '_stories', final_stories)
+    final.insert_into_final('stories', final_stories)
 
     # BOOKMARKS
     if bookmarks_without_tags is not None:
-      log.info("Copying bookmarks to final table {0}.{1}_bookmarks...".format(args.output_database, args.db_table_prefix))
+      log.info("Copying bookmarks to final table {0}.bookmarks...".format(args.output_database))
       final_bookmarks = []
       for bookmark in bookmarks_without_tags:
         # Add additional bookmark processing here
         final_bookmarks.append(aa.story_to_final_without_tags(bookmark))
-      if final_bookmarks: final.insert_into_final(args.db_table_prefix + '_bookmarks', final_bookmarks)
+      if final_bookmarks: final.insert_into_final('bookmarks', final_bookmarks)
 
     # AUTHORS
     log.info("Copying authors from original eFiction source, cleaning emails and removing authors with no works...")
@@ -169,9 +169,9 @@ if __name__ == "__main__":
       if any(story['authorid'] == final_author['id'] or story['coauthorid'] == final_author['id'] for story in final_stories):
         final_author['email'] = _clean_email(final_author)
       final_authors.append(final_author)
-    final.insert_into_final(args.db_table_prefix + '_authors', final_authors)
+    final.insert_into_final('authors', final_authors)
 
     # CHAPTERS
     log.info("Copying chapters from original eFiction source...")
     final_chapters = [efiction.chapter_to_final(chapter) for chapter in chapters]
-    final.insert_into_final(args.db_table_prefix + '_chapters', final_chapters)
+    final.insert_into_final('chapters', final_chapters)
