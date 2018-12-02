@@ -47,9 +47,9 @@ if __name__ == "__main__":
     filter = 'WHERE sid NOT IN '
   else:
     table_names = {
-      'authors': 'authors'
-      'stories': 'stories'
-      'chapters': 'chapters'
+      'authors': 'authors',
+      'stories': 'stories',
+      'chapters': 'chapters',
       'bookmarks': 'bookmarks'
     }
     filter = 'WHERE id NOT IN '

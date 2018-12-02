@@ -28,11 +28,11 @@ if __name__ == "__main__":
   # AUTOMATED ARCHIVE
   if args.archive_type == 'AA':
 
-    story_table_name = raw_input('Story table name (default: "stories"): '
+    story_table_name = raw_input('Story table name (default: "stories"): ')
     if story_table_name is None or story_table_name == '':
       story_table_name = 'stories'
 
-    bookmark_table_name = raw_input('Bookmark table name (default: "bookmarks"): '
+    bookmark_table_name = raw_input('Bookmark table name (default: "bookmarks"): ')
     if bookmark_table_name is None or bookmark_table_name == '':
       bookmark_table_name = 'bookmarks'
 
