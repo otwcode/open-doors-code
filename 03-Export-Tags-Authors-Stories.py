@@ -1,14 +1,11 @@
 import csv
 from shared_python import Args
+from shared_python.Logging import log
 from shared_python.Sql import Sql
 from HTMLParser import HTMLParser
 
 from shared_python.Tags import Tags
 
-import logging
-import sys
-logging.basicConfig(stream=sys.stdout,level=logging.DEBUG)
-log = logging.getLogger()
 
 def write_csv(filename, columns):
   html_parser = HTMLParser()

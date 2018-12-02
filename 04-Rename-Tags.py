@@ -1,16 +1,12 @@
 # encoding: utf-8
 import csv
 
-import sys
-
 from shared_python import Args
+from shared_python.Logging import log
 from shared_python.Common import print_progress
 from shared_python.Sql import Sql
 from shared_python.Tags import Tags
 
-import logging
-logging.basicConfig(stream=sys.stdout,level=logging.DEBUG)
-log = logging.getLogger()
 
 if __name__ == "__main__":
   """

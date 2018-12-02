@@ -1,13 +1,10 @@
-import logging
 import re
-import sys
 
 from shared_python import Args
+from shared_python.Logging import log
 from shared_python.Sql import Sql
 from shared_python.Tags import Tags
 
-logging.basicConfig(stream=sys.stdout,level=logging.DEBUG)
-log = logging.getLogger()
 
 if __name__ == "__main__":
   """
@@ -28,13 +25,13 @@ if __name__ == "__main__":
   # AUTOMATED ARCHIVE
   if args.archive_type == 'AA':
 
-    story_table_name = raw_input('Story table name (default: "stories"): '
+    story_table_name = raw_input('Story table name (default: "stories"): ')
     if story_table_name is None or story_table_name == '':
       story_table_name = 'stories'
 
-    bookmark_table_name = raw_input('Bookmark table name (default: "bookmarks"): '
+    bookmark_table_name = raw_input('Bookmark table name (default: "story_link"): ')
     if bookmark_table_name is None or bookmark_table_name == '':
-      bookmark_table_name = 'bookmarks'
+      bookmark_table_name = 'story_links'
 
     tag_columns = raw_input('Column names containing tags \n   (delimited by commas - default: "rating, tags, warnings, characters, fandoms, relationships"): ')
     if tag_columns is None or tag_columns == '':

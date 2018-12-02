@@ -68,7 +68,7 @@ def author_to_final(efiction_author):
     'name':   efiction_author['penname'],
     'email':  efiction_author['email'],
     'imported': 0,
-    'donotimport': 0
+    'do_not_import': 0
   }
   return final_author
 
@@ -79,12 +79,12 @@ def story_to_final_without_tags(efiction_story):
     'title':         efiction_story['title'],
     'summary ':      efiction_story['summary'],
     'notes':         efiction_story.get('storynotes', ''),
-    'authorid':      efiction_story['uid'],
-    'coauthorid':    efiction_story['coauthors'],
+    'author_id':     efiction_story['uid'],
+    'coauthor_id':    efiction_story['coauthors'],
     'date':          efiction_story['date'],
     'updated':       efiction_story['updated'],
     'imported':      0,
-    'doNotImport':   0,
+    'do_not_import':   0,
     # Not in eFiction original table
     # 'url':           efiction_story['url'],
     # 'ao3url':        efiction_story['ao3url'],
@@ -102,15 +102,15 @@ def story_to_final_without_tags(efiction_story):
 
 def chapter_to_final(efiction_chapter):
   final_chapter = {
-    'ID':       efiction_chapter['chapid'],
-    'Position': efiction_chapter['inorder'],
-    'Title':    efiction_chapter['title'],
-    'AuthorID': efiction_chapter['uid'],
-    'Text':     efiction_chapter['storytext'],
-    'Date':     None,
-    'StoryID':  efiction_chapter['sid'],
-    'Notes':    efiction_chapter['notes'],
-    'Url':      None
+    'ID':        efiction_chapter['chapid'],
+    'Position':  efiction_chapter['inorder'],
+    'Title':     efiction_chapter['title'],
+    'author_id': efiction_chapter['uid'],
+    'Text':      efiction_chapter['storytext'],
+    'Date':      None,
+    'story_id':  efiction_chapter['sid'],
+    'Notes':     efiction_chapter['notes'],
+    'Url':       None
     # efiction_chapter['endnotes'],
   }
   return final_chapter

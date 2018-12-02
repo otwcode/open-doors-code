@@ -5,7 +5,9 @@ import re
 import MySQLdb
 import sys
 
-log = logging.getLogger()
+from shared_python import Logging
+
+log = Logging.log
 
 class Sql(object):
 
@@ -34,7 +36,6 @@ class Sql(object):
 
   def run_script_from_file(self, filename, database, initial_load = False):
     # Open and read the file as a single buffer
-    self.cursor.execute('USE {0}'.format(database))
     fd = open(filename, 'r')
     sqlFile = fd.read()
     fd.close()
