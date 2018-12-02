@@ -1,13 +1,12 @@
 # -- coding: utf-8 --
 
 import codecs
-import logging
 import os
 import re
 
 from shared_python import Common
+from shared_python.Logging import log
 
-log = logging.getLogger()
 
 class Chapters(object):
 
@@ -65,7 +64,7 @@ class Chapters(object):
       if folder_name_type == '1':
         for cid, duplicate in duplicate_chapters.items():
           # look up the author id and add that one to the file_names list
-          self.cursor.execute("SELECT authorid FROM chapters WHERE id = {1}"
+          self.cursor.execute("SELECT author_id FROM chapters WHERE id = {1}"
                               .format(cid))
           sql_author_id = self.cursor.fetchall()
           if len(sql_author_id) > 0:
@@ -120,7 +119,7 @@ class Chapters(object):
           try:
             cur = Common.print_progress(cur, total)
             file_contents = c.read()
-            query = "UPDATE {0}.chapters SET text=%s WHERE url=%s".format(self.args.output_database)
+            query = "UPDATE {0}.chapters SET text=%s WHERE url=%s and text=''".format(self.args.output_database)
             self.cursor.execute(query, (file_contents, path))
             self.db.commit()
           except Exception as e:
