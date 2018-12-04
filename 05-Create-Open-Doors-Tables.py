@@ -6,13 +6,10 @@ from eFiction import efiction
 from shared_python import Args
 from shared_python.Chapters import Chapters
 from shared_python.FinalTables import FinalTables
+from shared_python.Logging import log
 from shared_python.Sql import Sql
 from shared_python.Tags import Tags
 
-import logging
-import sys
-logging.basicConfig(stream=sys.stdout,level=logging.DEBUG)
-log = logging.getLogger()
 
 def _clean_email(author):
   email = author['email']
@@ -50,7 +47,7 @@ if __name__ == "__main__":
       'authors': 'authors',
       'stories': 'stories',
       'chapters': 'chapters',
-      'bookmarks': 'bookmarks'
+      'story_links': 'story_links'
     }
     filter = 'WHERE id NOT IN '
 
@@ -69,7 +66,7 @@ if __name__ == "__main__":
 
   bookmark_exclusion_filter = ''
   # Filter out DNI stories - bookmark_ids_to_remove must be comma-separated list of DNI ids
-  if os.path.exists(args.bookmark_ids_to_remove):
+  if args.bookmark_ids_to_remove and os.path.exists(args.bookmark_ids_to_remove):
     with open(args.bookmark_ids_to_remove, "rt") as f:
       log.info("Removing {0} Do Not Import bookmarks...".format(sum(line.count(",") for line in f) + 1))
       f.seek(0)
@@ -81,7 +78,10 @@ if __name__ == "__main__":
   stories_without_tags = final.original_table(table_names['stories'], story_exclusion_filter)
   log.info("Stories without tags after removing DNI: {0}".format(len(stories_without_tags)))
   bookmarks_without_tags = final.original_table(table_names['bookmarks'], bookmark_exclusion_filter)
-  log.info("Bookmarks without tags after removing DNI: {0}".format(len(bookmarks_without_tags)))
+  if bookmarks_without_tags:
+    log.info("Bookmarks without tags after removing DNI: {0}".format(len(bookmarks_without_tags)))
+  else:
+    log.info("No bookmarks to remove")
 
   chapters = final.original_table(table_names['chapters'], '')
 
@@ -112,8 +112,8 @@ if __name__ == "__main__":
     final_authors = []
     authors = final.original_table(table_names['authors'])
     for final_author in authors:
-      if any(story['authorid'] == final_author['id'] or story['coauthorid'] == final_author['id'] for story in final_stories)\
-          or any(bookmark['authorid'] == final_author['id'] for bookmark in final_bookmarks):
+      if any(story['author_id'] == final_author['id'] or story['coauthor_id'] == final_author['id'] for story in final_stories)\
+          or any(bookmark['author_id'] == final_author['id'] for bookmark in final_bookmarks):
         final_author['email'] = _clean_email(final_author)
         final_authors.append(final_author)
     final.insert_into_final('authors', final_authors)
@@ -166,7 +166,7 @@ if __name__ == "__main__":
     authors = final.original_table(table_names['authors'])
     for author in authors:
       final_author = efiction.author_to_final(author)
-      if any(story['authorid'] == final_author['id'] or story['coauthorid'] == final_author['id'] for story in final_stories):
+      if any(story['author_id'] == final_author['id'] or story['coauthor_id'] == final_author['id'] for story in final_stories):
         final_author['email'] = _clean_email(final_author)
       final_authors.append(final_author)
     final.insert_into_final('authors', final_authors)

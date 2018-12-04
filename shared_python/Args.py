@@ -1,9 +1,8 @@
-import logging
+from shared_python.Logging import log
 import os
 import argparse
 import yaml
 
-log = logging.getLogger()
 
 def _load_args_from_file(filepath):
   """

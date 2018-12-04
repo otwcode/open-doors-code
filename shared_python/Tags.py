@@ -1,12 +1,11 @@
 from HTMLParser import HTMLParser
 import re
-import logging
 import MySQLdb
 import sys
 
-from shared_python import Common
+from shared_python import Common, Logging
 
-log = logging.getLogger()
+log = Logging.log
 
 class Tags(object):
 
@@ -85,9 +84,10 @@ class Tags(object):
                               .format(story_tags_row[story_id_col_name], val.replace("'", "\'").strip(),
                                       col, tag_col_lookup[col]['table_name']))
 
-      self.cursor.execute("""
-           INSERT INTO tags (storyid, original_tag, original_column, original_table, ao3_tag_fandom) VALUES {0}
-         """.format(', '.join(values)))
+      if len(values) > 0:
+          self.cursor.execute("""
+               INSERT INTO tags (storyid, original_tag, original_column, original_table, ao3_tag_fandom) VALUES {0}
+             """.format(', '.join(values)))
 
     self.db.commit()
 

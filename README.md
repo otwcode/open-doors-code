@@ -203,7 +203,7 @@ enter = UTF-8
 See note below about encoding problems.
 
 If there are duplicate chapters (for example if co-authored stories were listed under each author), the script will
-try to deduplicate them by only keeping the duplicate whose `authorid` is the same as the `authorid` in the `story` table.
+try to deduplicate them by only keeping the duplicate whose `author_id` is the same as the `authorid` in the `story` table.
 It will list duplicates it has found in the console output.
 
 Common problems to look out for when processing chapters:
@@ -218,7 +218,7 @@ in the affected story files.
 story manually to resolve.
 - Missing stories - sometimes the url in the database doesn't exactly match the path to the story. You should check for
 empty chapters after this step and look for their corresponding chapter files manually. If found, paste the HTML of the story into the empty `text` column for that row.
-- If the authors table has co-authors listed with 2 email addresses in an entry, create a new line in the authors table for the second author, amend the first author, then put the 2nd author ID into the `coauthorid` column of the stories table
+- If the authors table has co-authors listed with 2 email addresses in an entry, create a new line in the authors table for the second author, amend the first author, then put the second author ID into the `coauthor_id` column of the stories table
 - The author table may need to be de-duped
 
 

@@ -4,13 +4,10 @@ import csv
 from eFiction import efiction
 from shared_python import Args
 from shared_python.FinalTables import FinalTables
+from shared_python.Logging import log
 from shared_python.Sql import Sql
 from shared_python.Tags import Tags
 
-import logging
-import sys
-logging.basicConfig(stream=sys.stdout,level=logging.DEBUG)
-log = logging.getLogger()
 
 def valid_tags(key, tag_type_list):
   return [d[key].strip() for d in tag_type_list
@@ -66,4 +63,4 @@ if __name__ == "__main__":
     story_tags['fandoms'] = ', '.join(set(fandoms))
 
     final.populate_story_tags(story_id, 'stories', story_tags)
-    final.populate_story_tags(story_id, 'bookmarks', story_tags)
+    final.populate_story_tags(story_id, 'story_links', story_tags)
