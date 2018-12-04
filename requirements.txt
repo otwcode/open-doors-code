@@ -1,6 +1,6 @@
 MySQL-python
 Cython==0.25.2
-pyOpenSSL==17.0.0
+pyOpenSSL==17.5.0
 backports.functools_lru_cache==1.3
 certifi==2017.4.17
 charade==1.0.3
