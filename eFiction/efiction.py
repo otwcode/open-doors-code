@@ -64,10 +64,10 @@ def table_names():
 
 def author_to_final(efiction_author):
   final_author = {
-    'id':     efiction_author['uid'],
-    'name':   efiction_author['penname'],
-    'email':  efiction_author['email'],
-    'imported': 0,
+    'id':            efiction_author['uid'],
+    'name':          efiction_author['penname'],
+    'email':         efiction_author['email'],
+    'imported':      0,
     'do_not_import': 0
   }
   return final_author
@@ -80,11 +80,11 @@ def story_to_final_without_tags(efiction_story):
     'summary ':      efiction_story['summary'],
     'notes':         efiction_story.get('storynotes', ''),
     'author_id':     efiction_story['uid'],
-    'coauthor_id':    efiction_story['coauthors'],
+    'coauthor_id':   efiction_story['coauthors'],
     'date':          efiction_story['date'],
     'updated':       efiction_story['updated'],
     'imported':      0,
-    'do_not_import':   0,
+    'do_not_import': 0,
     # Not in eFiction original table
     # 'url':           efiction_story['url'],
     # 'ao3url':        efiction_story['ao3url'],
