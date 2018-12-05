@@ -1,4 +1,7 @@
 # open-doors-code
+
+[![Build Status](https://img.shields.io/travis/otwcode/open-doors-code/master.svg?label=travis-ci)](https://travis-ci.org/otwcode/open-doors-code)
+
 Scripts and miscellaneous code to aid Open Doors imports. This currently supports Automated Archive (AA) and eFiction (EF)
 databases, and with some manual work, can also be used to process any type of archive.
 
