@@ -5,23 +5,21 @@ import os
 import re
 
 from shared_python import Common
-from shared_python.Logging import log
 
 
 class Chapters(object):
 
-  def __init__(self, args, db):
+  def __init__(self, args, db, log):
     self.args = args
     self.db = db
     self.cursor = self.db.cursor()
-
+    self.log = log
 
   def _ends_with(self, filename, extensions):
     return any(filename.endswith(ext) for ext in extensions)
 
-
-  def _gather_and_dedupe(self, chapters_path, extensions, has_ids = False):
-    log.info("\nFinding chapters and identifying duplicates")
+  def _gather_and_dedupe(self, chapters_path, extensions, has_ids=False):
+    self.log.info("\nFinding chapters and identifying duplicates")
     extensions = re.split(r", ?", extensions)
     story_folder = os.walk(chapters_path)
     file_paths = {}
@@ -56,8 +54,8 @@ class Chapters(object):
           file_paths[name] = file_path
 
     if has_duplicates:
-      log.warn('\n'.join(messages + sql_messages))
-      log.warn(duplicate_chapters)
+      self.log.warn('\n'.join(messages + sql_messages))
+      self.log.warn(duplicate_chapters)
       folder_name_type = raw_input("Resolving duplicates: pick the type of the folder name under {0} "
                                    "\n1 = author id\n2 = author name\n3 = skip duplicates check\n"
                                    .format(chapters_path))
@@ -71,7 +69,7 @@ class Chapters(object):
             author_id = sql_author_id[0][0]
             file_paths[cid] = [dc['path'] for dc in duplicate_chapters[cid] if dc['folder_name'] == str(author_id)][0]
       elif folder_name_type == '2':
-        log.warn("Not implemented")
+        self.log.warn("Not implemented")
 
     return file_paths
 
@@ -82,7 +80,7 @@ class Chapters(object):
     if extensions is None:
       extensions = self.args.chapters_file_extensions
 
-    log.info("Processing chapters...")
+    self.log.info("Processing chapters...")
 
     filenames_are_ids = raw_input("\nChapter file names are chapter ids? Y/N\n")
     has_ids = True if str.lower(filenames_are_ids) == 'y' else False
@@ -109,7 +107,7 @@ class Chapters(object):
             self.cursor.execute(query, (file_contents, int(cid)))
             self.db.commit()
           except Exception as e:
-            log.error("Error = chapter id: {0} - chapter: {1}\n{2}".format(cid, chapter_path, str(e)))
+            self.log.error("Error = chapter id: {0} - chapter: {1}\n{2}".format(cid, chapter_path, str(e)))
           finally:
             pass
     else:
@@ -123,7 +121,7 @@ class Chapters(object):
             self.cursor.execute(query, (file_contents, path))
             self.db.commit()
           except Exception as e:
-            log.error("Error = chapter id: {0} - chapter: {1}\n{2}".format(path, chapter_path, str(e)))
+            self.log.error("Error = chapter id: {0} - chapter: {1}\n{2}".format(path, chapter_path, str(e)))
           finally:
             pass
 

@@ -1,21 +1,16 @@
-from HTMLParser import HTMLParser
-import logging
 import re
 
 import MySQLdb
-import sys
 
-from shared_python import Logging
-
-log = Logging.log
 
 class Sql(object):
 
-  def __init__(self, args):
+  def __init__(self, args, log):
     self.tag_count = 0
     db = MySQLdb.connect(args.db_host, args.db_user, args.db_password)
     cursor = db.cursor()
     cursor.execute('CREATE DATABASE IF NOT EXISTS {0}'.format(args.temp_db_database))
+    self.log = log
 
     self.db = MySQLdb.connect(args.db_host, args.db_user, args.db_password, args.temp_db_database, charset='utf8',
                               use_unicode=True, autocommit=True)
@@ -55,13 +50,13 @@ class Sql(object):
         end_command = re.sub(r'--.*?\n', '', command)
         lc_command = end_command.lower().strip().replace("\n", "")
         if initial_load and (lc_command.startswith("create database") or lc_command.startswith("use ")):
-          log.info("Skipping command - {0}".format(lc_command))
+          self.log.info("Skipping command - {0}".format(lc_command))
         elif lc_command is None or lc_command == '':
-          log.info(lc_command)
+          self.log.info(lc_command)
         else:
           self.cursor.execute(command)
       except MySQLdb.OperationalError, msg:
-        log.info("Command skipped: {0} [{1}]".format(command, msg))
+        self.log.info("Command skipped: {0} [{1}]".format(command, msg))
 
     self.db.commit()
 
