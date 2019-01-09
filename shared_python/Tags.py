@@ -5,16 +5,16 @@ import sys
 
 from shared_python import Common, Logging
 
-log = Logging.log
 
 class Tags(object):
 
-  def __init__(self, args, db):
+  def __init__(self, args, db, log):
     self.tag_count = 0
     self.db = db
     self.cursor = self.db.cursor()
     self.database = args.temp_db_database
     self.html_parser = HTMLParser()
+    self.log = log
 
     self.tag_export_map = {
       'original_tagid':       'Original Tag ID',
@@ -33,7 +33,7 @@ class Tags(object):
     try:
       self.cursor.execute("DROP TABLE IF EXISTS {0}.`tags`".format(self.database))
     except MySQLdb.OperationalError, msg:
-      log.info("Command skipped: {}".format(msg))
+      self.log.info("Command skipped: {}".format(msg))
     self.cursor.execute("""
       CREATE TABLE IF NOT EXISTS {0}.`tags` (
         `storyid` int(11) DEFAULT NULL,
@@ -185,7 +185,7 @@ class Tags(object):
     results = self.cursor.fetchall()
     total = len(results)
     cur = 0
-    log.info("{0} tags for column '{1}'".format(total, col))
+    self.log.info("{0} tags for column '{1}'".format(total, col))
 
     for tag_row in results:
       cur = Common.print_progress(cur, total)

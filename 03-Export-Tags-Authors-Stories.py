@@ -1,6 +1,5 @@
 import csv
 from shared_python import Args
-from shared_python.Logging import log
 from shared_python.Sql import Sql
 from HTMLParser import HTMLParser
 
@@ -26,6 +25,7 @@ if __name__ == "__main__":
   Spreadsheet and share with the rest of the Open Doors committee.
   """
   args = Args.args_for_03()
+  log = args.logger_with_filename()
   sql = Sql(args)
   tags = Tags(args, sql.db)
 

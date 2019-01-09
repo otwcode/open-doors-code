@@ -1,9 +1,8 @@
 # encoding: utf-8
 import MySQLdb
 
-from shared_python import Args
+from shared_python.Args import Args
 from shared_python.Chapters import Chapters
-from shared_python.Logging import log
 from shared_python.Sql import Sql
 
 
@@ -16,9 +15,11 @@ def __current_table(table_name, db):
 
 
 if __name__ == "__main__":
-  args = Args.args_for_05()
-  sql = Sql(args)
-  chaps = Chapters(args, sql.db)
+  argsClass = Args()
+  args = argsClass.args_for_05()
+  log = argsClass.logger_with_filename()
+  sql = Sql(args, log)
+  chaps = Chapters(args, sql.db, log)
 
 
   log.info("Loading chapters from {0}...".format(args.chapters_path))

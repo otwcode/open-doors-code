@@ -6,7 +6,6 @@ from eFiction import efiction
 from shared_python import Args
 from shared_python.Chapters import Chapters
 from shared_python.FinalTables import FinalTables
-from shared_python.Logging import log
 from shared_python.Sql import Sql
 from shared_python.Tags import Tags
 
@@ -22,7 +21,8 @@ def _clean_email(author):
 
 
 if __name__ == "__main__":
-  args = Args.args_for_05()
+  args = Args().args_for_05()
+  log = args.logger_with_filename()
   sql = Sql(args)
   tags = Tags(args, sql.db)
   final = FinalTables(args, sql.db)

@@ -6,13 +6,14 @@ import datetime
 
 class FinalTables(object):
 
-  def __init__(self, args, db):
+  def __init__(self, args, db, log):
     self.args = args
     self.db = db
     self.dict_cursor = self.db.cursor(MySQLdb.cursors.DictCursor)
     self.original_database = args.temp_db_database
     self.final_database = args.output_database
     self.html_parser = HTMLParser()
+    self.log = log
 
 
   def original_table(self, table_name, filter = ''):

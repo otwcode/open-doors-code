@@ -2,19 +2,17 @@
 
 import datetime
 import codecs
-import logging
 import MySQLdb
 import re
 from HTMLParser import HTMLParser
 from shared_python import Args, Common
 from shared_python.Sql import Sql
 
-log = logging.getLogger()
 
 def _escape_quote(text):
   return text.replace("(?<!\\)'", "\\'")
 
-def _clean_file(filepath):
+def _clean_file(filepath, log):
   """
   Convert the Perl hash into a Python dictionary
   :param filepath: Path to ARCHIVE_DB.pl
@@ -222,8 +220,8 @@ def _create_mysql(args, FILES):
   db.commit()
 
 
-def clean_and_load_data(args):
-  data = _clean_file(args.db_input_file)
+def clean_and_load_data(args, log):
+  data = _clean_file(args.db_input_file, log)
   _create_mysql(args, data)
 
 
@@ -267,5 +265,5 @@ def _dummy_chapter(story):
 
 
 if __name__ == "__main__":
-  args = Args.process_args()
+  args = Args().process_args()
   data = _clean_file(args.filepath)

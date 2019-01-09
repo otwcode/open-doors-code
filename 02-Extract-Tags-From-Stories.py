@@ -1,7 +1,6 @@
 import re
 
 from shared_python import Args
-from shared_python.Logging import log
 from shared_python.Sql import Sql
 from shared_python.Tags import Tags
 
@@ -13,6 +12,7 @@ if __name__ == "__main__":
   tables are created.
   """
   args = Args.args_for_02()
+  log = args.logger_with_filename()
   sql = Sql(args)
   tags = Tags(args, sql.db)
   log.info('Processing tags from stories and bookmarks table in {0}'.format(args.temp_db_database))
