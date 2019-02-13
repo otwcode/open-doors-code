@@ -44,8 +44,9 @@ class Chapters(object):
             messages.append(file_path + " is a duplicate of " + file_paths[cid])
             sql_messages.append("SELECT * FROM chapters WHERE id = {1}".format(cid))
             duplicate_chapters[cid] = [
-              { 'folder_name': os.path.split(os.path.split(file_paths[cid])[0])[1], 'filename': filename, 'path': file_paths[cid] },
-              { 'folder_name': duplicate_folder, 'filename': filename, 'path': file_path }
+              {'folder_name': os.path.split(os.path.split(file_paths[cid])[0])[1], 'filename': filename,
+               'path': file_paths[cid]},
+              {'folder_name': duplicate_folder, 'filename': filename, 'path': file_path}
             ]
             has_duplicates = True
         else:

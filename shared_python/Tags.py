@@ -115,9 +115,9 @@ class Tags(object):
     tag = unicode(row[tag_headers['original_tag']].replace("'", r"\'"), 'utf-8')
 
     if row[tag_headers['original_tagid']] == '' or row[tag_headers['original_tagid']] is None:
-      tagid_filter = "original_tag = '{0}'".format(tag)
+      tagid_filter = u"original_tag = '{0}'".format(tag)
     else:
-      tagid_filter = "original_tagid={0}".format(row[tag_headers['original_tagid']])
+      tagid_filter = u"original_tagid={0}".format(row[tag_headers['original_tagid']])
 
     ao3_tags = unicode(row[tag_headers['ao3_tag']].replace("'", r"\'"), 'utf-8').encode('utf-8').split(",")
     ao3_tag_types = row[tag_headers['ao3_tag_type']].split(",")
@@ -125,7 +125,7 @@ class Tags(object):
 
     # If tags length > types length -> there are remapped tags
     for idx, ao3_tag in enumerate(ao3_tags):
-      ao3_tag = ao3_tag.strip()
+      ao3_tag = ao3_tag
 
       if number_types >= idx + 1:
         ao3_tag_type = ao3_tag_types[idx].strip()
@@ -157,11 +157,11 @@ class Tags(object):
                          row[tag_headers['original_tagid']] or 'null',
                          original_table))
       else:
-        self.cursor.execute("""
+        self.cursor.execute(u"""
               UPDATE tags
               SET ao3_tag='{0}', ao3_tag_type='{1}', ao3_tag_category='{2}', ao3_tag_fandom='{3}'
               WHERE {4} and original_table='{5}'
-            """.format(ao3_tag,
+            """.format(unicode(ao3_tag),
                        ao3_tag_type,
                        row[tag_headers['ao3_tag_category']],
                        row[tag_headers['ao3_tag_fandom']].replace("'", r"\'"),

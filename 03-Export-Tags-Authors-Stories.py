@@ -46,13 +46,6 @@ if __name__ == "__main__":
     story_author_col = 'author_id'
     story_coauthor_col = 'coauthor_id'
     author_id = 'id'
-  elif args.archive_type == 'EF':
-    author_table = '{0}.fanfiction_authors'.format(args.temp_db_database)
-    stories_table = '{0}.fanfiction_stories'.format(args.temp_db_database)
-    author_name = 'penname'
-    story_id = 'sid'
-    story_author_col = 'uid'
-    author_id = 'uid'
 
   results = sql.execute("""
     SELECT s.{0} as "Story ID", s.title as "Title", s.summary as "Summary", a.{1} as "Creator", a.email as "Creator Email",

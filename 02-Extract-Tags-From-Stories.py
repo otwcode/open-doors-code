@@ -43,23 +43,4 @@ if __name__ == "__main__":
     tags.populate_tag_table(args.temp_db_database, "id", story_table_name, tag_columns_dict, fields_with_fandom)
     tags.populate_tag_table(args.temp_db_database, "id", bookmark_table_name, tag_columns_dict, fields_with_fandom, False)
 
-  # EFICTION
-  elif args.archive_type == 'EF':
-    from eFiction import efiction
-    tag_columns = raw_input('Column names containing tags \n   (delimited by commas - default: "catid, classes, charid, rid, gid, wid"): ')
-    if tag_columns is None or tag_columns == '':
-      tag_columns = "catid, classes, charid, rid, gid, wid"
-
-    for col in re.split(r", ?", tag_columns):
-      if sql.col_exists(col, "fanfiction_stories", args.temp_db_database):
-        tag_col_list[col] = efiction.column_schema(col)
-
-    tags.populate_tag_table(args.temp_db_database, "sid", "fanfiction_stories", tag_col_list, '')
-
-    has_ids_in_tags = raw_input('Do all the tag fields contain ids? (y, n) ')
-    for col in tag_col_list.keys():
-      log.debug("Processing {0}".format(col))
-      table = efiction.column_schema(col)
-      tags.hydrate_tags_table(col, table, has_ids_in_tags == 'y')
-
   log.info("Done extracting tags.")

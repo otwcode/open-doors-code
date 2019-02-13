@@ -117,5 +117,5 @@ def chapter_to_final(efiction_chapter):
 
 def add_coauthors_to_stories(db, stories):
   for story in stories:
-    db.cursor.execute("SELECT * FROM fanfiction_coauthors WHERE sid=%i", stories['sid'])
+    db.cursor.execute("SELECT * FROM fanfiction_coauthors WHERE sid=%i", story['sid'])
   return None

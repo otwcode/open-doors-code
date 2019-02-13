@@ -58,7 +58,7 @@ operating systems)
         - For Automated Archive, this is in a Perl file called ARCHIVE_DB.pl.
         - For eFiction, it will typically be a MySQL dump in a `.sql` file.
         - Other archive types may store their metadata in a custom database, or in flat HTML files. These archives will
-        need bespoke handling for step 01, but are handled as AA from step 02 onward.
+        need bespoke coding or manual processing to create the MySQL tables in step 01.
     1. The story files.
         - For AA, this is usually in a folder called `archive`.
         - For EF, the folder is usually called `stories`.
@@ -68,20 +68,47 @@ operating systems)
 See [Parameters](#parameters) for the list of properties. You will be prompted for any property you didn't include in
 the file if it is needed for a given stage.
 
+## High-level overview of each step
+
+01 - Load the original data into a temporary database for processing (optional)
+02 - Extract tags from stories and story links into a new `tags` table.
+03 - Export the distinct tags into a spreadsheet to enable wranglers to map tags to AO3 tags, and export story and
+story link information into spreadsheets used for searching.
+04 - Map the tags in the `tags` table
+05 - Create the final tables that will be used for the temp site and copy all the authors, stories and story links
+06 - Copy the AO3 tags into the final story and story link rows
+07 - Load chapters from files (optional)
 
 ### Step 01 - Load the original database into MySQL
 
-    python 01-Load-into-Mysql.py -p <archive name>.yml
+This step populates a set of temporary tables which will be used for later processes.
 
-This imports the database file specified in the `db_input_file` into the `temp_db_database` on your MySQL server
+#### eFiction
+
+    python 01-Load-eFiction-into-Mysql.py -p <archive name>.yml
+    
+This imports the eFiction database file specified in the `db_input_file` into the `temp_db_database` on your MySQL server
 using the `db_host`, `db_user` and `db_password` properties. The destination database will be destroyed and recreated
 every time you run the script, so you can safely rerun it as often as needed.
+    
+Dumps from eFiction sometimes include commands to recreate and use the database name from the original archive. 
+This script should skip the command to use the original's archive name, but if it doesn't, make sure to edit 
+`temp_db_database` to match the original archive's database name as later steps will fail otherwise.
 
-#### Notes on specific archives
-##### eFiction
-Dumps from eFiction sometimes include commands to recreate and use the database name from the original archive. This script should skip the command to use the original's archive name, but if it doesn't, make sure to edit `temp_db_database` to match the original archive's database name as later steps will fail otherwise.
+Some eFiction versions have comma-delimited ids in the story tag fields instead of the name of the tag. You will need
+to inspect the `fanfiction_stories` table to determine if this is the case before running the eFiction import script. 
+The script will ask you if all the tag fields contain ids (rather than text). If they do, answer `y`, and it will look 
+up the tag text in the original tag table.
 
-##### Automated Archive
+
+#### Automated Archive
+
+    python 01-Load-Automated-Archive-into-Mysql.py -p <archive name>.yml
+
+This imports the Automated Archive ARCHIVE_DB.pl file specified in the `db_input_file` property into the 
+`temp_db_database` on your MySQL server using the `db_host`, `db_user` and `db_password` properties. The destination 
+database will be destroyed and recreated every time you run the script, so you can safely rerun it as often as needed.
+
 *Import problems*: Some ARCHIVE_DB.pl files contain formatting that breaks the import. Common problems include, but are not limited to:
 - unescaped single quotes
 - irregular indents
@@ -101,13 +128,11 @@ to populate the tag fields (see below) with all the relevant fields in the ARCHI
 temporary database table.
 
 ##### Custom archives
+
 The step 01 script can't be used with archives which do not use Automated Archive or eFiction. The metadata for custom
-archives needs to be loaded manually or using custom scripts into `authors`, `bookmarks`, `chapters`
+archives needs to be loaded manually or using custom scripts into `authors`, `story_links`, `chapters`
 and `stories` tables matching [the Open Doors table schema](shared_python/create-open-doors-tables.sql) in the
 `temp_db_database`.
-
-These archives are then treated as Automated Archive archives by all the scripts from step 02 onward.
-
 
 ### Step 02 - Extract tags from the original stories
 
@@ -121,15 +146,8 @@ script.
 *Note*: This step splits the tag fields on commas. If the archive you are processing allowed commas in tag names, you
 will need to replace those commas with another character and let Tag Wrangling know this is what you've done.
 
-#### Notes on specific archives
-
-##### Automated Archive
 For multi-fandom archives that specify the fandoms for each story, the `fields_with_fandom` parameter can be used to
 specify that tags from the listed columns should be exported with the fandom.
-
-##### eFiction
-Some eFiction versions have comma-delimited ids in the story tag fields instead of the name of the tag. You will need
-to inspect the `fanfiction_stories` table to determine if this is the case before running step 02. The script will ask you if all the tag fields contain ids (rather than text). If they do, answer y, and it will look up the tag text in the original tag table.
 
 
 ### Step 03 - Export tags, authors and stories
@@ -183,7 +201,8 @@ that unlike the other scripts, this one does not destroy any databases or tables
 fields in the `stories` or `bookmarks` databases.
 
 *Notes*:
-- The output for this command  (eg "Getting all tags per story...429/429 stories") will report the number of stories in the tag table, which may be more than the number of stories you have after removing DNI in the previous stage.
+- The output for this command  (eg "Getting all tags per story...429/429 stories") will report the number of stories in 
+the tag table, which may be more than the number of stories you have after removing DNI in the previous stage.
 
 
 ### Step 07 - Load Chapters into the Open Doors chapters table
@@ -196,32 +215,45 @@ through all the files in the `chapters_path` and trying to find an entry in the 
 
 You will be prompted to answer two questions:
 
-Chapter file names are chapter ids? Y/N
+    Chapter file names are chapter ids? Y/N
 
-Look at the file names in `chapters_path`  and compare against the `chapterid` column in the database. For efiction, these are most likely to be the same (ie Y) , but for AA or other databases they probably are more likely to be a human readable name instead (N).
+Look at the file names in `chapters_path`  and compare against the `chapterid` column in the database. For eFiction, 
+these are most likely to be the same (ie Y) , but for AA or other databases they probably are more likely to be a human 
+readable name instead (N).
 
-Importing chapters: pick character encoding (check for curly quotes):
-1 = Windows 1252
-enter = UTF-8
+    Importing chapters: pick character encoding (check for curly quotes):
+    1 = Windows 1252
+    enter = UTF-8
+    
 See note below about encoding problems.
 
 If there are duplicate chapters (for example if co-authored stories were listed under each author), the script will
-try to deduplicate them by only keeping the duplicate whose `author_id` is the same as the `authorid` in the `story` table.
+try to deduplicate them by only keeping the duplicate whose `author_id` is the same as the `author_id` in the `story` table.
 It will list duplicates it has found in the console output.
 
-Common problems to look out for when processing chapters:
-- Email addresses in story files. These should be removed to protect the authors, but check for any stories that include
-fictional email conversations between the characters. Use a text editor that can find and replace across multipe files using Regular expressions (regex). To find email addresses try:  `.*(\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b).*`
+#### Common problems to look out for when processing chapters
+
+*Tip*: Some of these problems might be easier to fix by loading the chapters into MySQL and then exporting the `chapters`
+table as a MySQL dump. You can then perform edit-replace operations on all the chapters at once (though be very careful
+not to break the MySQL commands!). Then you can import the edited dump back into MySQL.
+
+- Email addresses in story files. These should be replaced with the text `[email address removed]` to protect the authors, 
+but check for any stories that include fictional email conversations between the characters (you probably want to keep 
+the made up addresses in that case). Use a text editor that can find and replace using Regular expressions (regex) - 
+for example Notepad++ on Windows or Sublime on Mac. To find email addresses try: `.*(\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b).*`
 - Navigation for the original site should be removed. (This is not typically a problem for eFiction sites)
-- Other links may need to be removed depending on where they linked to. (If they are relative links they definitely should be removed). Regex to find opening and closing <a> tags : `</?a(?:(?= )[^>]*)?>`
+- Other links may need to be removed depending on where they linked to. If they are relative links they definitely 
+should be removed. Regex to find opening and closing <a> tags so you can find the links: `</?a(?:(?= )[^>]*)?>`
 - Encoding problems - these result in curly quotes and accented characters being replaced by rubbish characters. Trying
-"Windows 1252" instead of "UTF-8" when prompted may solve this, or you might have to edit-replace the broken characters
-in the affected story files.
+"Windows 1252" instead of "UTF-8" when running the script may solve this, or you might have to edit-replace the broken characters
+in the affected chapters.
 - In some cases, a story file might contain a character that prevents it from being copied to the MySQL table. Edit the
 story manually to resolve.
 - Missing stories - sometimes the url in the database doesn't exactly match the path to the story. You should check for
-empty chapters after this step and look for their corresponding chapter files manually. If found, paste the HTML of the story into the empty `text` column for that row.
-- If the authors table has co-authors listed with 2 email addresses in an entry, create a new line in the authors table for the second author, amend the first author, then put the second author ID into the `coauthor_id` column of the stories table
+empty chapters after this step and look for their corresponding chapter files manually. If found, paste the HTML of the 
+story into the empty `text` column for that row in MySQL.
+- If the authors table has co-authors listed with 2 email addresses in an entry, create a new line in the authors table 
+for the second author, amend the first author, then put the second author ID into the `coauthor_id` column of the stories table
 - The author table may need to be de-duped
 
 

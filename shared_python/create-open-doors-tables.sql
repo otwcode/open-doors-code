@@ -23,7 +23,7 @@ USE $DATABASE$;
 # Dump of table authors
 # ------------------------------------------------------------
 
-CREATE TABLE `authors` (
+CREATE TABLE IF NOT EXISTS `authors` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL DEFAULT '',
   `email` varchar(255) NOT NULL DEFAULT '',
@@ -39,7 +39,7 @@ CREATE TABLE `authors` (
 # Dump of table chapters
 # ------------------------------------------------------------
 
-CREATE TABLE `chapters` (
+CREATE TABLE IF NOT EXISTS `chapters` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `position` bigint(22) DEFAULT NULL,
   `title` varchar(255) NOT NULL DEFAULT '',
@@ -59,7 +59,7 @@ CREATE TABLE `chapters` (
 # Dump of table stories
 # ------------------------------------------------------------
 
-CREATE TABLE `stories` (
+CREATE TABLE IF NOT EXISTS `stories` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `title` varchar(255) NOT NULL DEFAULT '',
   `summary` text,
@@ -72,8 +72,8 @@ CREATE TABLE `stories` (
   `tags` varchar(255) NOT NULL DEFAULT '',
   `warnings` varchar(255) DEFAULT '',
   `fandoms` varchar(255) DEFAULT '',
-  `characters` varchar(255) DEFAULT '',
-  `relationships` varchar(255) DEFAULT '',
+  `characters` varchar(1024) DEFAULT '',
+  `relationships` varchar(1024) DEFAULT '',
   `url` varchar(255) DEFAULT NULL,
   `imported` tinyint(1) NOT NULL DEFAULT '0',
   `do_not_import` tinyint(1) NOT NULL DEFAULT '0',
@@ -90,7 +90,7 @@ CREATE TABLE `stories` (
 # Dump of table story_links
 # ------------------------------------------------------------
 
-CREATE TABLE `story_links` (
+CREATE TABLE IF NOT EXISTS `story_links` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `title` varchar(255) NOT NULL DEFAULT '',
   `summary` text,
@@ -103,8 +103,8 @@ CREATE TABLE `story_links` (
   `tags` varchar(255) NOT NULL DEFAULT '',
   `warnings` varchar(255) DEFAULT '',
   `fandoms` varchar(255) DEFAULT '',
-  `characters` varchar(255) DEFAULT '',
-  `relationships` varchar(255) DEFAULT '',
+  `characters` varchar(1024) DEFAULT '',
+  `relationships` varchar(1024) DEFAULT '',
   `url` varchar(255) DEFAULT NULL,
   `imported` tinyint(1) NOT NULL DEFAULT '0',
   `do_not_import` tinyint(1) NOT NULL DEFAULT '0',
