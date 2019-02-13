@@ -102,7 +102,7 @@ def _extract_fandoms(args, record):
   return tags.strip(', ')
 
 
-def _create_mysql(args, FILES):
+def _create_mysql(args, FILES, log):
   db = MySQLdb.connect(args.db_host, args.db_user, args.db_password, "")
   cursor = db.cursor()
   DATABASE_NAME = args.temp_db_database
@@ -222,7 +222,7 @@ def _create_mysql(args, FILES):
 
 def clean_and_load_data(args, log):
   data = _clean_file(args.db_input_file, log)
-  _create_mysql(args, data)
+  _create_mysql(args, data, log)
 
 
 def story_to_final_without_tags(story, is_story = True):
@@ -231,13 +231,13 @@ def story_to_final_without_tags(story, is_story = True):
     'title':         story['title'],
     'summary ':      story['summary'],
     'notes':         story['notes'],
-    'author_id':      story['author_id'],
+    'author_id':     story['author_id'],
     'date':          story['date'],
     'updated':       story['updated'],
     'url':           story['url'],
-    'ao3url':        story['ao3url'],
+    'ao3_url':       story['ao3_url'],
     'imported':      0,
-    'doNotImport':   0,
+    'do_not_import':   0,
   }
   if is_story:
     final_story['coauthor_id'] = story['coauthor_id']
@@ -257,7 +257,7 @@ def _dummy_chapter(story):
     'author_id': chapter['author_id'],
     'text':     chapter.get('text', ''),
     'date':     chapter['date'],
-    'storyid':  chapter['id'],
+    'story_id':  chapter['id'],
     'notes':    chapter['notes'],
     'url':      chapter['url']
   }
