@@ -16,10 +16,14 @@ class FinalTables(object):
     self.log = log
 
 
-  def original_table(self, table_name, filter = ''):
+  def original_table(self, table_name, filter = '', database_name = None):
     if table_name is None:
       return None
-    query = "SELECT * FROM `{0}`.`{1}` {2}".format(self.original_database, table_name, filter)
+    if database_name is None:
+      original_database = self.original_database
+    else:
+      original_database = database_name
+    query = "SELECT * FROM `{0}`.`{1}` {2}".format(original_database, table_name, filter)
     self.dict_cursor.execute(query)
     return self.dict_cursor.fetchall()
 
@@ -44,8 +48,12 @@ class FinalTables(object):
     return value
 
 
-  def insert_into_final(self, output_table_name, rows):
-    self.dict_cursor.execute("TRUNCATE `{0}`.`{1}`".format(self.final_database, output_table_name))
+  def insert_into_final(self, output_table_name, rows, target_database = None):
+    if target_database:
+      final_database = target_database
+    else:
+      final_database = self.final_database
+    self.dict_cursor.execute("TRUNCATE `{0}`.`{1}`".format(final_database, output_table_name))
     columns = rows[0].keys()
     values = []
     for row in rows:
@@ -55,7 +63,7 @@ class FinalTables(object):
     self.dict_cursor.execute(u"""
        INSERT INTO `{0}`.`{1}` ({2})
        VALUES {3}
-      """.format(self.final_database, output_table_name, ', '.join(columns), u', '.join(values)))
+      """.format(final_database, output_table_name, ', '.join(columns), u', '.join(values)))
     self.db.commit()
 
 

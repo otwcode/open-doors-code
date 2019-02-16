@@ -29,9 +29,10 @@ class Tags(object):
     }
 
 
-  def create_tags_table(self):
+  def create_tags_table(self, database = None):
     try:
-      self.cursor.execute("DROP TABLE IF EXISTS {0}.`tags`".format(self.database))
+      database = self.database if database is None else database
+      self.cursor.execute("DROP TABLE IF EXISTS {0}.`tags`".format(database))
     except MySQLdb.OperationalError, msg:
       self.log.info("Command skipped: {}".format(msg))
     self.cursor.execute("""
@@ -48,7 +49,7 @@ class Tags(object):
         `ao3_tag_category` VARCHAR(255) DEFAULT NULL,
         `ao3_tag_fandom` VARCHAR(255) DEFAULT NULL
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-    """.format(self.database))
+    """.format(database))
 
 
   def populate_tag_table(self, database_name, story_id_col_name, table_name, tag_col_lookup, tags_with_fandoms, truncate = True):

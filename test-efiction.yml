@@ -1,0 +1,30 @@
+archive_type: EF
+default_fandom: Testing
+archive_name: Efiction Test Archive
+
+# Database settings
+db_input_file: test/efiction.sql
+db_password:
+db_user: root
+db_host: localhost
+temp_db_database: temporary_database_name
+output_database: final_database_name
+
+# Tag settings (AA only)
+# These all take comma-separated lists of fields from the *original* database (eg: Pairings, CatOther)
+tag_fields:
+relationship_fields:
+character_fields:
+fandom_fields:
+# Comma-separated list from the *output* database (eg: relationships, characters)
+fields_with_fandom:
+
+# Wrangling and story search exports and re-import
+output_folder: /path/to/output/files
+tag_input_file: /path/to/Tags Mapping Guide.csv
+story_ids_to_remove: /path/to/ids to remove.txt
+bookmark_ids_to_remove: /path/to/ids to remove.txt
+
+# Chapter file location
+chapters_path: /path/to/chapter/files/stories
+chapters_file_extensions: txt, html
