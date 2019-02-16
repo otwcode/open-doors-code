@@ -22,10 +22,10 @@ def _clean_email(author):
 if __name__ == "__main__":
   args = Args().args_for_05()
   log = args.logger_with_filename()
-  sql = Sql(args)
-  tags = Tags(args, sql.db)
-  final = FinalTables(args, sql.db)
-  chaps = Chapters(args, sql.db)
+  sql = Sql(args, log)
+  tags = Tags(args, sql.db, log)
+  final = FinalTables(args, sql.db, log)
+  chaps = Chapters(args, sql.db, log)
 
   coauthors = {}
 

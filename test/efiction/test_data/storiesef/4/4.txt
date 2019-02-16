@@ -1,0 +1,51 @@
+Some introductory text...
+
+From: <a href="mailto:BobCharacter@TEST.EXAMPLE.COM>BobCharacter@CMAFB.USAF.MIL</a>
+To: <a href="mailto:AliceCharacter@MADEUP.EXAMPLE.COM">AliceCharacter@MADEUP.EXAMPLE.COM</a>
+Subject: Server request
+
+Dear madam:
+
+This is a fanfic in epistolary form, containing emails that shouldn't be removed.
+
+Bob
+
+<hr>
+
+From: <a href="mailto:AliceCharacter@MADEUP.EXAMPLE.COM">AliceCharacter@MADEUP.EXAMPLE.COM</a>
+To: <a href="mailto:BobCharacter@MADEUP.EXAMPLE.COM">BobCharacter@MADEUP.EXAMPLE.COM</a>
+Subject: re: Server request
+
+> This is a fanfic in epistolary form, containing emails that shouldn't be removed.
+
+It also contains an emxample of quoted text that is not HTML markup.
+
+Alice
+
+<hr>
+
+From: <a href="mailto:BobCharacter@TEST.EXAMPLE.COM>BobCharacter@CMAFB.USAF.MIL</a>
+To: <a href="mailto:AliceCharacter@MADEUP.EXAMPLE.COM">AliceCharacter@MADEUP.EXAMPLE.COM</a>
+Subject: Server request
+
+Dear madam:
+
+This is a fanfic in epistolary form, containing emails that shouldn't be removed.
+
+Bob
+
+<hr>
+
+From: <a href="mailto:AliceCharacter@MADEUP.EXAMPLE.COM">AliceCharacter@MADEUP.EXAMPLE.COM</a>
+To: <a href="mailto:BobCharacter@MADEUP.EXAMPLE.COM">BobCharacter@MADEUP.EXAMPLE.COM</a>
+Subject: re: Server request
+
+> This is a fanfic in epistolary form, containing emails that shouldn't be removed.
+
+It also contains an emxample of quoted text that is not HTML markup.
+
+Alice
+
+<hr>
+
+And probably some more surrounding text...
