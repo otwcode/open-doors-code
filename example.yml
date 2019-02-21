@@ -1,6 +1,7 @@
 archive_type: EF or AA
 default_fandom: Testing
 archive_name: Archive Display Name
+archive_short_name: short name to be used as
 
 # Database settings
 db_input_file: /path/to/database_dump.sql or /path/to/ARCHIVE_DB.pl

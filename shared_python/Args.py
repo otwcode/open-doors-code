@@ -8,7 +8,7 @@ class Args(object):
 
   def __init__(self):
     self.args = self._process_args()
-    self.log = logger(self.args.archive_name)
+    self.log = logger(self.args.archive_short_name)
 
   def logger_with_filename(self):
     return self.log
@@ -39,7 +39,8 @@ class Args(object):
     # General archive-specific settings
     parser.add_argument('-a',  '--archive_type',             type=str, choices=['AA', 'EF'], help='Type of archive: AA or EF')
     parser.add_argument('-df', '--default_fandom',           type=str, help='Default fandom to use')
-    parser.add_argument('-n',  '--archive_name',             type=str, help='Name of the original archive (used in the temporary site)')
+    parser.add_argument('-n',  '--archive_name',             type=str, help='Name of the original archive (used as the title of the temporary site)')
+    parser.add_argument('-s',  '--archive_short_name',       type=str, help='Short name to use for the site URL and output database')
 
     # Database settings
     parser.add_argument('-i',  '--db_input_file',            type=str, help='Path to input file (ARCHIVE_DB.pl for AA, SQL script for eFiction)')
@@ -61,7 +62,7 @@ class Args(object):
     # Chapters
     parser.add_argument('-cp', '--chapters_path',            type=str, help='Location of the text files containing the stories')
     parser.add_argument('-cf', '--chapters_file_extensions', type=str, help='File extension(s) of the text files containing the stories (eg: "txt, html")')
-
+    parser.add_argument('-cd', '--chapters_sql_dump',        type=str, help='SQL dump containing the imported chapters for post-processing')
 
     args = parser.parse_args()
     if args.properties_file is not None and os.path.isfile(args.properties_file):
