@@ -70,14 +70,14 @@ the file if it is needed for a given stage.
 
 ## High-level overview of each step
 
-01 - Load the original data into a temporary database for processing (EF and AA only)
-02 - Extract tags from stories and story links into a new `tags` table. (AA and custom only)
-03 - Export the distinct tags into a spreadsheet to enable wranglers to map tags to AO3 tags, and export story and
+- 01 - Load the original data into a temporary database for processing (EF and AA only)
+- 02 - Extract tags from stories and story links into a new `tags` table. (AA and custom only)
+- 03 - Export the distinct tags into a spreadsheet to enable wranglers to map tags to AO3 tags, and export story and
 story link information into spreadsheets used for searching. (all)
-04 - Map the tags in the `tags` table. (all)
-05 - Create the final tables that will be used for the temp site and copy all the authors, stories and story links. (all)
-06 - Copy the AO3 tags into the final story and story link rows. (all)
-07 - Load chapters from files (AA, custom and some EF)
+- 04 - Map the tags in the `tags` table. (all)
+- 05 - Create the final tables that will be used for the temp site and copy all the authors, stories and story links. (all)
+- 06 - Copy the AO3 tags into the final story and story link rows. (all)
+- 07 - Load chapters from files (AA, custom and some EF)
 
 ### Step 01 - Load the original database into MySQL
 
