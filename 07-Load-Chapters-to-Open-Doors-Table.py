@@ -15,9 +15,9 @@ def __current_table(table_name, db):
 
 
 if __name__ == "__main__":
-  argsClass = Args()
-  args = argsClass.args_for_05()
-  log = argsClass.logger_with_filename()
+  args_obj = Args()
+  args = args_obj.args_for_07()
+  log = args_obj.logger_with_filename()
   sql = Sql(args, log)
   chaps = Chapters(args, sql.db, log)
 

@@ -2,7 +2,7 @@
 import csv
 
 from eFiction import efiction
-from shared_python import Args
+from shared_python.Args import Args
 from shared_python.FinalTables import FinalTables
 from shared_python.Sql import Sql
 from shared_python.Tags import Tags
@@ -16,11 +16,12 @@ def valid_tags(key, tag_type_list):
 
 
 if __name__ == "__main__":
-  args = Args.args_for_06()
-  log = args.logger_with_filename()
-  sql = Sql(args)
-  tags = Tags(args, sql.db)
-  final = FinalTables(args, sql.db)
+  args_obj = Args()
+  args = args_obj.args_for_06()
+  log = args_obj.logger_with_filename()
+  sql = Sql(args, log)
+  tags = Tags(args, sql.db, log)
+  final = FinalTables(args, sql.db, log)
 
   if args.archive_type == 'EF':
     table_names = efiction.table_names()
