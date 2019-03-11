@@ -2,7 +2,7 @@
 import os
 
 from automated_archive import aa
-from shared_python import Args
+from shared_python.Args import Args
 from shared_python.Chapters import Chapters
 from shared_python.FinalTables import FinalTables
 from shared_python.Sql import Sql
@@ -20,8 +20,9 @@ def _clean_email(author):
 
 
 if __name__ == "__main__":
-  args = Args().args_for_05()
-  log = args.logger_with_filename()
+  args_obj = Args()
+  args = args_obj.args_for_05()
+  log = args_obj.logger_with_filename()
   sql = Sql(args, log)
   tags = Tags(args, sql.db, log)
   final = FinalTables(args, sql.db, log)

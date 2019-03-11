@@ -1,5 +1,5 @@
 import csv
-from shared_python import Args
+from shared_python.Args import Args
 from shared_python.Sql import Sql
 from HTMLParser import HTMLParser
 
@@ -24,10 +24,11 @@ if __name__ == "__main__":
   This step exports the Tag Wrangling and Authors with stories CSV files which you then have to import into Google
   Spreadsheet and share with the rest of the Open Doors committee.
   """
-  args = Args.args_for_03()
-  log = args.logger_with_filename()
-  sql = Sql(args)
-  tags = Tags(args, sql.db)
+  args_obj = Args()
+  args = args_obj.args_for_03()
+  log = args_obj.logger_with_filename()
+  sql = Sql(args, log)
+  tags = Tags(args, sql.db, log)
 
   log.info('Exporting tags from {0} to {1}'.format(args.temp_db_database, args.output_folder))
   cols = tags.tag_export_map

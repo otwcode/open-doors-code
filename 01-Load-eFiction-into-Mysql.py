@@ -4,8 +4,9 @@ from shared_python.Sql import Sql
 from shared_python.Tags import Tags
 
 if __name__ == "__main__":
-  args = Args().args_for_01()
-  log = args.logger_with_filename()
+  args_obj = Args()
+  args = args_obj.args_for_01()
+  log = args_obj.logger_with_filename()
   sql = Sql(args, log)
   tags = Tags(args, sql.db, log)
   efiction = efiction.eFiction(args, sql, log, tags)

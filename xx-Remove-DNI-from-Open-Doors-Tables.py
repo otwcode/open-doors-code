@@ -3,15 +3,17 @@ import csv
 import os
 
 from eFiction import efiction
-from shared_python import Args
+from shared_python.Args import Args
 from shared_python.Chapters import Chapters
 from shared_python.FinalTables import FinalTables
 from shared_python.Sql import Sql
 from shared_python.Tags import Tags
 
 if __name__ == "__main__":
-  args = Args.args_for_05()
-  sql = Sql(args)
+  args_obj = Args()
+  args = args_obj.args_for_05()
+  log = args_obj.logger_with_filename()
+  sql = Sql(args, log)
 
   filter = 'WHERE `id` in '
 
