@@ -3,6 +3,9 @@ import codecs
 import re
 import shutil
 
+# TODO
+# list blockquotes
+# list tables
 
 class MysqlChapters(object):
   def __init__(self, filepath):
@@ -60,7 +63,28 @@ class MysqlChapters(object):
     text = codecs.open(self.filepath, 'r', encoding='utf-8').read()
     regex = "([^\" ]+\\.(?:jpg|gif|png|jpeg|bmp))"
     imgs = set(re.findall(regex, text))
-    print "Writing {0} filenames to {1}".format(len(imgs), outputfile)
+    print "Writing {0} image filenames to {1}".format(len(imgs), outputfile)
     with codecs.open(outputfile, 'w', encoding='utf-8') as f:
       f.write("\n".join(imgs))
+      f.close()
+
+
+  def extract_links(self, outputfile):
+    text = codecs.open(self.filepath, 'r', encoding='utf-8').read()
+    regex = "(\S+\/\S+)"
+    links = set(re.findall(regex, text))
+    print "Writing {0} links to {1}".format(len(links), outputfile)
+    with codecs.open(outputfile, 'w', encoding='utf-8') as f:
+      f.write("\n".join(links))
+      f.close()
+
+
+  def html_report(self, outputfile):
+    text = codecs.open(self.filepath, 'r', encoding='utf-8').read()
+    regex = "<(blockquote|table)"
+    html_tags = set(re.findall(regex, text))
+    html_tags_grouped = [[x, html_tags.count(x)] for x in set(html_tags)]
+    print "Writing {0} filenames to {1}".format(len(html_tags_grouped), outputfile)
+    with codecs.open(outputfile, 'w', encoding='utf-8') as f:
+      f.write("\n".join(html_tags_grouped))
       f.close()
