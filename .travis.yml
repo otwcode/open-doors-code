@@ -1,10 +1,10 @@
 language: python
 python:
   - "2.7"
-env:
-  - DB=mysql
+services:
+  - mysql
 install:
   - pip install -r requirements.txt
 script:
-  - python -m compileall .
+  - find . -iname "*.py" -print0 | xargs -0 -n 1 -I {} python -m compileall {}
   - pytest
