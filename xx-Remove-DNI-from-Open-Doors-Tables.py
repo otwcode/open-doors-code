@@ -2,7 +2,6 @@
 import csv
 import os
 
-from eFiction import efiction
 from shared_python.Args import Args
 from shared_python.Chapters import Chapters
 from shared_python.FinalTables import FinalTables

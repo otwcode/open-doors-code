@@ -2,7 +2,7 @@
 
 [![Build Status](https://img.shields.io/travis/otwcode/open-doors-code/master.svg?label=travis-ci)](https://travis-ci.org/otwcode/open-doors-code)
 
-Scripts and miscellaneous code to aid Open Doors imports. This currently supports Automated Archive (AA) and eFiction (EF)
+Scripts and miscellaneous code to aid Open Doors imports. This currently supports Automated Archive (AA)
 databases, and with some manual work, can also be used to process any type of archive.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
@@ -15,12 +15,10 @@ databases, and with some manual work, can also be used to process any type of ar
     - [Prepare the archive backup for local processing](#prepare-the-archive-backup-for-local-processing)
     - [Step 01 - Load the original database into MySQL](#step-01---load-the-original-database-into-mysql)
       - [Notes on specific archives](#notes-on-specific-archives)
-        - [eFiction](#efiction)
         - [Automated Archive](#automated-archive)
         - [Custom archives](#custom-archives)
     - [Step 02 - Extract tags from the original stories](#step-02---extract-tags-from-the-original-stories)
       - [Notes on specific archives](#notes-on-specific-archives-1)
-        - [eFiction](#efiction-1)
     - [Step 03 - Export tags, authors and stories](#step-03---export-tags-authors-and-stories)
     - [Step 04 - Reimport the Tag Wrangling sheet and map the original tags to the new AO3 tags](#step-04---reimport-the-tag-wrangling-sheet-and-map-the-original-tags-to-the-new-ao3-tags)
     - [Step 05 - Create the Open Doors tables](#step-05---create-the-open-doors-tables)
@@ -82,24 +80,6 @@ story link information into spreadsheets used for searching. (all)
 ### Step 01 - Load the original database into MySQL
 
 This step populates a set of temporary tables which will be used for later processes.
-
-#### eFiction
-
-    python 01-Load-eFiction-into-Mysql.py -p <archive name>.yml
-    
-This imports the eFiction database file specified in the `db_input_file` into the `temp_db_database` on your MySQL server
-using the `db_host`, `db_user` and `db_password` properties. The destination database will be destroyed and recreated
-every time you run the script, so you can safely rerun it as often as needed.
-    
-Dumps from eFiction sometimes include commands to recreate and use the database name from the original archive. 
-This script should skip the command to use the original's archive name, but if it doesn't, make sure to edit 
-`temp_db_database` to match the original archive's database name as later steps will fail otherwise.
-
-Some eFiction versions have comma-delimited ids in the story tag fields instead of the name of the tag. You will need
-to inspect the `fanfiction_stories` table to determine if this is the case before running the eFiction import script. 
-The script will ask you if all the tag fields contain ids (rather than text). If they do, answer `y`, and it will look 
-up the tag text in the original tag table.
-
 
 #### Automated Archive
 
@@ -217,8 +197,7 @@ You will be prompted to answer two questions:
 
     Chapter file names are chapter ids? Y/N
 
-Look at the file names in `chapters_path`  and compare against the `chapterid` column in the database. For eFiction, 
-these are most likely to be the same (ie Y) , but for AA or other databases they probably are more likely to be a human 
+Look at the file names in `chapters_path`  and compare against the `chapterid` column in the database. For AA or other databases they probably are more likely to be a human 
 readable name instead (N).
 
     Importing chapters: pick character encoding (check for curly quotes):
@@ -284,7 +263,7 @@ rows from the stories table in the final output database.
 | -si  | story_ids_to_remove      | Location of the text file containing the story ids to remove. Optional - if no path is specified, the stories table will be copied over as is. |
 | -bi  | bookmark_ids_to_remove   | Location of the text file containing the bookmark ids to remove. Optional - if no path is specified, the bookmark table will be copied over as is. |
 | *Databases* |
-| -i   | db_input_file            | Full path to input file (ARCHIVE_DB.pl for AA, SQL script for eFiction)|
+| -i   | db_input_file            | Full path to input file (ARCHIVE_DB.pl for AA)|
 | -dd  | temp_db_database         | MySQL temporary database name to use for processing (will be destroyed in step 1 if it exists) |
 | -od  | output_database          | Name of the database the final tables should be created in (default "od_sgf") |
 | *Tags* |

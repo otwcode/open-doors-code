@@ -80,10 +80,6 @@ class Tags(object):
                                       col,
                                       tag_col_lookup[col],
                                       story_tags_row['fandoms'] if needs_fandom else ''))
-              else: # eFiction
-                values.append('({0}, "{1}", "{2}", "{3}", "")'
-                              .format(story_tags_row[story_id_col_name], val.replace("'", "\'").strip(),
-                                      col, tag_col_lookup[col]['table_name']))
 
       if len(values) > 0:
           self.cursor.execute("""
