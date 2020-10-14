@@ -48,7 +48,7 @@ if __name__ == "__main__":
     story_coauthor_col = 'coauthor_id'
     author_id = 'id'
 
-  results = sql.execute("""
+    results = sql.execute("""
     SELECT s.{0} as "Story ID", s.title as "Title", s.summary as "Summary", a.{1} as "Creator", a.email as "Creator Email",
     "" as "New Email address", "" as "AO3 Account? (& does email match?)", "" as "Searched/Found", "" as "Work on AO3?",
     "" as "Import status", "" as "importer/inviter", "" as "import/invite date", "" as "AO3 link", "" as "Notes (if any)"
