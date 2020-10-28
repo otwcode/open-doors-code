@@ -37,12 +37,12 @@ class Args(object):
     parser.add_argument('-p', '--properties_file',           type=str, help='Load properties from specified file (ignores all other arguments)')
 
     # General archive-specific settings
-    parser.add_argument('-a',  '--archive_type',             type=str, choices=['AA', 'EF'], help='Type of archive: AA or EF')
+    parser.add_argument('-a',  '--archive_type',             type=str, choices=['AA'], help='Type of archive: AA')
     parser.add_argument('-df', '--default_fandom',           type=str, help='Default fandom to use')
     parser.add_argument('-n',  '--archive_name',             type=str, help='Name of the original archive (used in the temporary site)')
 
     # Database settings
-    parser.add_argument('-i',  '--db_input_file',            type=str, help='Path to input file (ARCHIVE_DB.pl for AA, SQL script for eFiction)')
+    parser.add_argument('-i',  '--db_input_file',            type=str, help='Path to input file (ARCHIVE_DB.pl for AA)')
     parser.add_argument('-o',  '--output_folder',            type=str, help='Path for output files')
     parser.add_argument('-od', '--output_database',          type=str, help='Name of the database the final tables should be created in (default "od_sgf")')
 
@@ -78,8 +78,8 @@ class Args(object):
 
     args.archive_name =     raw_input('Name of the original archive (used in export file names): ') if args.archive_name is None else args.archive_name
 
-    while args.archive_type is None or args.archive_type not in ['AA', 'EF']:
-      args.archive_type = raw_input('Type of archive (AA or EF): ')
+    while args.archive_type is None or args.archive_type not in ['AA']:
+      args.archive_type = raw_input('Type of archive (AA): ')
 
     return args
 
@@ -93,7 +93,7 @@ class Args(object):
 
   def args_for_01(self):
     while self.args.db_input_file is None or not os.path.isfile(self.args.db_input_file):
-      self.args.db_input_file = raw_input('Path to the input file (ARCHIVE_DB.pl for AA, SQL script for eFiction): ')
+      self.args.db_input_file = raw_input('Path to the input file (ARCHIVE_DB.pl for AA): ')
     self._print_args(self.args)
     return self.args
 
