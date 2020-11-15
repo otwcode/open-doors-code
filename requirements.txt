@@ -6,7 +6,7 @@ certifi==2017.4.17
 charade==1.0.3
 ed25519ll==0.6
 Genshi==0.7
-ipaddr==2.1.11
+ipaddr==2.2.0
 jsonschema==2.6.0
 keyring==10.3.2
 lxml==3.7.3
