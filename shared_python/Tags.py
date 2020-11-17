@@ -94,7 +94,6 @@ class Tags(object):
       SELECT DISTINCT
         original_tagid as "Original Tag ID",
         original_tag as "Original Tag Name",
-        replace(original_table, 'fanfiction_', '') as "Original Tag Type",
         original_parent as "Original Parent Tag",
         ao3_tag_fandom as "Related Fandom",
         ao3_tag as "Recommended AO3 Tag",
