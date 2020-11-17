@@ -102,7 +102,6 @@ class Tags(object):
         original_description as "Original Description",
         '' as "TW Notes" FROM tags
       """)
-      #original_table, 'fanfiction_', '') as "Original Tag Type",                 #original_table not a column in eFiction code table
     return self.cursor.fetchall()
 
 
