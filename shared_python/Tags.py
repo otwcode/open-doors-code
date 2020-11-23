@@ -1,4 +1,4 @@
-from HTMLParser import HTMLParser
+from html.parser import HTMLParser
 import re
 import MySQLdb
 import sys
@@ -33,7 +33,7 @@ class Tags(object):
     try:
       database = self.database if database is None else database
       self.cursor.execute("DROP TABLE IF EXISTS {0}.`tags`".format(database))
-    except MySQLdb.OperationalError, msg:
+    except (MySQLdb.OperationalError, msg):
       self.log.info("Command skipped: {}".format(msg))
     self.cursor.execute("""
       CREATE TABLE IF NOT EXISTS {0}.`tags` (
