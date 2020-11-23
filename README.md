@@ -54,12 +54,10 @@ operating systems)
 1. Copy the archive backup to your local machine. You will need the following files:
     1. The story metadata (authors, titles, summaries, tags etc.)
         - For Automated Archive, this is in a Perl file called ARCHIVE_DB.pl.
-        - For eFiction, it will typically be a MySQL dump in a `.sql` file.
         - Other archive types may store their metadata in a custom database, or in flat HTML files. These archives will
         need bespoke coding or manual processing to create the MySQL tables in step 01.
     1. The story files.
         - For AA, this is usually in a folder called `archive`.
-        - For EF, the folder is usually called `stories`.
         - Other archives may store their story contents elsewhere, for instance, in the database itself or as flat HTML files.
 
 1. Make a copy of `example.yml`, give it a simple name related to the archive you're processing, and fill it in.
@@ -68,14 +66,14 @@ the file if it is needed for a given stage.
 
 ## High-level overview of each step
 
-- 01 - Load the original data into a temporary database for processing (EF and AA only)
+- 01 - Load the original data into a temporary database for processing (AA only)
 - 02 - Extract tags from stories and story links into a new `tags` table. (AA and custom only)
 - 03 - Export the distinct tags into a spreadsheet to enable wranglers to map tags to AO3 tags, and export story and
 story link information into spreadsheets used for searching. (all)
 - 04 - Map the tags in the `tags` table. (all)
 - 05 - Create the final tables that will be used for the temp site and copy all the authors, stories and story links. (all)
 - 06 - Copy the AO3 tags into the final story and story link rows. (all)
-- 07 - Load chapters from files (AA, custom and some EF)
+- 07 - Load chapters from files (AA and custom)
 
 ### Step 01 - Load the original database into MySQL
 

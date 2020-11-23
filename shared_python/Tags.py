@@ -17,7 +17,7 @@ class Tags(object):
     self.log = log
 
     self.tag_export_map = {
-      'original_tagid':       'Original Tag ID',
+      'id':                   'Original Tag ID',
       'original_tag':         'Original Tag',
       'original_parent':      'Original Parent Tag',
       'original_table':       'Original Tag Type',
@@ -92,7 +92,7 @@ class Tags(object):
   def distinct_tags(self):
     self.cursor.execute("""
       SELECT DISTINCT
-        original_tagid as "Original Tag ID",
+        id as "Original Tag ID",
         original_tag as "Original Tag Name",
         original_parent as "Original Parent Tag",
         ao3_tag_fandom as "Related Fandom",

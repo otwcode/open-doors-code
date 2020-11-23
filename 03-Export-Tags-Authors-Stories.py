@@ -34,7 +34,7 @@ if __name__ == "__main__":
   cols = tags.tag_export_map
   results = tags.distinct_tags()
   write_csv('{0}/{1} - tags.csv'.format(args.output_folder, args.archive_name),
-            [cols['original_tagid'], cols['original_tag'], cols['original_table'], cols['original_parent'],
+            [cols['id'], cols['original_tag'], cols['original_table'], cols['original_parent'],
              cols['ao3_tag_fandom'], cols['ao3_tag'], cols['ao3_tag_type'], cols['ao3_tag_category'],
              cols['original_description'], "TW Notes"])
 
