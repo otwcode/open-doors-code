@@ -60,7 +60,7 @@ class Sql(object):
           self.log.info(lc_command)
         else:
           self.cursor.execute(command)
-      except MySQLdb.OperationalError, msg:
+      except (MySQLdb.OperationalError, msg):
         self.log.info("Command skipped: {0} [{1}]".format(command, msg))
 
     self.db.commit()

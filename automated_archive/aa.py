@@ -4,7 +4,7 @@ import datetime
 import codecs
 import MySQLdb
 import re
-from HTMLParser import HTMLParser
+from html.parser import HTMLParser
 from shared_python import Args, Common
 from shared_python.Sql import Sql
 
