@@ -1,7 +1,7 @@
 from html.parser import HTMLParser
 import re
-import MySQLdb
 import sys
+from pymysql import cursors, OperationalError
 
 from shared_python import Common, Logging
 
@@ -33,7 +33,7 @@ class Tags(object):
     try:
       database = self.database if database is None else database
       self.cursor.execute("DROP TABLE IF EXISTS {0}.`tags`".format(database))
-    except MySQLdb.OperationalError as e:
+    except OperationalError as e:
       self.log.info("Command skipped: {}".format(e))
     self.cursor.execute("""
       CREATE TABLE IF NOT EXISTS {0}.`tags` (
@@ -53,7 +53,7 @@ class Tags(object):
 
 
   def populate_tag_table(self, database_name, story_id_col_name, table_name, tag_col_lookup, tags_with_fandoms, truncate = True):
-    dict_cursor = self.db.cursor(MySQLdb.cursors.DictCursor)
+    dict_cursor = self.db.cursor(cursors.DictCursor)
     dict_cursor.execute('USE {0}'.format(database_name))
     if truncate:
       dict_cursor.execute('TRUNCATE {0}.`tags`'.format(database_name))
@@ -110,7 +110,6 @@ class Tags(object):
     tag = str(row[tag_headers['original_tag']]).replace("'", r"\'")
     tag_id = row[tag_headers['id']]
 
-    print(row)
     if tag_id == '' or tag_id is None:
       tagid_filter = f"original_tag = '{tag}'"
     else:
@@ -179,7 +178,7 @@ class Tags(object):
       lookup_column = ', {0} as parent'.format(lookup_data['lookup_field']) if 'lookup_field' in lookup_data else ''
       matching_field = lookup_data['id_name'] if lookup_ids else lookup_data['field_name']
 
-      dict_cursor = self.db.cursor(MySQLdb.cursors.DictCursor)
+      dict_cursor = self.db.cursor(cursors.DictCursor)
       dict_cursor.execute("""
           SELECT {0}, {1}{2}{3} FROM {4} WHERE {5}='{6}'
         """.format(lookup_data['id_name'], lookup_data['field_name'], lookup_column, extra_column, lookup_data['table_name'], matching_field, tag_row[0]))
@@ -210,7 +209,7 @@ class Tags(object):
     cur = 0
     total = len(storyids)
 
-    dict_cursor = self.db.cursor(MySQLdb.cursors.DictCursor)
+    dict_cursor = self.db.cursor(cursors.DictCursor)
     tags_by_story_id = {}
     for storyid in storyids:
       cur += 1

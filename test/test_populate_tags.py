@@ -44,7 +44,7 @@ class TestPopulate_tags(TestCase):
 
   def test_default_fandom_ignored_if_fandoms_present(self):
     story_tags = self.populate_tags.tags_for_story(1, self.basic_tags)
-    self.assertEqual('Fandom A (TV), Fandom B (TV)', story_tags['fandoms'], 'Fandoms should be a comma-separated string of specified AO3 tags')
+    self.assertCountEqual(['Fandom A (TV)', 'Fandom B (TV)'], story_tags['fandoms'].split(', '), 'Fandoms should be a comma-separated string of specified AO3 tags')
 
   def test_default_fandom_used_if_no_fandoms_present(self):
     tags_without_fandom = self.basic_tags.copy()

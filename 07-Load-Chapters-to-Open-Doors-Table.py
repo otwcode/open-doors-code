@@ -1,5 +1,5 @@
 # encoding: utf-8
-import MySQLdb
+from pymysql import cursors
 
 from shared_python.Args import Args
 from shared_python.Chapters import Chapters
@@ -9,7 +9,7 @@ from shared_python.Sql import Sql
 # Given an existing final chapter table, this will use the URL field and chapter location to load the chapter contents
 def __current_table(table_name, db):
   query = "SELECT * FROM `{0}`.`{1}`".format(args.output_database, table_name)
-  dict_cursor = db.cursor(MySQLdb.cursors.DictCursor)
+  dict_cursor = db.cursor(cursors.DictCursor)
   dict_cursor.execute(query)
   return dict_cursor.fetchall()
 

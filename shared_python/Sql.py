@@ -1,20 +1,21 @@
 import re
 import warnings
 
-import MySQLdb
 # ignore unhelpful MySQL warnings
-warnings.filterwarnings('ignore', category=MySQLdb.Warning)
+from pymysql import connect, cursors, OperationalError
+
+warnings.filterwarnings('ignore', category=Warning)
 
 class Sql(object):
 
   def __init__(self, args, log):
     self.tag_count = 0
-    db = MySQLdb.connect(args.db_host, args.db_user, args.db_password)
+    db = connect(args.db_host, args.db_user, args.db_password)
     cursor = db.cursor()
     cursor.execute('CREATE DATABASE IF NOT EXISTS `{0}`'.format(args.temp_db_database))
     self.log = log
 
-    self.db = MySQLdb.connect(args.db_host, args.db_user, args.db_password, args.temp_db_database, charset='utf8',
+    self.db = connect(args.db_host, args.db_user, args.db_password, args.temp_db_database, charset='utf8',
                               use_unicode=True, autocommit=True)
     self.cursor = self.db.cursor()
     self.database = args.temp_db_database
@@ -26,7 +27,7 @@ class Sql(object):
 
 
   def execute_dict(self, script, parameters = ()):
-    dict_cursor = self.db.cursor(MySQLdb.cursors.DictCursor)
+    dict_cursor = self.db.cursor(cursors.DictCursor)
     dict_cursor.execute(script, parameters)
     return dict_cursor.fetchall()
 
@@ -60,7 +61,7 @@ class Sql(object):
           self.log.info(lc_command)
         else:
           self.cursor.execute(command)
-      except MySQLdb.OperationalError as e:
+      except OperationalError as e:
         self.log.info("Command skipped: {0} [{1}]".format(command, e))
 
     self.db.commit()

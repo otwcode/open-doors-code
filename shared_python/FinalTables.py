@@ -1,7 +1,8 @@
 from html.parser import HTMLParser
 
-from MySQLdb import cursors
 import datetime
+
+from pymysql import cursors
 
 
 class FinalTables(object):
