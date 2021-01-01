@@ -51,6 +51,7 @@ operating systems)
 
 
 ### Prepare the archive backup for local processing
+Note: for eFiction Archives, pre-process the archive using the [eFiction Processor](https://github.com/otwcode/open-doors-eFiction).
 1. Copy the archive backup to your local machine. You will need the following files:
     1. The story metadata (authors, titles, summaries, tags etc.)
         - For Automated Archive, this is in a Perl file called ARCHIVE_DB.pl.

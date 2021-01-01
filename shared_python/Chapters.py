@@ -4,6 +4,8 @@ import codecs
 import os
 import re
 
+from pip._vendor.distlib.compat import raw_input
+
 from shared_python import Common
 
 

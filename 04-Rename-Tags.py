@@ -18,7 +18,7 @@ if __name__ == "__main__":
   sql = Sql(args, log)
   tags = Tags(args, sql.db, log)
 
-  with open(args.tag_input_file, 'r') as csvfile:
+  with open(args.tag_input_file, 'r', encoding='utf-8-sig') as csvfile:
     tw_tags = list(csv.DictReader(csvfile))
     tag_headers = tags.tag_export_map
     total = len(tw_tags)

@@ -35,10 +35,10 @@ class FinalTables(object):
   def _value(self, row):
     value = []
     for item in row:
-      if type(item) is unicode:
+      if type(item) is str:
         value.append('"' + self._escape_unescape(item) + '"')
       elif type(item) is datetime.datetime:
-        value.append('"' + unicode(item) + '"')
+        value.append('"' + str(item) + '"')
       elif item is None:
         value.append('null')
       elif item is '':
