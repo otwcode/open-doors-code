@@ -107,7 +107,6 @@ class Tags(object):
 
   def update_tag_row(self, row):
     tag_headers = self.tag_export_map
-    original_table = row[tag_headers['original_table']]
     tag = str(row[tag_headers['original_tag']]).replace("'", r"\'")
     tag_id = row[tag_headers['id']]
 
@@ -142,7 +141,7 @@ class Tags(object):
           '{fandom}', '{tagid_filter}', {tag}, 
           '{row[tag_headers['original_tagid']] or 'null'}')
         """)
-        # FIXME need to also insert entries in item_tags for the new tags
+        # FIXME OD-574 need to also insert entries in item_tags for the new tags
       else:
         self.cursor.execute(f"""
               UPDATE tags
