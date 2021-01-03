@@ -72,7 +72,7 @@ class Tags(object):
           for val in re.split(r", ?", story_tags_row[col]):
             if val != '':
               if type(tag_col_lookup[col]) is str: # Probably AA or a custom archive
-                cleaned_tag = unicode(val).encode('utf-8').replace("'", "\'").strip()
+                cleaned_tag = val.encode('utf-8').replace("'", "\'").strip()
 
                 values.append('({0}, "{1}", "{2}", "{3}", "{4}")'
                               .format(story_tags_row[story_id_col_name],

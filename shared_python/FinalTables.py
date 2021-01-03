@@ -44,7 +44,7 @@ class FinalTables(object):
       elif item is '':
         value.append('""')
       else:
-        value.append(unicode(item))
+        value.append(item)
     return value
 
 

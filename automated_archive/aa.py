@@ -170,7 +170,7 @@ def _create_mysql(args, FILES, log):
         table_name = 'bookmarks'
 
       # Clean up fandoms and add default fandom if it exists
-      final_fandoms = unicode(fandoms.replace("'", r"\'"), 'utf-8')
+      final_fandoms = fandoms.replace("'", r"\'")
       if args.default_fandom is not None:
         if final_fandoms == '' or final_fandoms == args.default_fandom:
           final_fandoms = args.default_fandom
@@ -183,16 +183,16 @@ def _create_mysql(args, FILES, log):
       stor = u"""
         INSERT INTO {0} (id, fandoms, title, summary, tags, characters, date, url, notes, relationships, rating, warnings, author_id)
         VALUES({1}, '{2}', '{3}', '{4}', '{5}', '{6}', '{7}', '{8}', '{9}', '{10}', '{11}', '{12}', '{13}');\n""" \
-        .format(unicode(table_name),
+        .format(table_name,
                 original_id,
                 final_fandoms.replace(r"\\", "\\"),
-                unicode(title.replace(r"\\", "\\"), 'utf-8'),
-                unicode(summary, 'utf-8'),
+                title.replace(r"\\", "\\"),
+                summary,
                 tags,
                 characters,
                 date,
                 filename,
-                unicode(notes, 'utf-8'),
+                notes,
                 pairings,
                 rating,
                 warnings,
@@ -202,16 +202,16 @@ def _create_mysql(args, FILES, log):
       log.error("table name: {0}\noriginal id: {1}\nfinal fandoms: '{2}'\ntitle: '{3}'\nsummary: '{4}'\ntags: '{5}'" \
             "\ncharacters: '{6}'\ndate: '{7}'\nfilename: '{8}'\nnotes: '{9}'\npairings: '{10}'\nrating: '{11}'" \
             "\nwarnings: '{12}'\nauthor id: '{13}'"\
-        .format(unicode(table_name),
+        .format(table_name,
             original_id,
             final_fandoms,
-            unicode(title, 'utf-8'),
-            unicode(summary, 'utf-8'),
+            title,
+            summary,
             tags,
             characters,
             date,
             filename,
-            unicode(notes, 'utf-8'),
+            notes,
             pairings,
             rating,
             warnings,
