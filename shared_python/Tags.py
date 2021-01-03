@@ -33,8 +33,8 @@ class Tags(object):
     try:
       database = self.database if database is None else database
       self.cursor.execute("DROP TABLE IF EXISTS {0}.`tags`".format(database))
-    except (MySQLdb.OperationalError, msg):
-      self.log.info("Command skipped: {}".format(msg))
+    except MySQLdb.OperationalError as e:
+      self.log.info("Command skipped: {}".format(e))
     self.cursor.execute("""
       CREATE TABLE IF NOT EXISTS {0}.`tags` (
         `storyid` int(11) DEFAULT NULL,

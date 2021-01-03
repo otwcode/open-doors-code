@@ -160,7 +160,7 @@ def _create_mysql(args, FILES, log):
     try:
       # For AA archives with external links:
       if filetype != 'bookmark':
-        if location is '':
+        if location == '':
           filename = url
         else:
           filename = location + '.' + filetype
