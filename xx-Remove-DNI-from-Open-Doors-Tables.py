@@ -24,6 +24,6 @@ if __name__ == "__main__":
         story_exclusion_filter = filter + '(' + line + ')'
 
   command = "SET SQLDELETE FROM `{0}`.`stories` {2}".format(args.output_database, story_exclusion_filter)
-  print command
+  print(command)
   result = sql.execute(command)
-  print result
+  print(result)

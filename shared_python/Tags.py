@@ -33,8 +33,8 @@ class Tags(object):
     try:
       database = self.database if database is None else database
       self.cursor.execute("DROP TABLE IF EXISTS {0}.`tags`".format(database))
-    except (MySQLdb.OperationalError, msg):
-      self.log.info("Command skipped: {}".format(msg))
+    except MySQLdb.OperationalError as e:
+      self.log.info("Command skipped: {}".format(e))
     self.cursor.execute("""
       CREATE TABLE IF NOT EXISTS {0}.`tags` (
         `storyid` int(11) DEFAULT NULL,
@@ -72,7 +72,7 @@ class Tags(object):
           for val in re.split(r", ?", story_tags_row[col]):
             if val != '':
               if type(tag_col_lookup[col]) is str: # Probably AA or a custom archive
-                cleaned_tag = unicode(val).encode('utf-8').replace("'", "\'").strip()
+                cleaned_tag = val.encode('utf-8').replace("'", "\'").strip()
 
                 values.append('({0}, "{1}", "{2}", "{3}", "{4}")'
                               .format(story_tags_row[story_id_col_name],
@@ -107,62 +107,49 @@ class Tags(object):
 
   def update_tag_row(self, row):
     tag_headers = self.tag_export_map
-    original_table = row[tag_headers['original_table']]
-    tag = unicode(row[tag_headers['original_tag']].replace("'", r"\'"), 'utf-8')
+    tag = str(row[tag_headers['original_tag']]).replace("'", r"\'")
+    tag_id = row[tag_headers['id']]
 
-    if row[tag_headers['original_tagid']] == '' or row[tag_headers['original_tagid']] is None:
-      tagid_filter = u"original_tag = '{0}'".format(tag)
+    print(row)
+    if tag_id == '' or tag_id is None:
+      tagid_filter = f"original_tag = '{tag}'"
     else:
-      tagid_filter = u"original_tagid={0}".format(row[tag_headers['original_tagid']])
+      tagid_filter = f"id={tag_id}"
 
-    ao3_tags = unicode(row[tag_headers['ao3_tag']].replace("'", r"\'"), 'utf-8').encode('utf-8').split(",")
+    fandom = row[tag_headers['ao3_tag_fandom']].replace("'", r"\'")
+    ao3_tags = row[tag_headers['ao3_tag']].replace("'", r"\'").split(",")
     ao3_tag_types = row[tag_headers['ao3_tag_type']].split(",")
     number_types = len(ao3_tag_types)
 
     # If tags length > types length -> there are remapped tags
+    # Iterate over all the provided AO3 tags:
+    # - First tag -> update the existing row
+    # - Other tags -> create new row in tags table
     for idx, ao3_tag in enumerate(ao3_tags):
-      ao3_tag = ao3_tag
-
       if number_types >= idx + 1:
         ao3_tag_type = ao3_tag_types[idx].strip()
       else:
         ao3_tag_type = ao3_tag_types[0].strip()
 
-      self.cursor.execute("USE {0}".format(self.database))
-      if idx > 0:
-        self.cursor.execute("""
-              SELECT storyid from tags
-              WHERE {0} and original_table='{1}'
-            """.format(tagid_filter,
-                       original_table))
-        story_ids = self.cursor.fetchall()
+      self.cursor.execute(f"USE {self.database}")
 
-        for story_id in story_ids:
-          self.cursor.execute("""
-                INSERT INTO tags (ao3_tag, ao3_tag_type, ao3_tag_category, ao3_tag_fandom, original_table, storyid,
-                original_tag, original_tagid, original_column)
-                VALUES ('{0}', '{1}', '{2}', '{3}', '{5}', {6}, '{7}', {8}, '{9}')
-              """.format(ao3_tag,
-                         ao3_tag_type,
-                         row[tag_headers['ao3_tag_category']],
-                         row[tag_headers['ao3_tag_fandom']].replace("'", r"\'"),
-                         tagid_filter,
-                         original_table,
-                         story_id[0],
-                         tag,
-                         row[tag_headers['original_tagid']] or 'null',
-                         original_table))
+      if idx > 0:
+        self.cursor.execute(f"""
+          INSERT INTO tags (ao3_tag, ao3_tag_type, ao3_tag_category, ao3_tag_fandom, 
+          original_tag, original_tagid, original_column)
+          VALUES ('{ao3_tag}', '{ao3_tag_type}', '{row[tag_headers['ao3_tag_category']]}', 
+          '{fandom}', '{tagid_filter}', {tag}, 
+          '{row[tag_headers['original_tagid']] or 'null'}')
+        """)
+        # FIXME OD-574 need to also insert entries in item_tags for the new tags
       else:
-        self.cursor.execute(u"""
+        self.cursor.execute(f"""
               UPDATE tags
-              SET ao3_tag='{0}', ao3_tag_type='{1}', ao3_tag_category='{2}', ao3_tag_fandom='{3}'
-              WHERE {4} and original_table='{5}'
-            """.format(unicode(ao3_tag),
-                       ao3_tag_type,
-                       row[tag_headers['ao3_tag_category']],
-                       row[tag_headers['ao3_tag_fandom']].replace("'", r"\'"),
-                       tagid_filter,
-                       original_table))
+              SET ao3_tag='{str(ao3_tag)}', ao3_tag_type='{ao3_tag_type}', 
+              ao3_tag_category='{row[tag_headers['ao3_tag_category']]}', 
+              ao3_tag_fandom='{fandom}'
+              WHERE {tagid_filter}
+            """)
       self.db.commit()
 
 

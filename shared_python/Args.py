@@ -76,7 +76,7 @@ class Args(object):
       if getattr(args, arg_name) is None:
         setattr(args, arg_name, input(argdict[arg_name] + ': '))
 
-    args.archive_name =     input('Name of the original archive (used in export file names): ') if args.archive_name is None else args.archive_name
+    args.archive_name = input('Name of the original archive (used in export file names): ') if args.archive_name is None else args.archive_name
 
     while args.archive_type is None or args.archive_type not in ['AA']:
       args.archive_type = input('Type of archive (AA): ')

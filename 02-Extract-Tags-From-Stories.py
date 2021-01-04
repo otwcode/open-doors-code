@@ -1,4 +1,5 @@
 import re
+from pip._vendor.distlib.compat import raw_input
 
 from shared_python.Args import Args
 from shared_python.Sql import Sql

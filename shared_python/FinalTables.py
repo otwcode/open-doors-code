@@ -1,6 +1,6 @@
 from html.parser import HTMLParser
 
-import MySQLdb
+from MySQLdb import cursors
 import datetime
 
 
@@ -9,7 +9,7 @@ class FinalTables(object):
   def __init__(self, args, db, log):
     self.args = args
     self.db = db
-    self.dict_cursor = self.db.cursor(MySQLdb.cursors.DictCursor)
+    self.dict_cursor = self.db.cursor(cursors.DictCursor)
     self.original_database = args.temp_db_database
     self.final_database = args.output_database
     self.html_parser = HTMLParser()
@@ -35,16 +35,16 @@ class FinalTables(object):
   def _value(self, row):
     value = []
     for item in row:
-      if type(item) is unicode:
+      if type(item) is str:
         value.append('"' + self._escape_unescape(item) + '"')
       elif type(item) is datetime.datetime:
-        value.append('"' + unicode(item) + '"')
+        value.append('"' + str(item) + '"')
       elif item is None:
         value.append('null')
-      elif item is '':
+      elif item == '':
         value.append('""')
       else:
-        value.append(unicode(item))
+        value.append(item)
     return value
 
 
