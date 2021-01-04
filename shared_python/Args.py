@@ -74,12 +74,12 @@ class Args(object):
 
     for arg_name in argdict.keys():
       if getattr(args, arg_name) is None:
-        setattr(args, arg_name, raw_input(argdict[arg_name] + ': '))
+        setattr(args, arg_name, input(argdict[arg_name] + ': '))
 
-    args.archive_name =     raw_input('Name of the original archive (used in export file names): ') if args.archive_name is None else args.archive_name
+    args.archive_name =     input('Name of the original archive (used in export file names): ') if args.archive_name is None else args.archive_name
 
     while args.archive_type is None or args.archive_type not in ['AA']:
-      args.archive_type = raw_input('Type of archive (AA): ')
+      args.archive_type = input('Type of archive (AA): ')
 
     return args
 
@@ -93,7 +93,7 @@ class Args(object):
 
   def args_for_01(self):
     while self.args.db_input_file is None or not os.path.isfile(self.args.db_input_file):
-      self.args.db_input_file = raw_input('Path to the input file (ARCHIVE_DB.pl for AA): ')
+      self.args.db_input_file = input('Path to the input file (ARCHIVE_DB.pl for AA): ')
     self._print_args(self.args)
     return self.args
 
@@ -107,7 +107,7 @@ class Args(object):
     if not os.path.exists(self.args.output_folder):
       os.makedirs(self.args.output_folder)
     while self.args.output_folder is None or not os.path.isdir(self.args.output_folder):
-      self.args.output_folder = raw_input('Path for output files: ')
+      self.args.output_folder = input('Path for output files: ')
       if not os.path.exists(self.args.output_folder):
         os.makedirs(self.args.output_folder)
     self._print_args(self.args)
@@ -116,38 +116,38 @@ class Args(object):
 
   def args_for_04(self):
     while self.args.tag_input_file is None or not os.path.isfile(self.args.tag_input_file):
-      self.args.tag_input_file = raw_input('Path to tag renaming csv file: ')
+      self.args.tag_input_file = input('Path to tag renaming csv file: ')
     self._print_args(self.args)
     return self.args
 
 
   def args_for_05(self):
     if self.args.output_database is None:
-      self.args.output_database = raw_input('Name of the database the final tables should be created in (default "od_sgf"):')
+      self.args.output_database = input('Name of the database the final tables should be created in (default "od_sgf"):')
       self.args.output_database = "od_sgf" if self.args.output_database is "" else self.args.output_database
     if self.args.story_ids_to_remove is None:
-      self.args.story_ids_to_remove = raw_input('Location of the text file containing the story ids to remove:')
+      self.args.story_ids_to_remove = input('Location of the text file containing the story ids to remove:')
     self._print_args(self.args)
     return self.args
 
 
   def args_for_06(self):
     if self.args.output_database is None:
-      self.args.output_database = raw_input('Name of the database the final tables should be created in (default "od_sgf"):')
+      self.args.output_database = input('Name of the database the final tables should be created in (default "od_sgf"):')
     self.args.output_database = "od_sgf" if self.args.output_database is "" else self.args.output_database
     if self.args.default_fandom is None:
-      self.args.default_fandom = raw_input('Default fandom:')
+      self.args.default_fandom = input('Default fandom:')
       self.args.default_fandom = '' if self.args.default_fandom is None else self.args.default_fandom
     self._print_args(self.args)
     return self.args
 
   def args_for_07(self):
     if self.args.output_database is None:
-      self.args.output_database = raw_input('Name of the database the final tables should be created in (default "od_sgf"):')
+      self.args.output_database = input('Name of the database the final tables should be created in (default "od_sgf"):')
       self.args.output_database = "od_sgf" if self.args.output_database is "" else self.args.output_database
     if self.args.chapters_path is None:
-      self.args.chapters_path = raw_input('Location of the text files containing the stories:')
+      self.args.chapters_path = input('Location of the text files containing the stories:')
     if self.args.chapters_path is not None and self.args.chapters_file_extensions is None:
-      self.args.chapters_file_extensions = raw_input('File extension(s) of the text files containing the stories (eg: "txt, html"):')
+      self.args.chapters_file_extensions = input('File extension(s) of the text files containing the stories (eg: "txt, html"):')
     self._print_args(self.args)
     return self.args

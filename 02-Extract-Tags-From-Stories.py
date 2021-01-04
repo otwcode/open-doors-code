@@ -26,15 +26,15 @@ if __name__ == "__main__":
   # AUTOMATED ARCHIVE
   if args.archive_type == 'AA':
 
-    story_table_name = raw_input('Story table name (default: "stories"): ')
+    story_table_name = input('Story table name (default: "stories"): ')
     if story_table_name is None or story_table_name == '':
       story_table_name = 'stories'
 
-    bookmark_table_name = raw_input('Bookmark table name (default: "story_link"): ')
+    bookmark_table_name = input('Bookmark table name (default: "story_link"): ')
     if bookmark_table_name is None or bookmark_table_name == '':
       bookmark_table_name = 'story_links'
 
-    tag_columns = raw_input('Column names containing tags \n   (delimited by commas - default: "rating, tags, warnings, characters, fandoms, relationships"): ')
+    tag_columns = input('Column names containing tags \n   (delimited by commas - default: "rating, tags, warnings, characters, fandoms, relationships"): ')
     if tag_columns is None or tag_columns == '':
       tag_columns = "rating, tags, warnings, characters, fandoms, relationships"
     # fancy footwork to ensure compatibility with eFiction
