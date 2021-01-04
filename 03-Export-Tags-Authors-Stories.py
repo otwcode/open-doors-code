@@ -2,19 +2,20 @@ import csv
 from shared_python.Args import Args
 from shared_python.Sql import Sql
 from html.parser import HTMLParser
+import html
 
 from shared_python.Tags import Tags
 
 
 def write_csv(filename, columns):
   html_parser = HTMLParser()
-  with open(filename, 'wb') as fp:
+  with open(filename, 'w') as fp:
     myFile = csv.writer(fp)
     myFile.writerow(columns)
     for row in results:
       r = []
       for s in row:
-        r.append('' if s is None else html_parser.unescape(unicode(s)).encode('utf-8'))
+        r.append('' if s is None else html.unescape(str(s)).encode('utf-8'))
       myFile.writerows([r])
     fp.close()
 
