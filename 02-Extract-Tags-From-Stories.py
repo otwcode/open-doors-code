@@ -30,7 +30,7 @@ if __name__ == "__main__":
     if story_table_name is None or story_table_name == '':
       story_table_name = 'stories'
 
-    bookmark_table_name = input('Bookmark table name (default: "story_link"): ')
+    bookmark_table_name = input('Bookmark table name (default: "story_links"): ')
     if bookmark_table_name is None or bookmark_table_name == '':
       bookmark_table_name = 'story_links'
 
