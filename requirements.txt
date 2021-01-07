@@ -7,7 +7,7 @@ charade==1.0.3
 Genshi==0.7.5
 ipaddr==2.2.0
 keyring==21.5.0
-lxml==4.6.1
+lxml==4.6.2
 ndg_httpsclient==0.4.2
 pyasn1==0.4.8
 pytest==6.1.2
