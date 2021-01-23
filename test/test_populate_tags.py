@@ -17,7 +17,7 @@ def testArgs():
   setattr(args, "archive_type", "AA")
   setattr(args, "db_host", "localhost")
   setattr(args, "db_user", "root")
-  setattr(args, "db_password", "")
+  setattr(args, "db_password", "test")
   setattr(args, "temp_db_database", "unit_test")
   setattr(args, "output_database", "unit_test_output")
   setattr(args, "default_fandom", "Fandom C (TV)")
