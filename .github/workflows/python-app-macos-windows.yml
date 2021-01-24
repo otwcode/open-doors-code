@@ -19,14 +19,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-
-      - name: Run MySQL
-        uses: samin/mysql-action@v1
-        with:
-          mysql database: 'unit_test'
-          mysql user: 'root'
-          mysql password: 'test'
-
       - name: Set up Python 3.8
         uses: actions/setup-python@v2
         with:

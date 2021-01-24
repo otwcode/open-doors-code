@@ -1,11 +1,10 @@
 from collections import defaultdict
 from unittest import TestCase
 import unittest
+from unittest.mock import MagicMock
 
-from shared_python.FinalTables import FinalTables
 from shared_python.Logging import logger
 from shared_python.PopulateTags import PopulateTags
-from shared_python.Sql import Sql
 import argparse
 
 from shared_python.Tags import Tags
@@ -17,7 +16,7 @@ def testArgs():
   setattr(args, "archive_type", "AA")
   setattr(args, "db_host", "localhost")
   setattr(args, "db_user", "root")
-  setattr(args, "db_password", "test")
+  setattr(args, "db_password", "")
   setattr(args, "temp_db_database", "unit_test")
   setattr(args, "output_database", "unit_test_output")
   setattr(args, "default_fandom", "Fandom C (TV)")
@@ -26,9 +25,9 @@ def testArgs():
 class TestPopulate_tags(TestCase):
   args = testArgs()
   log = logger("test")
-  sql = Sql(args, log)
+  sql = MagicMock()
   tags = Tags(args, sql.db, log)
-  final = FinalTables(args, sql.db, log)
+  final = MagicMock()
   populate_tags = PopulateTags(args, sql, log, tags, final)
 
   basic_tags = {
