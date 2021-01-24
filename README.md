@@ -2,31 +2,30 @@
 
 [![Build Status](https://img.shields.io/travis/otwcode/open-doors-code/master.svg?label=travis-ci)](https://travis-ci.org/otwcode/open-doors-code)
 
-Scripts and miscellaneous code to aid Open Doors imports. This currently supports Automated Archive (AA)
+Processing code to aid Open Doors imports. This currently supports Automated Archive (AA)
 databases, and with some manual work, can also be used to process any type of archive.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
-- [open-doors-code](#open-doors-code)
-  - [Process](#process)
-    - [Set up your system and the Open Doors scripts](#set-up-your-system-and-the-open-doors-scripts)
-    - [Prepare the archive backup for local processing](#prepare-the-archive-backup-for-local-processing)
-    - [Step 01 - Load the original database into MySQL](#step-01---load-the-original-database-into-mysql)
-      - [Notes on specific archives](#notes-on-specific-archives)
-        - [Automated Archive](#automated-archive)
-        - [Custom archives](#custom-archives)
-    - [Step 02 - Extract tags from the original stories](#step-02---extract-tags-from-the-original-stories)
-      - [Notes on specific archives](#notes-on-specific-archives-1)
-    - [Step 03 - Export tags, authors and stories](#step-03---export-tags-authors-and-stories)
-    - [Step 04 - Reimport the Tag Wrangling sheet and map the original tags to the new AO3 tags](#step-04---reimport-the-tag-wrangling-sheet-and-map-the-original-tags-to-the-new-ao3-tags)
-    - [Step 05 - Create the Open Doors tables](#step-05---create-the-open-doors-tables)
-    - [Step 06 - Copy AO3 tags into the stories table](#step-06---copy-ao3-tags-into-the-stories-table)
-    - [Stage 07 - Load Chapters into the Open Doors chapters table](#stage-07---load-chapters-into-the-open-doors-chapters-table)
-  - [Other Scripts](#other-scripts)
-    - [Remove DNI from Open Doors tables](#remove-dni-from-open-doors-tables)
-  - [Parameters](#parameters)
+- [Process](#process)
+  - [Set up your system and the Open Doors scripts](#set-up-your-system-and-the-open-doors-scripts)
+  - [Prepare the archive backup for local processing](#prepare-the-archive-backup-for-local-processing)
+- [High-level overview of each step](#high-level-overview-of-each-step)
+  - [Step 01 - Load the original database into MySQL (AA and custom)](#step-01---load-the-original-database-into-mysql-aa-and-custom)
+    - [Automated Archive](#automated-archive)
+      - [Custom archives](#custom-archives)
+  - [Step 02 - Extract tags from the original stories (AA and custom)](#step-02---extract-tags-from-the-original-stories-aa-and-custom)
+  - [Step 03 - Export tags, authors and stories (all: eFiction, Automated Archive and custom)](#step-03---export-tags-authors-and-stories-all-efiction-automated-archive-and-custom)
+  - [Step 04 - Reimport the Tag Wrangling sheet and map the original tags to the new AO3 tags](#step-04---reimport-the-tag-wrangling-sheet-and-map-the-original-tags-to-the-new-ao3-tags)
+  - [Step 05 - Create the Open Doors tables](#step-05---create-the-open-doors-tables)
+  - [Step 06 - Copy AO3 tags into the stories table](#step-06---copy-ao3-tags-into-the-stories-table)
+  - [Step 07 - Load Chapters into the Open Doors chapters table](#step-07---load-chapters-into-the-open-doors-chapters-table)
+    - [Common problems to look out for when processing chapters](#common-problems-to-look-out-for-when-processing-chapters)
+- [Other Scripts](#other-scripts)
+  - [Remove DNI from Open Doors tables](#remove-dni-from-open-doors-tables)
+- [Parameters](#parameters)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -37,7 +36,7 @@ databases, and with some manual work, can also be used to process any type of ar
 You will need the following installed before you start (consult the tools' documentation for installation instructions
 for your operating system):
 - MySQL server 5.7 or higher
-- Python 2.7 (the scripts have not been tested with Python 3)
+- Python 3.8
 
 Some general tools you will find useful:
 - A text editor which can open and save files with different encodings, and perform regular expression replacing across
@@ -76,7 +75,7 @@ story link information into spreadsheets used for searching. (all)
 - 06 - Copy the AO3 tags into the final story and story link rows. (all)
 - 07 - Load chapters from files (AA and custom)
 
-### Step 01 - Load the original database into MySQL
+### Step 01 - Load the original database into MySQL (AA and custom)
 
 This step populates a set of temporary tables which will be used for later processes.
 
@@ -113,7 +112,7 @@ archives needs to be loaded manually or using custom scripts into `authors`, `st
 and `stories` tables matching [the Open Doors table schema](shared_python/create-open-doors-tables.sql) in the
 `temp_db_database`.
 
-### Step 02 - Extract tags from the original stories
+### Step 02 - Extract tags from the original stories (AA and custom)
 
     python 02-Extract-Tags-From-Stories.py -p <archive name>.yml
 
@@ -129,7 +128,7 @@ For multi-fandom archives that specify the fandoms for each story, the `fields_w
 specify that tags from the listed columns should be exported with the fandom.
 
 
-### Step 03 - Export tags, authors and stories
+### Step 03 - Export tags, authors and stories (all: eFiction, Automated Archive and custom)
 
     python 03-Export-Tags-Authors-Stories.py -p <archive name>.yml
 
