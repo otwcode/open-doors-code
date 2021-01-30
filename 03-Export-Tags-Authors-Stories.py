@@ -15,7 +15,7 @@ def write_csv(filename, columns):
     for row in results:
       r = []
       for s in row:
-        r.append('' if s is None else html.unescape(str(s)).encode('utf-8'))
+        r.append('' if s is None else html.unescape(str(s)))
       myFile.writerows([r])
     fp.close()
 
