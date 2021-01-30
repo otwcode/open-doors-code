@@ -1,11 +1,10 @@
 from collections import defaultdict
 from unittest import TestCase
 import unittest
+from unittest.mock import MagicMock
 
-from shared_python.FinalTables import FinalTables
 from shared_python.Logging import logger
 from shared_python.PopulateTags import PopulateTags
-from shared_python.Sql import Sql
 import argparse
 
 from shared_python.Tags import Tags
@@ -26,9 +25,9 @@ def testArgs():
 class TestPopulate_tags(TestCase):
   args = testArgs()
   log = logger("test")
-  sql = Sql(args, log)
+  sql = MagicMock()
   tags = Tags(args, sql.db, log)
-  final = FinalTables(args, sql.db, log)
+  final = MagicMock()
   populate_tags = PopulateTags(args, sql, log, tags, final)
 
   basic_tags = {
@@ -44,7 +43,7 @@ class TestPopulate_tags(TestCase):
 
   def test_default_fandom_ignored_if_fandoms_present(self):
     story_tags = self.populate_tags.tags_for_story(1, self.basic_tags)
-    self.assertEqual('Fandom A (TV), Fandom B (TV)', story_tags['fandoms'], 'Fandoms should be a comma-separated string of specified AO3 tags')
+    self.assertCountEqual(['Fandom A (TV)', 'Fandom B (TV)'], story_tags['fandoms'].split(', '), 'Fandoms should be a comma-separated string of specified AO3 tags')
 
   def test_default_fandom_used_if_no_fandoms_present(self):
     tags_without_fandom = self.basic_tags.copy()

@@ -2,9 +2,11 @@
 
 import datetime
 import codecs
-import MySQLdb
 import re
 from html.parser import HTMLParser
+
+from pymysql import connect
+
 from shared_python import Args, Common
 from shared_python.Sql import Sql
 
@@ -103,7 +105,7 @@ def _extract_fandoms(args, record):
 
 
 def _create_mysql(args, FILES, log):
-  db = MySQLdb.connect(args.db_host, args.db_user, args.db_password, "")
+  db = connect(args.db_host, args.db_user, args.db_password, "")
   cursor = db.cursor()
   DATABASE_NAME = args.temp_db_database
 

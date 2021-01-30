@@ -124,7 +124,7 @@ class Args(object):
   def args_for_05(self):
     if self.args.output_database is None:
       self.args.output_database = input('Name of the database the final tables should be created in (default "od_sgf"):')
-      self.args.output_database = "od_sgf" if self.args.output_database is "" else self.args.output_database
+      self.args.output_database = "od_sgf" if self.args.output_database == "" else self.args.output_database
     if self.args.story_ids_to_remove is None:
       self.args.story_ids_to_remove = input('Location of the text file containing the story ids to remove:')
     self._print_args(self.args)
@@ -134,7 +134,7 @@ class Args(object):
   def args_for_06(self):
     if self.args.output_database is None:
       self.args.output_database = input('Name of the database the final tables should be created in (default "od_sgf"):')
-    self.args.output_database = "od_sgf" if self.args.output_database is "" else self.args.output_database
+    self.args.output_database = "od_sgf" if self.args.output_database == "" else self.args.output_database
     if self.args.default_fandom is None:
       self.args.default_fandom = input('Default fandom:')
       self.args.default_fandom = '' if self.args.default_fandom is None else self.args.default_fandom
@@ -144,7 +144,7 @@ class Args(object):
   def args_for_07(self):
     if self.args.output_database is None:
       self.args.output_database = input('Name of the database the final tables should be created in (default "od_sgf"):')
-      self.args.output_database = "od_sgf" if self.args.output_database is "" else self.args.output_database
+      self.args.output_database = "od_sgf" if self.args.output_database == "" else self.args.output_database
     if self.args.chapters_path is None:
       self.args.chapters_path = input('Location of the text files containing the stories:')
     if self.args.chapters_path is not None and self.args.chapters_file_extensions is None:
