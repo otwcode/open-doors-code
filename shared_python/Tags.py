@@ -48,9 +48,8 @@ class Tags(object):
         `ao3_tag_type` VARCHAR(255) DEFAULT NULL,
         `ao3_tag_category` VARCHAR(255) DEFAULT NULL,
         `ao3_tag_fandom` VARCHAR(255) DEFAULT NULL,
-        PRIMARY KEY (`id`),
-        UNIQUE KEY `id_UNIQUE` (`id`)
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+        PRIMARY KEY (`id`)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     """.format(database))
 
 
