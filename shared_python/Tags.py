@@ -37,7 +37,7 @@ class Tags(object):
       self.log.info("Command skipped: {}".format(e))
     self.cursor.execute("""
       CREATE TABLE IF NOT EXISTS {0}.`tags` (
-        `storyid` int(11) DEFAULT NULL,
+        `id` int(11) AUTO_INCREMENT,
         `original_tagid` int(11) DEFAULT NULL,
         `original_tag` varchar(1024) DEFAULT NULL,
         `original_column` varchar(255) DEFAULT NULL,
@@ -47,8 +47,9 @@ class Tags(object):
         `ao3_tag` varchar(1024) DEFAULT NULL,
         `ao3_tag_type` VARCHAR(255) DEFAULT NULL,
         `ao3_tag_category` VARCHAR(255) DEFAULT NULL,
-        `ao3_tag_fandom` VARCHAR(255) DEFAULT NULL
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+        `ao3_tag_fandom` VARCHAR(255) DEFAULT NULL,
+        PRIMARY KEY (`id`)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     """.format(database))
 
 
