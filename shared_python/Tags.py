@@ -139,7 +139,7 @@ class Tags(object):
           original_tag, original_tagid, original_column)
           VALUES ('{ao3_tag}', '{ao3_tag_type}', '{row[tag_headers['ao3_tag_category']]}', 
           '{fandom}', '{tagid_filter}', {tag}, 
-          '{row[tag_headers['original_tagid']] or 'null'}')
+          '{row[tag_headers['id']] or 'null'}')
         """)
         # FIXME OD-574 need to also insert entries in item_tags for the new tags
       else:
