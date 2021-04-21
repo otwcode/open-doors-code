@@ -40,7 +40,6 @@ class Tags(object):
         `id` int(11) AUTO_INCREMENT,
         `original_tagid` int(11) DEFAULT NULL,
         `original_tag` varchar(1024) DEFAULT NULL,
-        `original_column` varchar(255) DEFAULT NULL,
         `original_parent` varchar(255) DEFAULT NULL,
         `original_table` varchar(255) DEFAULT NULL,
         `original_description` varchar(255) DEFAULT NULL,
@@ -75,16 +74,15 @@ class Tags(object):
               if type(tag_col_lookup[col]) is str: # Probably AA or a custom archive
                 cleaned_tag = val.encode('utf-8').replace("'", "\'").strip()
 
-                values.append('({0}, "{1}", "{2}", "{3}", "{4}")'
+                values.append('({0}, "{1}", "{2}", "{3}")'
                               .format(story_tags_row[story_id_col_name],
                                       re.sub(r'(?<!\\)"', '\\"', cleaned_tag),
-                                      col,
                                       tag_col_lookup[col],
                                       story_tags_row['fandoms'] if needs_fandom else ''))
 
       if len(values) > 0:
           self.cursor.execute("""
-               INSERT INTO tags (storyid, original_tag, original_column, original_table, ao3_tag_fandom) VALUES {0}
+               INSERT INTO tags (storyid, original_tag, original_table, ao3_tag_fandom) VALUES {0}
              """.format(', '.join(values)))
 
     self.db.commit()
@@ -136,10 +134,9 @@ class Tags(object):
       if idx > 0:
         self.cursor.execute(f"""
           INSERT INTO tags (ao3_tag, ao3_tag_type, ao3_tag_category, ao3_tag_fandom, 
-          original_tag, original_tagid, original_column)
+          original_tag, original_tagid)
           VALUES ('{ao3_tag}', '{ao3_tag_type}', '{row[tag_headers['ao3_tag_category']]}', 
-          '{fandom}', '{tagid_filter}', {tag}, 
-          '{row[tag_headers['original_tagid']] or 'null'}')
+          '{fandom}', '{tagid_filter}', '{tag}')
         """)
         # FIXME OD-574 need to also insert entries in item_tags for the new tags
       else:
