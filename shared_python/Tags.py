@@ -152,58 +152,6 @@ class Tags(object):
             """)
       self.db.commit()
 
-
-  def hydrate_tag_row(self, tag_id, tag_to_look_up, tag, col, table, parent ='', description =''):
-    self.cursor.execute("""
-        UPDATE `tags`
-        SET original_tagid=%s, original_tag=%s, original_parent=%s, original_description=%s, original_table=%s
-        WHERE original_tag=%s and original_column=%s
-      """,
-      (tag_id, self.html_parser.unescape(tag.strip()), self.html_parser.unescape(parent.strip()), self.html_parser.unescape(description.strip()), table, tag_to_look_up.strip(), col))
-    self.db.commit()
-
-
-  def hydrate_tags_table(self, col, lookup_data, lookup_ids = False):
-    self.cursor.execute('SELECT DISTINCT original_tag from tags WHERE original_column="{0}"'.format(col))
-    results = self.cursor.fetchall()
-    total = len(results)
-    cur = 0
-    self.log.info("{0} tags for column '{1}'".format(total, col))
-
-    for tag_row in results:
-      cur = Common.print_progress(cur, total)
-
-      # Get tag data
-      parent = ''
-      extra_column = ', {0} as description'.format(lookup_data['extra_column']) if 'extra_column' in lookup_data else ''
-      lookup_column = ', {0} as parent'.format(lookup_data['lookup_field']) if 'lookup_field' in lookup_data else ''
-      matching_field = lookup_data['id_name'] if lookup_ids else lookup_data['field_name']
-
-      dict_cursor = self.db.cursor(cursors.DictCursor)
-      dict_cursor.execute("""
-          SELECT {0}, {1}{2}{3} FROM {4} WHERE {5}='{6}'
-        """.format(lookup_data['id_name'], lookup_data['field_name'], lookup_column, extra_column, lookup_data['table_name'], matching_field, tag_row[0]))
-      tag = dict_cursor.fetchone()
-      if tag is not None:
-        # Get parent data
-        if 'lookup_field' in lookup_data:
-          self.cursor.execute("SELECT {0} FROM {1} WHERE {2}='{3}'"
-                            .format(lookup_data['lookup_table_field'],
-                                    lookup_data['lookup_table'],
-                                    lookup_data['lookup_id'],
-                                    tag['parent']))
-          result = self.cursor.fetchone()
-          parent = result[0] if result is not None else ''
-
-        # Update the table
-        description = tag['description'] if 'description' in tag else ''
-        self.hydrate_tag_row(tag_id = tag[lookup_data['id_name']],
-                            tag_to_look_up= tag_row[0],
-                            tag = tag[lookup_data['field_name']],
-                            table = lookup_data['table_name'],
-                            col = col, parent = parent, description = description)
-
-
   def tags_by_story_id(self):
     self.cursor.execute("SELECT DISTINCT storyid FROM tags;")
     storyids = self.cursor.fetchall()
