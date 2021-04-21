@@ -136,7 +136,7 @@ class Tags(object):
           INSERT INTO tags (ao3_tag, ao3_tag_type, ao3_tag_category, ao3_tag_fandom, 
           original_tag, original_tagid)
           VALUES ('{ao3_tag}', '{ao3_tag_type}', '{row[tag_headers['ao3_tag_category']]}', 
-          '{fandom}', '{tagid_filter}', '{tag}')
+          '{fandom}', '{tag}', '{tag_id}')
         """)
         # FIXME OD-574 need to also insert entries in item_tags for the new tags
       else:
