@@ -1,16 +1,14 @@
 import datetime
 import html
 from logging import Logger
-
-from pymysql import cursors
+from shared_python.Sql import Sql
 
 
 class FinalTables(object):
 
-    def __init__(self, args, db, log: Logger):
+    def __init__(self, args, sql: Sql, log: Logger):
         self.args = args
-        self.db = db
-        self.dict_cursor = self.db.cursor(cursors.DictCursor)
+        self.sql = sql
         self.original_database = args.temp_db_database
         self.final_database = args.output_database
         self.log = log
@@ -23,8 +21,7 @@ class FinalTables(object):
         else:
             original_database = database_name
         query = "SELECT * FROM `{0}`.`{1}` {2}".format(original_database, table_name, filter)
-        self.dict_cursor.execute(query)
-        return self.dict_cursor.fetchall()
+        return self.sql.execute_dict(query)
 
     def _escape_unescape(self, item):
         return html.unescape(item).replace('\\', '\\\\').replace('"', '\\"').replace("'", "\\'")
@@ -49,17 +46,16 @@ class FinalTables(object):
             final_database = target_database
         else:
             final_database = self.final_database
-        self.dict_cursor.execute("TRUNCATE `{0}`.`{1}`".format(final_database, output_table_name))
+        self.sql.execute("TRUNCATE `{0}`.`{1}`".format(final_database, output_table_name))
         columns = rows[0].keys()
         values = []
         for row in rows:
             col = self._value(row.values())
             values.append('(' + ', '.join(col) + ')')
 
-        self.dict_cursor.execute(f"""
+        self.sql.execute(f"""
             INSERT INTO `{final_database}`.`{output_table_name}` ({', '.join(columns)}) VALUES {', '.join(values)}
           """)
-        self.db.commit()
 
     def populate_story_tags(self, story_id, output_table_name, story_tags):
         cols_with_tags = []
@@ -67,10 +63,9 @@ class FinalTables(object):
             cols_with_tags.append(u"{0}='{1}'".format(col, tags.replace("'", "\\'").strip()))
 
         if cols_with_tags:
-            self.dict_cursor.execute("""
+            self.sql.execute("""
          UPDATE `{0}`.`{1}` SET {2} WHERE id={3}
         """.format(self.final_database, output_table_name, ", ".join(cols_with_tags), story_id))
-            self.db.commit()
 
     def story_to_final_without_tags(self, story, story_authors, is_story=True):
         type = 'story' if is_story else 'story_link'

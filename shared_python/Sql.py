@@ -10,26 +10,39 @@ class Sql(object):
 
   def __init__(self, args, log):
     self.tag_count = 0
-    db = connect(args.db_host, args.db_user, args.db_password)
-    cursor = db.cursor()
+    conn = connect(args.db_host, args.db_user, args.db_password)
+    cursor = conn.cursor()
     cursor.execute('CREATE DATABASE IF NOT EXISTS `{0}`'.format(args.temp_db_database))
     self.log = log
 
-    self.db = connect(args.db_host, args.db_user, args.db_password, args.temp_db_database, charset='utf8',
+    self.conn = connect(args.db_host, args.db_user, args.db_password, args.temp_db_database, charset='utf8',
                               use_unicode=True, autocommit=True)
-    self.cursor = self.db.cursor()
+    self.cursor = self.conn.cursor()
     self.database = args.temp_db_database
 
 
   def execute(self, script, parameters = ()):
     self.cursor.execute(script, parameters)
-    return self.cursor.fetchall()
+    self.conn.commit()
 
 
   def execute_dict(self, script, parameters = ()):
-    dict_cursor = self.db.cursor(cursors.DictCursor)
+    dict_cursor = self.conn.cursor(cursors.DictCursor)
     dict_cursor.execute(script, parameters)
     return dict_cursor.fetchall()
+
+  def execute_and_fetchall(self, database: str, statement: str):
+    """
+    Execute a SQL statement and then fetch its results.
+    :param database: The database to run the statement against.
+    :param statement: The SQL statement to execute.
+    :return: The fetched result of the SQL statement as a dict.
+    """
+    cursor = self.conn.cursor()
+    cursor.execute(f"USE {database}")
+    cursor.execute(statement)
+    self.conn.commit()
+    return cursor.fetchall()
 
 
   def run_script_from_file(self, filename, database, initial_load = False):

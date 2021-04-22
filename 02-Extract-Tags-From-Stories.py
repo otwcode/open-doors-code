@@ -8,6 +8,7 @@ from shared_python.Tags import Tags
 
 if __name__ == "__main__":
   """
+  Only for non-eFiction archives.
   This script creates a table called tags in the temporary database and denormalises all the tags for each story.
   This table is the basis for the Tag Wrangling sheet and is used to map the tags back to the story when the final
   tables are created.

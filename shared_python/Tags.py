@@ -1,17 +1,18 @@
-from html.parser import HTMLParser
 import re
+from html.parser import HTMLParser
+from logging import Logger
+
 import sys
 from pymysql import cursors, OperationalError
 
-from shared_python import Common, Logging
+from shared_python.Sql import Sql
 
 
 class Tags(object):
 
-  def __init__(self, args, db, log):
+  def __init__(self, args, sql: Sql, log: Logger):
     self.tag_count = 0
-    self.db = db
-    self.cursor = self.db.cursor()
+    self.sql = sql
     self.database = args.temp_db_database
     self.html_parser = HTMLParser()
     self.log = log
@@ -30,12 +31,15 @@ class Tags(object):
 
 
   def create_tags_table(self, database = None):
+    """
+    Used only in step 02 for non-eFiction archives
+    """
     try:
       database = self.database if database is None else database
-      self.cursor.execute("DROP TABLE IF EXISTS {0}.`tags`".format(database))
+      self.sql.execute("DROP TABLE IF EXISTS {0}.`tags`".format(database))
     except OperationalError as e:
       self.log.info("Command skipped: {}".format(e))
-    self.cursor.execute("""
+    self.sql.execute("""
       CREATE TABLE IF NOT EXISTS {0}.`tags` (
         `id` int(11) AUTO_INCREMENT,
         `original_tagid` int(11) DEFAULT NULL,
@@ -53,16 +57,17 @@ class Tags(object):
 
 
   def populate_tag_table(self, database_name, story_id_col_name, table_name, tag_col_lookup, tags_with_fandoms, truncate = True):
-    dict_cursor = self.db.cursor(cursors.DictCursor)
-    dict_cursor.execute('USE {0}'.format(database_name))
+    """
+    Used only in step 02 for non-eFiction archives
+    """
+    self.sql.execute('USE {0}'.format(database_name))
     if truncate:
-      dict_cursor.execute('TRUNCATE {0}.`tags`'.format(database_name))
+      self.sql.execute('TRUNCATE {0}.`tags`'.format(database_name))
 
     tag_columns = tag_col_lookup.keys() # [d['col'] for d in tag_col_lookup if 'col' in d]
 
     # Get all values from all tag columns in the stories table and load as denormalised values in `tags` table
-    dict_cursor.execute('SELECT {0}, {1} FROM {2}'.format(story_id_col_name, ', '.join(tag_columns), table_name))
-    data = dict_cursor.fetchall()
+    data = self.sql.execute_dict('SELECT {0}, {1} FROM {2}'.format(story_id_col_name, ', '.join(tag_columns), table_name))
 
     for story_tags_row in data :
       values = []
@@ -81,15 +86,17 @@ class Tags(object):
                                       story_tags_row['fandoms'] if needs_fandom else ''))
 
       if len(values) > 0:
-          self.cursor.execute("""
+          self.sql.execute("""
                INSERT INTO tags (storyid, original_tag, original_table, ao3_tag_fandom) VALUES {0}
              """.format(', '.join(values)))
 
-    self.db.commit()
-
 
   def distinct_tags(self):
-    self.cursor.execute("""
+    """
+    Used in step 03. Maps table columns to the names used in the Tag Wrangling sheet.
+    :return: distinct rows from the tags table with renamed columns
+    """
+    return self.sql.execute("""
       SELECT DISTINCT
         id as "Original Tag ID",
         original_tag as "Original Tag Name",
@@ -101,10 +108,14 @@ class Tags(object):
         original_description as "Original Description",
         '' as "TW Notes" FROM tags
       """)
-    return self.cursor.fetchall()
 
 
-  def update_tag_row(self, row):
+  def update_tag_row(self, row: dict):
+    """
+    Used in step 04.
+    :param row: a row from the Tag Wrangling spreadsheet as a dict
+    :return:
+    """
     tag_headers = self.tag_export_map
     tag = str(row[tag_headers['original_tag']]).replace("'", r"\'")
     tag_id = row[tag_headers['id']]
@@ -129,10 +140,10 @@ class Tags(object):
       else:
         ao3_tag_type = ao3_tag_types[0].strip()
 
-      self.cursor.execute(f"USE {self.database}")
+      self.sql.execute(f"USE {self.database}")
 
       if idx > 0:
-        self.cursor.execute(f"""
+        self.sql.execute(f"""
           INSERT INTO tags (ao3_tag, ao3_tag_type, ao3_tag_category, ao3_tag_fandom, 
           original_tag, original_tagid)
           VALUES ('{ao3_tag}', '{ao3_tag_type}', '{row[tag_headers['ao3_tag_category']]}', 
@@ -140,29 +151,29 @@ class Tags(object):
         """)
         # FIXME OD-574 need to also insert entries in item_tags for the new tags
       else:
-        self.cursor.execute(f"""
+        self.sql.execute(f"""
               UPDATE tags
               SET ao3_tag='{str(ao3_tag)}', ao3_tag_type='{ao3_tag_type}', 
               ao3_tag_category='{row[tag_headers['ao3_tag_category']]}', 
               ao3_tag_fandom='{fandom}'
               WHERE {tagid_filter}
             """)
-      self.db.commit()
 
-  def tags_by_story_id(self):
-    self.cursor.execute("SELECT DISTINCT storyid FROM tags;")
-    storyids = self.cursor.fetchall()
+  def tags_by_story_id(self, item_type: str = 'story'):
+    story_ids = \
+      self.sql.execute_and_fetchall(self.database,
+                                    f"""
+                                    SELECT item_id, item_type, GROUP_CONCAT(tag_id) as tag_ids
+                                    FROM item_tags WHERE item_type='{item_type}' GROUP BY item_id, item_type ;""")
     cur = 0
-    total = len(storyids)
+    total = len(story_ids)
 
-    dict_cursor = self.db.cursor(cursors.DictCursor)
     tags_by_story_id = {}
-    for storyid in storyids:
+    for story_id in story_ids:
       cur += 1
-      sys.stdout.write('\rCollecting tags for {0}/{1} stories and bookmarks (including DNI)'.format(cur, total))
+      sys.stdout.write(f'\rCollecting tags for {item_type}: {cur}/{total}  (including Do Not Import)')
       sys.stdout.flush()
 
-      dict_cursor.execute("SELECT * FROM tags WHERE storyid={0}".format(storyid[0]))
-      tags = dict_cursor.fetchall()
-      tags_by_story_id[storyid[0]] = tags
+      tags = self.sql.execute_dict(f"SELECT * FROM tags WHERE id in ({story_id[2]})")
+      tags_by_story_id[story_id[0]] = tags
     return tags_by_story_id

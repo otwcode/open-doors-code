@@ -33,7 +33,8 @@ class PopulateTags(object):
     story_tags['fandoms'] = ', '.join(set(fandoms))
     return story_tags
 
-  def write_tags_for_story(self, tags_by_story_id):
+  def write_tags_for_story(self, tags_by_story_id, item_type='story'):
+    output_table = 'stories' if item_type == 'story' else 'story_links'
     for (story_id, story_tags) in tags_by_story_id.items():
 
       # group tags by type into comma-separated lists
@@ -46,10 +47,13 @@ class PopulateTags(object):
 
       story_tags = self.tags_for_story(story_id, tags_by_type)
 
-      self.final.populate_story_tags(story_id, 'stories', story_tags)
-      self.final.populate_story_tags(story_id, 'story_links', story_tags)
+      self.final.populate_story_tags(story_id, output_table, story_tags)
 
   def populate_tags(self):
-    self.log.info("Getting all tags per story...")
-    tags_by_story_id = self.tags.tags_by_story_id()
-    self.write_tags_for_story(tags_by_story_id)
+    self.log.info("Getting all tags per story or story_link...")
+    # Story
+    tags_by_story_id = self.tags.tags_by_story_id("story")
+    self.write_tags_for_story(tags_by_story_id, "story")
+    # Story Link
+    tags_by_story_id = self.tags.tags_by_story_id("story_link")
+    self.write_tags_for_story(tags_by_story_id, "story_link")
