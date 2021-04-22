@@ -227,45 +227,6 @@ def clean_and_load_data(args, log):
   _create_mysql(args, data, log)
 
 
-def story_to_final_without_tags(story, is_story = True):
-  final_story = {
-    'id':            story['id'],
-    'title':         story['title'],
-    'summary ':      story['summary'],
-    'notes':         story['notes'],
-    'author_id':     story['author_id'],
-    'date':          story['date'],
-    'updated':       story['updated'],
-    'url':           story['url'],
-    'ao3_url':       story['ao3_url'],
-    'imported':      0,
-    'do_not_import':   0,
-  }
-  if is_story:
-    final_story['coauthor_id'] = story['coauthor_id']
-  return final_story
-
-
-def dummy_chapters(stories):
-  return [_dummy_chapter(story) for story in stories]
-
-
-def _dummy_chapter(story):
-  chapter = {k.lower(): v for k, v in story.iteritems()}
-  final_chapter = {
-    'id':       chapter['id'],
-    'position': chapter.get('position', 1),
-    'title':    chapter['title'],
-    'author_id': chapter['author_id'],
-    'text':     chapter.get('text', ''),
-    'date':     chapter['date'],
-    'story_id':  chapter['id'],
-    'notes':    chapter['notes'],
-    'url':      chapter['url']
-  }
-  return final_chapter
-
-
 if __name__ == "__main__":
   args = Args().process_args()
   data = _clean_file(args.filepath)
