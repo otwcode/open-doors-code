@@ -1,33 +1,6 @@
 # open-doors-code
 
-[![Build Status](https://img.shields.io/travis/otwcode/open-doors-code/master.svg?label=travis-ci)](https://travis-ci.org/otwcode/open-doors-code)
-
-Processing code to aid Open Doors imports. This currently supports Automated Archive (AA)
-databases, and with some manual work, can also be used to process any type of archive.
-
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
-
-- [Process](#process)
-  - [Set up your system and the Open Doors scripts](#set-up-your-system-and-the-open-doors-scripts)
-  - [Prepare the archive backup for local processing](#prepare-the-archive-backup-for-local-processing)
-- [High-level overview of each step](#high-level-overview-of-each-step)
-  - [Step 01 - Load the original database into MySQL (AA and custom)](#step-01---load-the-original-database-into-mysql-aa-and-custom)
-    - [Automated Archive](#automated-archive)
-      - [Custom archives](#custom-archives)
-  - [Step 02 - Extract tags from the original stories (AA and custom)](#step-02---extract-tags-from-the-original-stories-aa-and-custom)
-  - [Step 03 - Export tags, authors and stories (all: eFiction, Automated Archive and custom)](#step-03---export-tags-authors-and-stories-all-efiction-automated-archive-and-custom)
-  - [Step 04 - Reimport the Tag Wrangling sheet and map the original tags to the new AO3 tags](#step-04---reimport-the-tag-wrangling-sheet-and-map-the-original-tags-to-the-new-ao3-tags)
-  - [Step 05 - Create the Open Doors tables](#step-05---create-the-open-doors-tables)
-  - [Step 06 - Copy AO3 tags into the stories table](#step-06---copy-ao3-tags-into-the-stories-table)
-  - [Step 07 - Load Chapters into the Open Doors chapters table](#step-07---load-chapters-into-the-open-doors-chapters-table)
-    - [Common problems to look out for when processing chapters](#common-problems-to-look-out-for-when-processing-chapters)
-- [Other Scripts](#other-scripts)
-  - [Remove DNI from Open Doors tables](#remove-dni-from-open-doors-tables)
-- [Parameters](#parameters)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+Code to convert Open Doors imports into a set of tables for importing. 
 
 ## Process
 
@@ -46,6 +19,8 @@ operating systems)
 
 1. Either clone the repository at https://github.com/otwcode/open-doors-code, or download the code as a zip file.
 (Note that if you download the code, you will need to download it again when changes are made)
+1. Strongly recommended: create a [virtual environment](https://docs.python.org/3/tutorial/venv.html) for this project 
+   to keep its dependencies separate from other Python projects you might have.
 1. Run `pip install -r requirements.txt` from the root folder of the project to install required dependencies
 
 
@@ -67,13 +42,16 @@ the file if it is needed for a given stage.
 ## High-level overview of each step
 
 - 01 - Load the original data into a temporary database for processing (AA only)
+- 01.5 - Load chapters into the chapters table of the temporary database (AA and custom only)
 - 02 - Extract tags from stories and story links into a new `tags` table. (AA and custom only)
 - 03 - Export the distinct tags into a spreadsheet to enable wranglers to map tags to AO3 tags, and export story and
 story link information into spreadsheets used for searching. (all)
-- 04 - Map the tags in the `tags` table. (all)
+- 04 - Map the tags in the `tags` table to AO3 tags suggested by wranglers. (all)
 - 05 - Create the final tables that will be used for the temp site and copy all the authors, stories and story links. (all)
 - 06 - Copy the AO3 tags into the final story and story link rows. (all)
-- 07 - Load chapters from files (AA and custom)
+
+At this point, the final database is ready to be loaded into a [temporary website](https://github.com/otwcode/open-doors-temp-site) that will be used to feed the works into
+the Archive using its mass import API.
 
 ### Step 01 - Load the original database into MySQL (AA and custom)
 
@@ -112,7 +90,32 @@ archives needs to be loaded manually or using custom scripts into `authors`, `st
 and `stories` tables matching [the Open Doors table schema](shared_python/create-open-doors-tables.sql) in the
 `temp_db_database`.
 
-### Step 02 - Extract tags from the original stories (AA and custom)
+### Step 02a - Load Chapters into the chapters table [NEEDS REVISION]
+
+    python 02-Load-Chapters-to-Open-Doors-Table.py -p <archive name>.yml
+
+Loads the chapter contents in the output database (this can be run at any point after stage 05). It does this by going
+through all the files in the `chapters_path` and trying to find an entry in the chapters table that has the same
+`url`. It then copied the contents of the file into the `text` column for that row.
+
+You will be prompted to answer two questions:
+
+    Chapter file names are chapter ids? Y/N
+
+Look at the file names in `chapters_path`  and compare against the `chapterid` column in the database. For AA or other databases they probably are more likely to be a human
+readable name instead (N).
+
+    Importing chapters: pick character encoding (check for curly quotes):
+    1 = Windows 1252
+    enter = UTF-8
+
+See note at the end about encoding problems and other issues that usually need to be fixed in chapters.
+
+If there are duplicate chapters (for example if co-authored stories were listed under each author), the script will
+try to deduplicate them by only keeping the duplicate whose `author_id` is the same as the `author_id` in the `story` table.
+It will list duplicates it has found in the console output.
+
+### Step 02b - Extract tags from the original stories (AA and custom)
 
     python 02-Extract-Tags-From-Stories.py -p <archive name>.yml
 
@@ -182,33 +185,7 @@ fields in the `stories` or `bookmarks` databases.
 - The output for this command  (eg "Getting all tags per story...429/429 stories") will report the number of stories in 
 the tag table, which may be more than the number of stories you have after removing DNI in the previous stage.
 
-
-### Step 07 - Load Chapters into the Open Doors chapters table
-
-    python 07-Load-Chapters-to-Open-Doors-Table.py -p <archive name>.yml
-
-Loads the chapter contents in the output database (this can be run at any point after stage 05). It does this by going
-through all the files in the `chapters_path` and trying to find an entry in the chapters table that has the same
-`url`. It then copied the contents of the file into the `text` column for that row.
-
-You will be prompted to answer two questions:
-
-    Chapter file names are chapter ids? Y/N
-
-Look at the file names in `chapters_path`  and compare against the `chapterid` column in the database. For AA or other databases they probably are more likely to be a human 
-readable name instead (N).
-
-    Importing chapters: pick character encoding (check for curly quotes):
-    1 = Windows 1252
-    enter = UTF-8
-    
-See note below about encoding problems.
-
-If there are duplicate chapters (for example if co-authored stories were listed under each author), the script will
-try to deduplicate them by only keeping the duplicate whose `author_id` is the same as the `author_id` in the `story` table.
-It will list duplicates it has found in the console output.
-
-#### Common problems to look out for when processing chapters
+### Common problems to look out for when processing chapters
 
 *Tip*: Some of these problems might be easier to fix by loading the chapters into MySQL and then exporting the `chapters`
 table as a MySQL dump. You can then perform edit-replace operations on all the chapters at once (though be very careful
@@ -240,8 +217,6 @@ for the second author, amend the first author, then put the second author ID int
 
 Given a comma-separated list of story ids specified in the `story_ids_to_remove` parameter, deletes the corresponding
 rows from the stories table in the final output database.
-
-
 
 
 ## Parameters
