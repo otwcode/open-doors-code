@@ -8,12 +8,12 @@ from pip._vendor.distlib.compat import raw_input
 
 from shared_python import Common
 
-
+# TODO this code is no longer needed for eFiction and will need to be reviewed for other archive types
 class Chapters(object):
 
-  def __init__(self, args, db, log):
+  def __init__(self, args, sql, log):
     self.args = args
-    self.db = db
+    self.sql = sql
     self.log = log
 
   def _ends_with(self, filename, extensions):
@@ -43,7 +43,7 @@ class Chapters(object):
           else:
             duplicate_folder = os.path.split(os.path.split(file_path)[0])[1]
             messages.append(file_path + " is a duplicate of " + file_paths[cid])
-            sql_messages.append("SELECT * FROM chapters WHERE id = {1}".format(cid))
+            sql_messages.append("SELECT * FROM chapters WHERE id = {0}".format(cid))
             duplicate_chapters[cid] = [
               {'folder_name': os.path.split(os.path.split(file_paths[cid])[0])[1], 'filename': filename,
                'path': file_paths[cid]},
@@ -64,9 +64,7 @@ class Chapters(object):
       if folder_name_type == '1':
         for cid, duplicate in duplicate_chapters.items():
           # look up the author id and add that one to the file_names list
-          self.db.execute("SELECT author_id FROM chapters WHERE id = {1}"
-                              .format(cid))
-          sql_author_id = self.db.cursor.fetchall()
+          sql_author_id = self.sql.execute_and_fetchall("SELECT author_id FROM chapters WHERE id = {0}".format(cid))
           if len(sql_author_id) > 0:
             author_id = sql_author_id[0][0]
             file_paths[cid] = [dc['path'] for dc in duplicate_chapters[cid] if dc['folder_name'] == str(author_id)][0]
@@ -75,7 +73,7 @@ class Chapters(object):
 
     return file_paths
 
-
+  # TODO this is no longer needed to load eFiction chapters - see if it's still useful for other archive types
   def populate_chapters(self, folder = None, extensions = None):
     if folder is None:
       folder = self.args.chapters_path
@@ -106,8 +104,7 @@ class Chapters(object):
             cur = Common.print_progress(cur, total)
             file_contents = c.read()
             query = "UPDATE {0}.chapters SET text=%s WHERE id=%s".format(self.args.output_database)
-            self.db.execute(query, (file_contents, int(cid)))
-            self.db.commit()
+            self.sql.execute(query, (file_contents, int(cid)))
           except Exception as e:
             self.log.error("Error = chapter id: {0} - chapter: {1}\n{2}".format(cid, chapter_path, str(e)))
           finally:
@@ -120,8 +117,7 @@ class Chapters(object):
             cur = Common.print_progress(cur, total)
             file_contents = c.read()
             query = "UPDATE {0}.chapters SET text=%s WHERE url=%s and text=''".format(self.args.output_database)
-            self.db.execute(query, (file_contents, path))
-            self.db.commit()
+            self.sql.execute(query, (file_contents, path))
           except Exception as e:
             self.log.error("Error = chapter id: {0} - chapter: {1}\n{2}".format(path, chapter_path, str(e)))
           finally:
