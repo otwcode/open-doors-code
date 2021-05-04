@@ -14,7 +14,6 @@ class Chapters(object):
   def __init__(self, args, db, log):
     self.args = args
     self.db = db
-    self.cursor = self.db.cursor()
     self.log = log
 
   def _ends_with(self, filename, extensions):
@@ -65,9 +64,9 @@ class Chapters(object):
       if folder_name_type == '1':
         for cid, duplicate in duplicate_chapters.items():
           # look up the author id and add that one to the file_names list
-          self.cursor.execute("SELECT author_id FROM chapters WHERE id = {1}"
+          self.db.execute("SELECT author_id FROM chapters WHERE id = {1}"
                               .format(cid))
-          sql_author_id = self.cursor.fetchall()
+          sql_author_id = self.db.cursor.fetchall()
           if len(sql_author_id) > 0:
             author_id = sql_author_id[0][0]
             file_paths[cid] = [dc['path'] for dc in duplicate_chapters[cid] if dc['folder_name'] == str(author_id)][0]
@@ -107,7 +106,7 @@ class Chapters(object):
             cur = Common.print_progress(cur, total)
             file_contents = c.read()
             query = "UPDATE {0}.chapters SET text=%s WHERE id=%s".format(self.args.output_database)
-            self.cursor.execute(query, (file_contents, int(cid)))
+            self.db.execute(query, (file_contents, int(cid)))
             self.db.commit()
           except Exception as e:
             self.log.error("Error = chapter id: {0} - chapter: {1}\n{2}".format(cid, chapter_path, str(e)))
@@ -121,11 +120,9 @@ class Chapters(object):
             cur = Common.print_progress(cur, total)
             file_contents = c.read()
             query = "UPDATE {0}.chapters SET text=%s WHERE url=%s and text=''".format(self.args.output_database)
-            self.cursor.execute(query, (file_contents, path))
+            self.db.execute(query, (file_contents, path))
             self.db.commit()
           except Exception as e:
             self.log.error("Error = chapter id: {0} - chapter: {1}\n{2}".format(path, chapter_path, str(e)))
           finally:
             pass
-
-    self.db.close()

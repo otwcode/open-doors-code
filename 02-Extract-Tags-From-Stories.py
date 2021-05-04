@@ -17,7 +17,7 @@ if __name__ == "__main__":
   args = args_obj.args_for_02()
   log = args_obj.logger_with_filename()
   sql = Sql(args, log)
-  tags = Tags(args, sql.db, log)
+  tags = Tags(args, sql, log)
   log.info('Processing tags from stories and bookmarks table in {0}'.format(args.temp_db_database))
   tags.create_tags_table()
 
