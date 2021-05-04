@@ -77,7 +77,7 @@ class Sql(object):
       except OperationalError as e:
         self.log.info("Command skipped: {0} [{1}]".format(command, e))
 
-    self.db.commit()
+    self.conn.commit()
 
 
   def col_exists(self, col, table, database):
