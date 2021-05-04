@@ -19,7 +19,7 @@ if __name__ == "__main__":
   args = args_obj.args_for_07()
   log = args_obj.logger_with_filename()
   sql = Sql(args, log)
-  chaps = Chapters(args, sql.db, log)
+  chaps = Chapters(args, sql, log)
 
 
   log.info("Loading chapters from {0}...".format(args.chapters_path))

@@ -26,7 +26,7 @@ class TestPopulate_tags(TestCase):
   args = testArgs()
   log = logger("test")
   sql = MagicMock()
-  tags = Tags(args, sql.db, log)
+  tags = Tags(args, sql, log)
   final = MagicMock()
   populate_tags = PopulateTags(args, sql, log, tags, final)
 

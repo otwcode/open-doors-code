@@ -28,9 +28,9 @@ if __name__ == "__main__":
     args = args_obj.args_for_05()
     log = args_obj.logger_with_filename()
     sql = Sql(args, log)
-    tags = Tags(args, sql.db, log)
-    final = FinalTables(args, sql.db, log)
-    chaps = Chapters(args, sql.db, log)
+    tags = Tags(args, sql, log)
+    final = FinalTables(args, sql, log)
+    chaps = Chapters(args, sql, log)
 
     coauthors = {}
 
