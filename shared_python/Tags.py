@@ -46,7 +46,7 @@ class Tags(object):
         `original_tag` varchar(1024) DEFAULT NULL,
         `original_parent` varchar(255) DEFAULT NULL,
         `original_table` varchar(255) DEFAULT NULL,
-        `original_description` varchar(255) DEFAULT NULL,
+        `original_description` mediumtext DEFAULT NULL,
         `ao3_tag` varchar(1024) DEFAULT NULL,
         `ao3_tag_type` VARCHAR(255) DEFAULT NULL,
         `ao3_tag_category` VARCHAR(255) DEFAULT NULL,
