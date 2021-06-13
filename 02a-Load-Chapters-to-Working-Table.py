@@ -15,6 +15,7 @@ def __current_table(table_name, db):
 
 
 if __name__ == "__main__":
+  # TODO the eFiction process now loads chapters into MySQL before further processing in ODAP, all others should too
   args_obj = Args()
   args = args_obj.args_for_07()
   log = args_obj.logger_with_filename()

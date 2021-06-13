@@ -1,4 +1,6 @@
 .idea/
+.pytest_cache/
+post_processing/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -81,7 +83,7 @@ celerybeat-schedule
 .env
 
 # virtualenv
-venv/
+venv*/
 ENV/
 
 # Spyder project settings
