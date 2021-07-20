@@ -91,12 +91,12 @@ class Tags(object):
              """.format(', '.join(values)))
 
 
-  def distinct_tags(self):
+  def distinct_tags(self, database):
     """
     Used in step 03. Maps table columns to the names used in the Tag Wrangling sheet.
     :return: distinct rows from the tags table with renamed columns
     """
-    return self.sql.execute("""
+    return self.sql.execute_and_fetchall(database, """
       SELECT DISTINCT
         id as "Original Tag ID",
         original_tag as "Original Tag Name",
@@ -120,7 +120,7 @@ class Tags(object):
     tag = str(row[tag_headers['original_tag']]).replace("'", r"\'")
     tag_id = row[tag_headers['id']]
 
-    if tag_id == '' or tag_id is None:
+    if tag_id == '' or tag_id is None or not tag_id.isnumeric():
       tagid_filter = f"original_tag = '{tag}'"
     else:
       tagid_filter = f"id={tag_id}"
