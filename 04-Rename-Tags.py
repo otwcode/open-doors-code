@@ -24,6 +24,5 @@ if __name__ == "__main__":
     total = len(tw_tags)
 
     for cur, row in enumerate(tw_tags):
-      print_progress(cur + 1, total, "tags")
-
       tags.update_tag_row(row)
+      print_progress(cur, total, "tags")
