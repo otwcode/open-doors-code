@@ -176,5 +176,17 @@ class Tags(object):
       sys.stdout.flush()
 
       tags = self.sql.execute_dict(f"SELECT * FROM tags WHERE id in ({story_id[2]})")
+      
+      ### add additional tags if original_tag is split into multiple ao3 tags
+      new_tags = []
+      keys = ', '.join(['original_tagid', 'original_tag', 'original_type', 
+                        'original_parent', 'original_description', 'ao3_tag', 
+                        'ao3_tag_type', 'ao3_tag_category', 'ao3_tag_fandom'])
+      for tag in tags:
+        original_tagid, original_tag = tag['id'], tag['original_tag']
+        extra_tags = self.sql.execute_dict(f"""SELECT DISTINCT  {keys} from tags where original_tagid = {original_tagid} AND original_tag = '{original_tag}'""")
+        new_tags.extend(extra_tags)
+      tags.extend(new_tags)
+      
       tags_by_story_id[story_id[0]] = tags
     return tags_by_story_id
