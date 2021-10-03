@@ -136,6 +136,7 @@ class Tags(object):
     # - First tag -> update the existing row
     # - Other tags -> create new row in tags table
     for idx, ao3_tag in enumerate(ao3_tags):
+      # TODO: Validate Tags Here?
       if number_types >= idx + 1:
         ao3_tag_type = ao3_tag_types[idx].strip()
       else:
@@ -145,17 +146,17 @@ class Tags(object):
 
       if idx > 0:
         self.sql.execute(f"""
-          INSERT INTO tags (ao3_tag, ao3_tag_type, ao3_tag_category, ao3_tag_fandom, 
+          INSERT INTO tags (ao3_tag, ao3_tag_type, ao3_tag_category, ao3_tag_fandom,
           original_tag, original_tagid)
-          VALUES ('{ao3_tag}', '{ao3_tag_type}', '{row[tag_headers['ao3_tag_category']]}', 
+          VALUES ('{ao3_tag}', '{ao3_tag_type}', '{row[tag_headers['ao3_tag_category']]}',
           '{fandom}', '{tag}', '{tag_id}')
         """)
         # FIXME OD-574 need to also insert entries in item_tags for the new tags
       else:
         self.sql.execute(f"""
               UPDATE tags
-              SET ao3_tag='{str(ao3_tag)}', ao3_tag_type='{ao3_tag_type}', 
-              ao3_tag_category='{row[tag_headers['ao3_tag_category']]}', 
+              SET ao3_tag='{str(ao3_tag)}', ao3_tag_type='{ao3_tag_type}',
+              ao3_tag_category='{row[tag_headers['ao3_tag_category']]}',
               ao3_tag_fandom='{fandom}'
               WHERE {tagid_filter}
             """)
