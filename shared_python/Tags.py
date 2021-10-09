@@ -7,7 +7,6 @@ from pymysql import cursors, OperationalError
 
 from shared_python.Sql import Sql
 
-
 class Tags(object):
 
   def __init__(self, args, sql: Sql, log: Logger):
@@ -151,6 +150,16 @@ class Tags(object):
           '{fandom}', '{tag}', '{tag_id}')
         """)
         # FIXME OD-574 need to also insert entries in item_tags for the new tags
+        # get last auto increment tag id
+        sql_dict = self.sql.execute_dict(f"""select LAST_INSERT_ID();""")
+        new_tag_id = sql_dict[0]['LAST_INSERT_ID()']
+        # get all associated items from item_tags
+        items = self.sql.execute_dict(f"""SELECT item_id, item_type 
+                                          FROM item_tags WHERE tag_id = {row['Original Tag ID']}""")
+        # insert into item_tags table
+        for item in items:
+          item_id, item_type = item['item_id'], item['item_type']
+          self.sql.execute(f"""INSERT INTO item_tags (item_id, item_type, tag_id) VALUES ('{item_id}', '{item_type}', '{new_tag_id}')""")
       else:
         self.sql.execute(f"""
               UPDATE tags
@@ -174,19 +183,6 @@ class Tags(object):
       cur += 1
       sys.stdout.write(f'\rCollecting tags for {item_type}: {cur}/{total}  (including Do Not Import)')
       sys.stdout.flush()
-
       tags = self.sql.execute_dict(f"SELECT * FROM tags WHERE id in ({story_id[2]})")
-      
-      ### add additional tags if original_tag is split into multiple ao3 tags
-      new_tags = []
-      keys = ', '.join(['original_tagid', 'original_tag', 'original_type', 
-                        'original_parent', 'original_description', 'ao3_tag', 
-                        'ao3_tag_type', 'ao3_tag_category', 'ao3_tag_fandom'])
-      for tag in tags:
-        original_tagid, original_tag = tag['id'], tag['original_tag']
-        extra_tags = self.sql.execute_dict(f"""SELECT DISTINCT  {keys} from tags where original_tagid = {original_tagid} AND original_tag = '{original_tag}'""")
-        new_tags.extend(extra_tags)
-      tags.extend(new_tags)
-      
       tags_by_story_id[story_id[0]] = tags
     return tags_by_story_id
