@@ -117,6 +117,108 @@ class Tags(object):
     :param row: a row from the Tag Wrangling spreadsheet as a dict
     :return:
     """
+    # Helper functions
+    def identify_tag_type(tag_type):
+        return {
+            "rating": 1,
+            "warnings": 2,
+            "categories": 3,
+            "fandoms": 4,
+            "characters": 5,
+            "relationships": 6,
+            "tags": 7
+        }.get(tag_type, 0)
+
+    def identify_rating(tag):
+        return{
+            "Not Rated": 1,
+            "General Audiences": 2,
+            "Teen And Up Audiences": 3,
+            "Mature": 4,
+            "Explicit": 5
+        }.get(tag, 0)
+
+    def identify_warning(tag):
+        return {
+            "Choose Not To Use Archive Warnings": 1,
+            "Graphic Depictions Of Violence": 2,
+            "Major Character Death": 3,
+            "No Archive Warnings Apply": 4,
+            "Rape/Non-Con": 5,
+            "Underage": 6
+        }.get(tag, 0)
+
+    def identify_category(tag):
+        return {
+            "Gen": 1,
+            "F/M": 2,
+            "M/M": 3,
+            "F/F": 4,
+            "Multi": 5,
+            "Other": 6
+        }.get(tag, 0)
+
+    def print_tag_correction(before, after):
+        print('\r\033[96mCorrection successful. "' + before + '" is now "' + after + '"\x1b[0m')
+    def print_tag_warning(tag, isType):
+        print('\r\033[93mWarning: "' + tag + '" is not a valid TAG', end='')
+        if (isType):
+            print (' TYPE', end='')
+        print ('. Attempting correction...\x1b[0m')
+    def prompt_correction(tag_name, isType):
+        print('\r\033[91mAll attempts at self correction have failed.')
+        print('\r\033[91mPlease enter the correct name for "' + tag_name + '": \x1b[0m')
+        tag_correction = input()
+        #FIXME: configure default empty tag type behavior
+        if (isType and not tag_correction):
+            tag_correction = "tags"
+        print_tag_correction(tag_name, tag_correction)
+        return tag_correction
+
+    def verify_tag_type(tag_type):
+        if (identify_tag_type(tag_type) == 0):
+          print_tag_warning(tag_type, True)
+
+          # Attempt self correciton by making whole word lowercase
+          tag_correction = tag_type.lower()
+          if (identify_tag_type(tag_correction) > 0):
+              print_tag_correction(tag_type, tag_correction)
+              return tag_correction
+
+          # Attempt self correction by removing last character
+          if (identify_tag_type(tag_correction + "s") > 0):
+              print_tag_correction(tag_type, tag_correction + "s")
+              return tag_correction + "s"
+
+          # Attempt self correction by removing last character
+          if (identify_tag_type(tag_correction[:-1]) > 0):
+              print_tag_correction(tag_type, tag_correction[:-1])
+              return tag_correction[:-1]
+
+          # Prompt and return for manual correction.
+          return prompt_correction(tag_type, True)
+        return tag_type
+
+    def classify_tag(tag, tag_type):
+        if (tag_type == "rating"):
+            return identify_rating(tag)
+        if (tag_type == "categories"):
+            return identify_category(tag)
+        if (tag_type == "warnings"):
+            return identify_warning(tag)
+        return 20
+
+    def verify_tag(tag, tag_type):
+        if (classify_tag(tag, tag_type) > 0):
+            return tag
+        print_tag_warning(tag, False)
+        # Attempt self correction by uppercasing every character
+        if (classify_tag(tag.title(), tag_type) > 0):
+            print_tag_correction(tag, tag.title())
+            return tag.title()
+        # Else prompt and return manual correction
+        return prompt_correction(tag, False)
+
     tag_headers = self.tag_export_map
     tag = str(row[tag_headers['original_tag']]).replace("'", r"\'")
     tag_id = row[tag_headers['id']]
@@ -136,11 +238,13 @@ class Tags(object):
     # - First tag -> update the existing row
     # - Other tags -> create new row in tags table
     for idx, ao3_tag in enumerate(ao3_tags):
-      # TODO: Validate Tags Here?
       if number_types >= idx + 1:
         ao3_tag_type = ao3_tag_types[idx].strip()
       else:
         ao3_tag_type = ao3_tag_types[0].strip()
+
+      ao3_tag_type = verify_tag_type(ao3_tag_type)
+      ao3_tag = verify_tag(ao3_tag, ao3_tag_type)
 
       self.sql.execute(f"USE {self.database}")
 
