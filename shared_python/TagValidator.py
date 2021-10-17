@@ -62,7 +62,7 @@ class TagValidator(object):
         print('\r\033[93m', end='')
         if (isType):
             self.log.warning('Warning: "' + tag + '" is not a valid TAG TYPE.'
-            + 'Attempting self correction...')
+            + ' Attempting self correction...')
         else:
             self.log.warning('Warning: "' + tag + '" is not a valid '
             + tag_type.upper() + ' tag. Attempting self correction...')
@@ -71,7 +71,7 @@ class TagValidator(object):
     def print_fail_self(self):
         print('\r\033[91m', end='')
         self.log.warning('All attempts at self correction have failed.'
-        + 'Manual correction required.')
+        + ' Manual correction required.')
         print('\x1b[0m', end='')
 
     def print_fail(self, tag_name):
@@ -125,9 +125,16 @@ class TagValidator(object):
             return None
 
         # Attempt self correction by uppercasing every first character
-        if (self.classify_tag(tag.title(), tag_type) > 0):
-            self.print_tag_correction(tag, tag.title())
-            return tag.title()
+        tag_correction = tag.title()
+        if (self.classify_tag(tag_correction, tag_type) > 0):
+            self.print_tag_correction(tag, tag_correction)
+            return tag_correction
+
+        # Attempt self correctioni by replacing ampersands with 'and'
+        tag_correction = tag.replace("&", "And")
+        if (self.classify_tag(tag_correction, tag_type) > 0):
+            self.print_tag_correction(tag, tag_correction)
+            return tag_correction
 
         # All attempts failed
         return None
