@@ -8,7 +8,7 @@ from shared_python.Tags import Tags
 
 
 def write_csv(data, filename, columns):
-  with open(filename, 'w', encoding="utf-8", newline='') as fp:
+  with open(filename, "w", encoding="utf_8_sig", newline="") as fp:
     myFile = csv.writer(fp)
     myFile.writerow(columns)
     if data:
