@@ -1,10 +1,11 @@
 from logging import Logger
 
-class ValidateTags(object):
+class TagValidator(object):
     def __init__(self, log):
         self.log = log
 
-    ## Dictionaries for tag validation
+    ## Dictionaries/constants for tag validation
+    IS_TAGTYPE = True
     dict_tag_type = {
         "rating": 1,
         "warnings": 2,
@@ -57,17 +58,20 @@ class ValidateTags(object):
         self.log.info('Correction successful. "' + before + '" is now "' + after+ '"')
         print('\x1b[0m', end='')
 
-    def print_tag_warning(self, tag, isType):
+    def print_tag_warning(self, tag, tag_type, isType):
         print('\r\033[93m', end='')
         if (isType):
-            self.log.warning('Warning: "' + tag + '" is not a valid TAG TYPE. Attempting self correction...')
+            self.log.warning('Warning: "' + tag + '" is not a valid TAG TYPE.'
+            + 'Attempting self correction...')
         else:
-            self.log.warning('Warning: "' + tag + '" is not a valid TAG. Attempting self correction...')
+            self.log.warning('Warning: "' + tag + '" is not a valid '
+            + tag_type.upper() + ' tag. Attempting self correction...')
         print('\x1b[0m', end='')
 
     def print_fail_self(self):
         print('\r\033[91m', end='')
-        self.log.warning('All attempts at self correction have failed. Manual correction required.')
+        self.log.warning('All attempts at self correction have failed.'
+        + 'Manual correction required.')
         print('\x1b[0m', end='')
 
     def print_fail(self, tag_name):
@@ -97,7 +101,7 @@ class ValidateTags(object):
     ## Self Correction Logic
     ## NOTE: This is for very light corrections only.
     def correct_tag_type(self, tag_type):
-        # Attempt self correciton by making whole word lowercase
+        # Attempt self correction by making whole word lowercase
         tag_correction = tag_type.lower()
         if (self.classify_tag(None, tag_correction) > 0):
           self.print_tag_correction(tag_type, tag_correction)
@@ -117,6 +121,9 @@ class ValidateTags(object):
         return None
 
     def correct_tag(self, tag, tag_type):
+        if (not tag):
+            return None
+
         # Attempt self correction by uppercasing every first character
         if (self.classify_tag(tag.title(), tag_type) > 0):
             self.print_tag_correction(tag, tag.title())
@@ -147,30 +154,37 @@ class ValidateTags(object):
         elif (tag_type == 'warnings'):
             return str(list(self.dict_warning.keys()))
 
-    ## Verify methods to use
-    def verify_tag_type(self, tag_type):
+    ## Validate methods to use.
+    def validate_and_fix_tag_type(self, tag_type):
         if (self.classify_tag(None, tag_type) < 1):
-          self.print_tag_warning(tag_type, True)
+          self.print_tag_warning(tag_type, None, True)
 
           # Attempt self correction
           tag_correction = self.correct_tag_type(tag_type)
           if (tag_correction):
               return tag_correction
 
-          # Prompt and return for manual correction.
+          # Prompt manual correction.
           self.print_fail_self()
-          tag_correction = self.prompt_correction(tag_type, None, True)
+          tag_correction = self.prompt_correction(tag_type, None, self.IS_TAGTYPE)
           while (self.classify_tag(None, tag_correction) < 1):
-              self.print_fail(tag_correction)
-              tag_correction = self.prompt_correction(tag_type, None, True)
+              self.print_tag_warning(tag_correction, None, True)
+              # Attempt correction of failed manual correction
+              tag_selfcorrect = self.correct_tag_type(tag_correction)
+              if (tag_selfcorrect):
+                  self.print_tag_correction(tag_type, tag_selfcorrect)
+                  return tag_selfcorrect
+              # Else prompt manual correction again
+              self.print_fail(tag_type)
+              tag_correction = self.prompt_correction(tag_type, None, self.IS_TAGTYPE)
           self.print_tag_correction(tag_type, tag_correction)
           return tag_correction
         return tag_type
 
-    def verify_tag(self, tag, tag_type):
+    def validate_and_fix_tag(self, tag, tag_type):
         if (self.classify_tag(tag, tag_type) > 0):
             return tag
-        self.print_tag_warning(tag, False)
+        self.print_tag_warning(tag, tag_type, False)
 
         # Attempt self correction
         tag_correction = self.correct_tag(tag, tag_type)
@@ -179,9 +193,16 @@ class ValidateTags(object):
 
         # Else prompt and return manual correction
         self.print_fail_self()
-        tag_correction = self.prompt_correction(tag, tag_type, False)
+        tag_correction = self.prompt_correction(tag, tag_type, not self.IS_TAGTYPE)
         while (not tag_correction or self.classify_tag(tag_correction, tag_type) < 1):
+            self.print_tag_warning(tag_correction, tag_type, False)
+            # Attempt correction of failed manual correction
+            tag_selfcorrect = self.correct_tag(tag_correction, tag_type)
+            if (tag_selfcorrect):
+                self.print_tag_correction(tag, tag_selfcorrect)
+                return tag_selfcorrect
+            # Else prompt manual correction again
             self.print_fail(tag_correction)
-            tag_correction = self.prompt_correction(tag, tag_type, False)
+            tag_correction = self.prompt_correction(tag, tag_type, not self.IS_TAGTYPE)
         self.print_tag_correction(tag, tag_correction)
         return tag_correction

@@ -6,7 +6,7 @@ import sys
 from pymysql import cursors, OperationalError
 
 from shared_python.Sql import Sql
-from shared_python.ValidateTags import ValidateTags
+from shared_python.TagValidator import TagValidator
 
 
 class Tags(object):
@@ -121,7 +121,7 @@ class Tags(object):
     tag_headers = self.tag_export_map
     tag = str(row[tag_headers['original_tag']]).replace("'", r"\'")
     tag_id = row[tag_headers['id']]
-    validate_tag = ValidateTags(self.log)
+    validate_tag = TagValidator(self.log)
 
     if tag_id == '' or tag_id is None or not tag_id.isnumeric():
       tagid_filter = f"original_tag = '{tag}'"
@@ -143,8 +143,8 @@ class Tags(object):
       else:
         ao3_tag_type = ao3_tag_types[0].strip()
 
-      ao3_tag_type = validate_tag.verify_tag_type(ao3_tag_type)
-      ao3_tag = validate_tag.verify_tag(ao3_tag, ao3_tag_type)
+      ao3_tag_type = validate_tag.validate_and_fix_tag_type(ao3_tag_type)
+      ao3_tag = validate_tag.validate_and_fix_tag(ao3_tag, ao3_tag_type)
 
       self.sql.execute(f"USE {self.database}")
 
