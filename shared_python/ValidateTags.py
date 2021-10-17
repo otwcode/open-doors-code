@@ -79,16 +79,16 @@ class ValidateTags(object):
         print('\x1b[0m', end='')
 
     def prompt_correction(self, tag_name, tag_type, isType):
-        print ('\r\033[91mThe following values are accepted:\x1b[0m')
+        print ('\rThe following values are accepted:')
         if (isType):
-            print('\r\033[91m' + self.list_dicts(None, tag_type) + '\x1b[0m')
+            print('\r' + self.list_dicts(None, tag_type))
         else:
-            print('\r\033[91m' + self.list_dicts(tag_name, tag_type) + '\x1b[0m')
-        prompt = '\r\033[91mPlease enter the correct name for "' + tag_name + '"'
+            print('\r' + self.list_dicts(tag_name, tag_type))
+        prompt = '\rPlease enter the correct name for "' + tag_name + '"'
         if (isType):
-            prompt += ' (Press ENTER to default to "tags"):\x1b[0m '
+            prompt += ' (Press ENTER to default to "tags"): '
         else:
-            prompt += ':\x1b[0m '
+            prompt += ': '
         tag_correction = input(prompt)
         if (isType and not tag_correction):
             tag_correction = "tags"
