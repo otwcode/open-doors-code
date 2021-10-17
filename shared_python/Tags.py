@@ -114,7 +114,7 @@ class Tags(object):
     """
     Used in step 04.
     :param row: a row from the Tag Wrangling spreadsheet as a dict
-    :return:
+    :return: number of newly inserted rows to item_tags
     """
     tag_headers = self.tag_export_map
     tag = str(row[tag_headers['original_tag']]).replace("'", r"\'")
@@ -130,6 +130,7 @@ class Tags(object):
     ao3_tag_types = row[tag_headers['ao3_tag_type']].split(",")
     number_types = len(ao3_tag_types)
 
+    num_insert = 0
     # If tags length > types length -> there are remapped tags
     # Iterate over all the provided AO3 tags:
     # - First tag -> update the existing row
@@ -156,10 +157,12 @@ class Tags(object):
         # get all associated items from item_tags
         items = self.sql.execute_dict(f"""SELECT item_id, item_type 
                                           FROM item_tags WHERE tag_id = {row['Original Tag ID']}""")
+        
         # insert into item_tags table
         for item in items:
           item_id, item_type = item['item_id'], item['item_type']
           self.sql.execute(f"""INSERT INTO item_tags (item_id, item_type, tag_id) VALUES ('{item_id}', '{item_type}', '{new_tag_id}')""")
+          num_insert += 1
       else:
         self.sql.execute(f"""
               UPDATE tags
@@ -168,6 +171,7 @@ class Tags(object):
               ao3_tag_fandom='{fandom}'
               WHERE {tagid_filter}
             """)
+    return num_insert
 
   def tags_by_story_id(self, item_type: str = 'story'):
     story_ids = \
