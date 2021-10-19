@@ -17,9 +17,9 @@ def write_csv(data, filename, columns):
         for s in row:
           r.append('' if s is None else html.unescape(str(s)))
         myFile.writerows([r])
-        log.info(f"Data written to {filename}")
+      log.info(f"...Data written to {filename}")
     else:
-      log.error(f"No data to write to {filename}")
+      log.error(f"...No data to write to {filename}")
     fp.close()
 
 
