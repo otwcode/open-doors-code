@@ -130,7 +130,7 @@ class TagValidator(object):
             self.print_tag_correction(tag, tag_correction)
             return tag_correction
 
-        # Attempt self correctioni by replacing ampersands with 'and'
+        # Attempt self correction by replacing ampersands with 'and'
         tag_correction = tag.replace("&", "And")
         if (self.classify_tag(tag_correction, tag_type) > 0):
             self.print_tag_correction(tag, tag_correction)
