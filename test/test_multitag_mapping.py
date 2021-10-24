@@ -2,14 +2,10 @@ from collections import defaultdict
 from unittest import TestCase
 import unittest
 from unittest.mock import MagicMock
-import pdb
 from shared_python.Sql import Sql
 from shared_python.Logging import logger
-from shared_python.PopulateTags import PopulateTags
-from test.mysql import SqlDb
-import argparse
-
 from shared_python.Tags import Tags
+import argparse
 
 def testArgs():
 	parser = argparse.ArgumentParser(description='Test an archive database')
@@ -27,12 +23,8 @@ def testArgs():
 class TestMultiTagMapping(TestCase):
 	args = testArgs()
 	log = logger("test")
-	sqldb = SqlDb(args, log)
-	sqldb.load_sql_file_into_db(args.sql_path)
-	args.db_user = sqldb.config['user']
-	args.db_host = sqldb.config['host']
-	args.db_password = sqldb.config['password']
 	sql = Sql(args, log)
+	sql.run_script_from_file(args.sql_path, args.temp_db_database, initial_load=True)
 	tags = Tags(args, sql, log)
 
 	def test_multi_tag_mapping(self):
