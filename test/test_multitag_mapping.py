@@ -6,6 +6,7 @@ import pdb
 from shared_python.Sql import Sql
 from shared_python.Logging import logger
 from shared_python.PopulateTags import PopulateTags
+from test.mysql import SqlDb
 import argparse
 
 from shared_python.Tags import Tags
@@ -20,11 +21,17 @@ def testArgs():
 	setattr(args, "temp_db_database", "test_working_open_doors")
 	setattr(args, "output_database", "unit_test_output")
 	setattr(args, "default_fandom", "Fandom C (TV)")
+	setattr(args, "sql_path", "./test/test_data/test.sql")
 	return args
 
 class TestMultiTagMapping(TestCase):
 	args = testArgs()
 	log = logger("test")
+	sqldb = SqlDb(args, log)
+	sqldb.load_sql_file_into_db(args.sql_path)
+	args.db_user = sqldb.config['user']
+	args.db_host = sqldb.config['host']
+	args.db_password = sqldb.config['password']
 	sql = Sql(args, log)
 	tags = Tags(args, sql, log)
 
@@ -37,8 +44,8 @@ class TestMultiTagMapping(TestCase):
 			'Original Parent Tag': 'Genres', 
 			'Related Fandom': 'Fandom-1',
 			'Recommended AO3 Tag': 'AO3-tag-1, AO3-tag-2, AO3-tag-3', 
-			'Recommended AO3 Type': 'M/M, F/M',
-			'Recommended AO3 Category (for relationships)': 'characters, tags, tags', 
+			'Recommended AO3 Type': 'characters, tags, tags',
+			'Recommended AO3 Category (for relationships)': 'M/M, F/M', 
 			'Original Tag Description': '', 
 			'TW Notes': ''
 		}
@@ -52,8 +59,8 @@ class TestMultiTagMapping(TestCase):
 			'Original Parent Tag': 'Genres', 
 			'Related Fandom': 'Fandom-2',
 			'Recommended AO3 Tag': 'AO3-tag-2, AO3-tag-4', 
-			'Recommended AO3 Type': 'M/M, F/M',
-			'Recommended AO3 Category (for relationships)': 'fandoms, characters, tags', 
+			'Recommended AO3 Type': 'tags, fandoms',
+			'Recommended AO3 Category (for relationships)': 'M/M, F/M', 
 			'Original Tag Description': '', 
 			'TW Notes': ''
 		}
