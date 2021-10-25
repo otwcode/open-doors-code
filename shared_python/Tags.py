@@ -6,6 +6,7 @@ import sys
 from pymysql import cursors, OperationalError
 
 from shared_python.Sql import Sql
+from shared_python.TagValidator import TagValidator
 
 class Tags(object):
 
@@ -119,6 +120,7 @@ class Tags(object):
     tag_headers = self.tag_export_map
     tag = str(row[tag_headers['original_tag']]).replace("'", r"\'")
     tag_id = row[tag_headers['id']]
+    validate_tag = TagValidator(self.log)
 
     if tag_id == '' or tag_id is None or not tag_id.isnumeric():
       tagid_filter = f"original_tag = '{tag}'"
@@ -142,13 +144,16 @@ class Tags(object):
       else:
         ao3_tag_type = ao3_tag_types[0].strip()
 
+      ao3_tag_type = validate_tag.validate_and_fix_tag_type(ao3_tag_type)
+      ao3_tag = validate_tag.validate_and_fix_tag(ao3_tag, ao3_tag_type)
+
       self.sql.execute(f"USE {self.database}")
 
       if idx > 0:
         self.sql.execute(f"""
-          INSERT INTO tags (ao3_tag, ao3_tag_type, ao3_tag_category, ao3_tag_fandom, 
+          INSERT INTO tags (ao3_tag, ao3_tag_type, ao3_tag_category, ao3_tag_fandom,
           original_tag, original_tagid)
-          VALUES ('{ao3_tag}', '{ao3_tag_type}', '{row[tag_headers['ao3_tag_category']]}', 
+          VALUES ('{ao3_tag}', '{ao3_tag_type}', '{row[tag_headers['ao3_tag_category']]}',
           '{fandom}', '{tag}', '{tag_id}')
         """)
         # get last auto increment tag id
@@ -166,8 +171,8 @@ class Tags(object):
       else:
         self.sql.execute(f"""
               UPDATE tags
-              SET ao3_tag='{str(ao3_tag)}', ao3_tag_type='{ao3_tag_type}', 
-              ao3_tag_category='{row[tag_headers['ao3_tag_category']]}', 
+              SET ao3_tag='{str(ao3_tag)}', ao3_tag_type='{ao3_tag_type}',
+              ao3_tag_category='{row[tag_headers['ao3_tag_category']]}',
               ao3_tag_fandom='{fandom}'
               WHERE {tagid_filter}
             """)
