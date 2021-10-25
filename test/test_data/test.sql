@@ -29,7 +29,7 @@ CREATE TABLE tags (
 
 INSERT INTO tags VALUES (10,989,'original-tag-1','classes',NULL,'','','','',''),(11,345,'original-tag-2','classes',NULL,'','','','','');
 UE KEY `id_UNIQUE` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) -- ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
