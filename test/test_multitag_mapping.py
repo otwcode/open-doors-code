@@ -24,7 +24,7 @@ class TestMultiTagMapping(TestCase):
 	args = testArgs()
 	log = logger("test")
 	sql = Sql(args, log)
-	sql.run_script_from_file(args.sql_path, args.temp_db_database, initial_load=True)
+	sql.run_script_from_file(args.sql_path, args.temp_db_database, initial_load=False)
 	tags = Tags(args, sql, log)
 
 	def test_multi_tag_mapping(self):
