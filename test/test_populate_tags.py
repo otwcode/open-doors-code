@@ -12,7 +12,7 @@ from shared_python.Tags import Tags
 
 def testArgs():
   parser = argparse.ArgumentParser(description='Test an archive database')
-  args = parser.parse_args()
+  args = parser.parse_args([])
   setattr(args, "archive_type", "AA")
   setattr(args, "db_host", "localhost")
   setattr(args, "db_user", "root")
