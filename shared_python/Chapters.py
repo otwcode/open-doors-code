@@ -108,14 +108,18 @@ class Chapters(object):
             encoding = chardet.detect(file_contents)
             if encoding['confidence'] < 0.7:
                 print(f" Low confidence in {encoding['encoding']} in file {chapter_path}", flush=True)
-            file_contents = file_contents.decode(encoding=encoding['encoding'])
+                file_contents = file_contents.decode(encoding=encoding['encoding'], errors='ignore')
+            else:
+                file_contents = file_contents.decode(encoding=encoding['encoding'])
             query = "UPDATE {0}.chapters SET text=%s WHERE id=%s".format(self.args.output_database)
             self.sql.execute(query, (file_contents, int(cid)))
           except Exception as e:
+            # TODO maybe display where encoding fault is?
             self.log.error("Error = chapter id: {0} - chapter: {1}\n{2}".format(cid, chapter_path, str(e)))
           finally:
             pass
     else:
+      # TODO add encoding detection here
       for _, chapter_path in file_paths.items():
         path = chapter_path.replace(self.args.chapters_path, '')[1:]
         with codecs.open(chapter_path, 'r', encoding=char_encoding) as c:
