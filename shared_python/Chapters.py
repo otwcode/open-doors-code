@@ -1,13 +1,15 @@
 # -- coding: utf-8 --
 
-import codecs
+#import codecs
 import os
 import re
+import chardet
 
 from pip._vendor.distlib.compat import raw_input
 
 from shared_python import Common
-
+import logging
+logging.getLogger('chardet.charsetprober').setLevel(logging.INFO)
 # TODO this code is no longer needed for eFiction and will need to be reviewed for other archive types
 class Chapters(object):
 
@@ -86,23 +88,27 @@ class Chapters(object):
     has_ids = True if str.lower(filenames_are_ids) == 'y' else False
     file_paths = self._gather_and_dedupe(folder, extensions, has_ids)
 
-    char_encoding = raw_input("\n\nImporting chapters: pick character encoding (check for curly quotes):\n"
-                              "1 = Windows 1252\nenter = UTF-8\n")
+    #char_encoding = raw_input("\n\nImporting chapters: pick character encoding (check for curly quotes):\n"
+    #                          "1 = Windows 1252\nenter = UTF-8\n")
 
-    if char_encoding == '1':
-      char_encoding = 'cp1252'
-    else:
-      char_encoding = 'utf8'
+    #if char_encoding == '1':
+    #  char_encoding = 'cp1252'
+    #else:
+    #  char_encoding = 'utf8'
 
     cur = 0
     total = len(file_paths)
 
     if has_ids:
       for cid, chapter_path in file_paths.items():
-        with codecs.open(chapter_path, 'r', encoding=char_encoding) as c:
+        with open(chapter_path, 'rb') as raw_chapter:
           try:
             cur = Common.print_progress(cur, total)
-            file_contents = c.read()
+            file_contents = raw_chapter.read()
+            encoding = chardet.detect(file_contents)
+            if encoding['confidence'] < 0.7:
+                print(f" Low confidence in {encoding['encoding']} in file {chapter_path}", flush=True)
+            file_contents = file_contents.decode(encoding=encoding['encoding'])
             query = "UPDATE {0}.chapters SET text=%s WHERE id=%s".format(self.args.output_database)
             self.sql.execute(query, (file_contents, int(cid)))
           except Exception as e:
