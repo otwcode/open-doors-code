@@ -8,7 +8,6 @@ from pymysql import cursors, OperationalError
 from shared_python.Sql import Sql
 from shared_python.TagValidator import TagValidator
 
-
 class Tags(object):
 
   def __init__(self, args, sql: Sql, log: Logger):
@@ -116,7 +115,7 @@ class Tags(object):
     """
     Used in step 04.
     :param row: a row from the Tag Wrangling spreadsheet as a dict
-    :return:
+    :return: number of newly inserted rows to item_tags
     """
     tag_headers = self.tag_export_map
     tag = str(row[tag_headers['original_tag']]).replace("'", r"\'")
@@ -133,11 +132,13 @@ class Tags(object):
     ao3_tag_types = row[tag_headers['ao3_tag_type']].split(",")
     number_types = len(ao3_tag_types)
 
+    num_insert = 0
     # If tags length > types length -> there are remapped tags
     # Iterate over all the provided AO3 tags:
     # - First tag -> update the existing row
     # - Other tags -> create new row in tags table
     for idx, ao3_tag in enumerate(ao3_tags):
+      ao3_tag = ao3_tag.strip()
       if number_types >= idx + 1:
         ao3_tag_type = ao3_tag_types[idx].strip()
       else:
@@ -155,7 +156,18 @@ class Tags(object):
           VALUES ('{ao3_tag}', '{ao3_tag_type}', '{row[tag_headers['ao3_tag_category']]}',
           '{fandom}', '{tag}', '{tag_id}')
         """)
-        # FIXME OD-574 need to also insert entries in item_tags for the new tags
+        # get last auto increment tag id
+        sql_dict = self.sql.execute_dict(f"""select LAST_INSERT_ID();""")
+        new_tag_id = sql_dict[0]['LAST_INSERT_ID()']
+        # get all associated items from item_tags
+        items = self.sql.execute_dict(f"""SELECT item_id, item_type 
+                                          FROM item_tags WHERE tag_id = {row['Original Tag ID']}""")
+        
+        # insert into item_tags table
+        for item in items:
+          item_id, item_type = item['item_id'], item['item_type']
+          self.sql.execute(f"""INSERT INTO item_tags (item_id, item_type, tag_id) VALUES ('{item_id}', '{item_type}', '{new_tag_id}')""")
+          num_insert += 1
       else:
         self.sql.execute(f"""
               UPDATE tags
@@ -164,6 +176,7 @@ class Tags(object):
               ao3_tag_fandom='{fandom}'
               WHERE {tagid_filter}
             """)
+    return num_insert
 
   def tags_by_story_id(self, item_type: str = 'story'):
     story_ids = \
@@ -179,7 +192,6 @@ class Tags(object):
       cur += 1
       sys.stdout.write(f'\rCollecting tags for {item_type}: {cur}/{total}  (including Do Not Import)')
       sys.stdout.flush()
-
       tags = self.sql.execute_dict(f"SELECT * FROM tags WHERE id in ({story_id[2]})")
       tags_by_story_id[story_id[0]] = tags
     return tags_by_story_id
