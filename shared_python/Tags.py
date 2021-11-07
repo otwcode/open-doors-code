@@ -138,7 +138,7 @@ class Tags(object):
     # - First tag -> update the existing row
     # - Other tags -> create new row in tags table
     for idx, ao3_tag in enumerate(ao3_tags):
-      ao3_tag = ao3_tag.lstrip().rstrip()
+      ao3_tag = ao3_tag.strip()
       if number_types >= idx + 1:
         ao3_tag_type = ao3_tag_types[idx].strip()
       else:
