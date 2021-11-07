@@ -1,6 +1,5 @@
 # -- coding: utf-8 --
 
-#import codecs
 import os
 import re
 import chardet
