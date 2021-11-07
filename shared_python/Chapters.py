@@ -8,8 +8,11 @@ import chardet
 from pip._vendor.distlib.compat import raw_input
 
 from shared_python import Common
+
+# Disable useless logs from chardet
 import logging
 logging.getLogger('chardet.charsetprober').setLevel(logging.INFO)
+
 # TODO this code is no longer needed for eFiction and will need to be reviewed for other archive types
 class Chapters(object):
 
@@ -66,6 +69,7 @@ class Chapters(object):
       if folder_name_type == '1':
         for cid, duplicate in duplicate_chapters.items():
           # look up the author id and add that one to the file_names list
+          # TODO fix this, it is missing the database 
           sql_author_id = self.sql.execute_and_fetchall("SELECT author_id FROM chapters WHERE id = {0}".format(cid))
           if len(sql_author_id) > 0:
             author_id = sql_author_id[0][0]
@@ -88,47 +92,51 @@ class Chapters(object):
     has_ids = True if str.lower(filenames_are_ids) == 'y' else False
     file_paths = self._gather_and_dedupe(folder, extensions, has_ids)
 
-    #char_encoding = raw_input("\n\nImporting chapters: pick character encoding (check for curly quotes):\n"
-    #                          "1 = Windows 1252\nenter = UTF-8\n")
-
-    #if char_encoding == '1':
-    #  char_encoding = 'cp1252'
-    #else:
-    #  char_encoding = 'utf8'
 
     cur = 0
     total = len(file_paths)
 
-    if has_ids:
-      for cid, chapter_path in file_paths.items():
-        with open(chapter_path, 'rb') as raw_chapter:
-          try:
-            cur = Common.print_progress(cur, total)
-            file_contents = raw_chapter.read()
-            encoding = chardet.detect(file_contents)
-            if encoding['confidence'] < 0.7:
-                print(f" Low confidence in {encoding['encoding']} in file {chapter_path}", flush=True)
-                file_contents = file_contents.decode(encoding=encoding['encoding'], errors='ignore')
-            else:
-                file_contents = file_contents.decode(encoding=encoding['encoding'])
-            query = "UPDATE {0}.chapters SET text=%s WHERE id=%s".format(self.args.output_database)
-            self.sql.execute(query, (file_contents, int(cid)))
-          except Exception as e:
-            # TODO maybe display where encoding fault is?
-            self.log.error("Error = chapter id: {0} - chapter: {1}\n{2}".format(cid, chapter_path, str(e)))
-          finally:
-            pass
-    else:
-      # TODO add encoding detection here
-      for _, chapter_path in file_paths.items():
-        path = chapter_path.replace(self.args.chapters_path, '')[1:]
-        with codecs.open(chapter_path, 'r', encoding=char_encoding) as c:
-          try:
-            cur = Common.print_progress(cur, total)
-            file_contents = c.read()
-            query = "UPDATE {0}.chapters SET text=%s WHERE url=%s and text=''".format(self.args.output_database)
-            self.sql.execute(query, (file_contents, path))
-          except Exception as e:
-            self.log.error("Error = chapter id: {0} - chapter: {1}\n{2}".format(path, chapter_path, str(e)))
-          finally:
-            pass
+    for cid, chapter_path in file_paths.items():
+      if has_ids:
+        cid = int(cid)
+      else:
+        cid = chapter_path.replace(self.args.chapters_path, '')[1:]
+      with open(chapter_path, 'rb') as raw_chapter:
+        try:
+          cur = Common.print_progress(cur, total)
+          file_contents = raw_chapter.read()
+          encoding = chardet.detect(file_contents)
+          if encoding['confidence'] < 0.7:
+            self.log.warn(f" Low confidence in {encoding['encoding']} in file {chapter_path}: {round(encoding['confidence'] * 100)}%")
+          # Try decoding `file_contents` until it actually becomes `str`
+          while isinstance(file_contents, bytes):
+            try:
+              file_contents = file_contents.decode(encoding=encoding['encoding'])
+            except UnicodeDecodeError as e:
+              self.log.warn(f"\nFailed to decode {chapter_path}")
+              line_num = file_contents[:e.start].decode(encoding['encoding']).count("\n")
+              print(f"At line {line_num}:\t{str(e)}")
+              print("--\t", file_contents[max(e.start - 40, 0):e.end + 30])
+              # print `^` under the offending byte
+              print(
+                      "\t",
+                      " " * (len(str(file_contents[max(e.start - 40, 0):e.start])) - 1) +
+                      "^" * (len(str(file_contents[e.start:e.end])) - 3)
+              )
+              print("Will be converted to:")
+              # remove the offending bytes (usually one)
+              file_contents = file_contents[:e.start] + file_contents[e.end:]
+              print(
+                "++\t  ",
+                file_contents[
+                  max(e.start - 40, 0):
+                  e.end + 30
+                ].decode(encoding['encoding'])
+                  .replace("\n", "\\n") # escape line endings so it looks nicer
+                  .replace("\r", "\\r")
+                )
+          query = "UPDATE {0}.chapters SET text=%s WHERE id=%s".format(self.args.output_database)
+          self.sql.execute(query, (file_contents, cid))
+        except Exception as e:
+          self.log.error("Error = chapter id: {0} - chapter: {1}\n{2}".format(str(cid), chapter_path, str(e)))
+
