@@ -3,7 +3,7 @@ import sys
 import os
 from colorlog import ColoredFormatter
 
-logging.basicConfig(format='%(message)s', stream=sys.stdout, level=logging.DEBUG)
+# logging.basicConfig(format='%(message)s', stream=sys.stdout, level=logging.DEBUG)
 
 def logger(filename):
   log = logging.getLogger()
@@ -11,7 +11,7 @@ def logger(filename):
 
   color_formatter = ColoredFormatter('%(log_color)s%(message)s%(reset)s')
   stream = logging.StreamHandler(sys.stdout)
-  stream.setLevel(logging.INFO)
+  stream.setLevel(logging.DEBUG)
   stream.setFormatter(color_formatter)
   log.addHandler(stream)
 
