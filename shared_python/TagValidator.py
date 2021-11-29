@@ -57,6 +57,7 @@ class TagValidator(object):
         self.log.info('Correction successful. "' + before + '" is now "' + after+ '"')
 
     def print_tag_warning(self, tag, tag_type, isType):
+        print()
         if (isType):
             self.log.warning('Warning: "' + tag + '" is not a valid TAG TYPE.'
             + ' Attempting self correction...')

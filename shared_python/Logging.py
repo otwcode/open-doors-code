@@ -11,7 +11,7 @@ def logger(filename):
 
   color_formatter = ColoredFormatter('%(log_color)s%(message)s%(reset)s')
   stream = logging.StreamHandler(sys.stdout)
-  stream.setLevel(logging.DEBUG)
+  stream.setLevel(logging.INFO)
   stream.setFormatter(color_formatter)
   log.addHandler(stream)
 
