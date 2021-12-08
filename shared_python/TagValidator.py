@@ -54,33 +54,25 @@ class TagValidator(object):
 
     ## Print statements
     def print_tag_correction(self, before, after):
-        print('\r\033[96m', end='')
         self.log.info('Correction successful. "' + before + '" is now "' + after+ '"')
-        print('\x1b[0m', end='')
 
     def print_tag_warning(self, tag, tag_type, isType):
-        print('\r\033[93m', end='')
         if (isType):
             self.log.warning('Warning: "' + tag + '" is not a valid TAG TYPE.'
             + ' Attempting self correction...')
         else:
             self.log.warning('Warning: "' + tag + '" is not a valid '
             + tag_type.upper() + ' tag. Attempting self correction...')
-        print('\x1b[0m', end='')
 
     def print_fail_self(self):
-        print('\r\033[91m', end='')
-        self.log.warning('All attempts at self correction have failed.'
+        self.log.error('All attempts at self correction have failed.'
         + ' Manual correction required.')
-        print('\x1b[0m', end='')
 
     def print_fail(self, tag_name):
-        print('\r\033[91m', end='')
         if (tag_name):
-            self.log.warning('Manual Input Failed. "' + tag_name + '" has failed re-check.')
+            self.log.error('Manual Input Failed. "' + tag_name + '" has failed re-check.')
         else:
-            self.log.warning('Manual Input Failed. This field cannot be empty.')
-        print('\x1b[0m', end='')
+            self.log.error('Manual Input Failed. This field cannot be empty.')
 
     def prompt_correction(self, tag_name, tag_type, isType):
         print ('\rThe following values are accepted:')
@@ -164,6 +156,7 @@ class TagValidator(object):
     ## Validate methods to use.
     def validate_and_fix_tag_type(self, tag_type):
         if (self.classify_tag(None, tag_type) < 1):
+          print()
           self.print_tag_warning(tag_type, None, True)
 
           # Attempt self correction
