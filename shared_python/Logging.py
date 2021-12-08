@@ -3,8 +3,6 @@ import sys
 import os
 from colorlog import ColoredFormatter
 
-# logging.basicConfig(format='%(message)s', stream=sys.stdout, level=logging.DEBUG)
-
 def logger(filename):
   log = logging.getLogger()
   log.setLevel(logging.INFO)
