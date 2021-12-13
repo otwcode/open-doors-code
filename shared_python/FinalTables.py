@@ -57,6 +57,28 @@ class FinalTables(object):
             INSERT INTO `{final_database}`.`{output_table_name}` ({', '.join(columns)}) VALUES {', '.join(values)}
           """)
 
+    def insert_stories_into_final(self, output_table_name, rows, target_database=None):
+        if target_database:
+            final_database = target_database
+        else:
+            final_database = self.final_database
+        self.sql.execute("TRUNCATE `{0}`.`{1}`".format(final_database, output_table_name))
+
+        columns = rows[0].keys()
+        placeholders = []
+        for i in range(len(columns)):
+            placeholders.append("%s")
+
+        values = []
+        for row in rows:
+            values.append(tuple(row.values()))
+
+        query = f"""
+            INSERT INTO `{final_database}`.`{output_table_name}` ({', '.join(columns)}) VALUES ({', '.join(placeholders)})
+        """
+
+        self.sql.execute_many(query, list(values))
+
     def populate_story_tags(self, story_id, output_table_name, story_tags):
         cols_with_tags = []
         for (col, tags) in story_tags.items():

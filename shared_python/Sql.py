@@ -25,6 +25,9 @@ class Sql(object):
     self.cursor.execute(script, parameters)
     self.conn.commit()
 
+  def execute_many(self, script, parameters = ()):
+    self.cursor.executemany(script, parameters)
+    self.conn.commit()
 
   def execute_dict(self, script, parameters = ()):
     dict_cursor = self.conn.cursor(cursors.DictCursor)

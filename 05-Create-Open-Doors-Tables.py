@@ -83,7 +83,7 @@ if __name__ == "__main__":
         story_authors = final.original_table('item_authors', f"WHERE item_id={story['id']} and item_type='story'")
         # Add additional story processing here
         final_stories.append(final.story_to_final_without_tags(story, story_authors))
-    final.insert_into_final('stories', final_stories)
+    final.insert_stories_into_final('stories', final_stories)
 
     # BOOKMARKS
     if bookmarks_without_tags is not None:
