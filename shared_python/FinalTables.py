@@ -24,7 +24,7 @@ class FinalTables(object):
         return self.sql.execute_dict(query)
 
     def _escape_unescape(self, item):
-        return html.unescape(item).replace('\\', '\\\\').replace('"', '\\"').replace("'", "\\'")
+        return html.unescape(item).replace('\\', '\\\\').replace('"', '\\"').replace("'", "\\'").replace("%", "%%")
 
     def _value(self, row):
         value = []
@@ -73,8 +73,9 @@ class FinalTables(object):
         notes = story['notes']
         if authors_count > 2:
             # AO3 works can't currently be imported with more than two authors
+            story_authors_ids = [str(x['author_id']) for x in story_authors]
             self.log.warning(f"{type} {story['id']} has {authors_count} authors - listing all authors in notes...")
-            author_names = "Creators: {} and {}".format(", ".join(story_authors[:-1]),  story_authors[-1])
+            author_names = "Creators: {} and {}".format(", ".join(story_authors_ids[:-1]),  story_authors_ids[-1])
             notes = "{author_names}<br/><br/>{notes}" if notes else author_names
 
         final_story = {
