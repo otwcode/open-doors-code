@@ -74,7 +74,8 @@ class FinalTables(object):
         if authors_count > 2:
             # AO3 works can't currently be imported with more than two authors
             self.log.warning(f"{type} {story['id']} has {authors_count} authors - listing all authors in notes...")
-            author_names = "Creators: {} and {}".format(", ".join(story_authors[:-1]),  story_authors[-1])
+            story_authors_ids = [str(x['author_id']) for x in story_authors]
+            author_names = "Creators: {} and {}".format(", ".join(story_authors_ids[:-1]),  story_authors_ids[-1])
             notes = "{author_names}<br/><br/>{notes}" if notes else author_names
 
         final_story = {
