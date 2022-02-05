@@ -38,4 +38,3 @@ jobs:
       - name: Test with pytest - exclude MySQL integration tests
         run: |
           pytest --ignore "test/test_multitag_mapping.py" --ignore "test/test_percent_symbol.py" --ignore "test/test_tags_length.py" 
-
