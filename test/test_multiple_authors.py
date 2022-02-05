@@ -9,19 +9,18 @@ import argparse
 import datetime
 
 def testArgs():
-	parser = argparse.ArgumentParser(description='Test an archive database')
-	args = parser.parse_args()
+	args = argparse.Namespace()
 	setattr(args, "temp_db_database", "test_final_open_doors")
 	setattr(args, "output_database", "test_final_open_doors")
 	return args
 
-class TestTagsLength(TestCase):
+class TestMultipleAuthors(TestCase):
 	args = testArgs()
 	log = logger("test")
 	sql = None
 	final_tables = FinalTables(args, sql, log)
 
-	def test_percent_symbol(self):
+	def test_multiple_authors(self):
 		
 		story = {'id': 1, 'title': 'A Story', 
 						 'summary': "summary", 
