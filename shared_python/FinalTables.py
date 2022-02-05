@@ -24,7 +24,7 @@ class FinalTables(object):
         return self.sql.execute_dict(query)
 
     def _escape_unescape(self, item):
-        return html.unescape(item).replace('\\', '\\\\').replace('"', '\\"').replace("'", "\\'")
+        return html.unescape(item).replace('\\', '\\\\').replace('"', '\\"').replace("'", "\\'").replace("%", "%%")
 
     def _value(self, row):
         value = []
