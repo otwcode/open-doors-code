@@ -29,7 +29,7 @@ class TestTagsLength(TestCase):
 	sql.run_script_from_file(args.sql_path, args.temp_db_database, initial_load=False)
 	final_tables = FinalTables(args, sql, log)
 
-	def test_percent_symbol(self):
+	def test_tags_length(self):
 		
 		test_item = [
 			{	'id': 1, 
