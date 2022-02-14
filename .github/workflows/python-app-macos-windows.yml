@@ -37,4 +37,4 @@ jobs:
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
       - name: Test with pytest - exclude MySQL integration tests
         run: |
-          pytest --ignore "test/test_multitag_mapping.py"  --ignore "test/test_percent_symbol.py"
+          pytest --ignore "test/test_multitag_mapping.py" --ignore "test/test_percent_symbol.py" --ignore "test/test_tags_length.py" 
