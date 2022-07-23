@@ -44,6 +44,21 @@ class Sql(object):
     self.conn.commit()
     return cursor.fetchall()
 
+  def execute_and_iter(self, database: str, statement: str):
+    """
+    Execute an SQL statement and return its results as a Generator
+    :param database: The database to run the statement against.
+    :param statement: The SQL statement to execute.
+    :return: The fetched result of the SQL statement as a generator.
+    """
+    cursor = self.conn.cursor(cursor=cursors.SSCursor)
+    cursor.execute(f"USE {database}")
+    cursor.execute(statement)
+    for row in cursor:
+      yield row
+    self.conn.commit()
+
+
 
   def run_script_from_file(self, filename, database, initial_load = False):
     # Open and read the file as a single buffer

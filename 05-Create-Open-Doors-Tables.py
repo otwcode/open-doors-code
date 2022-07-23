@@ -82,7 +82,10 @@ if __name__ == "__main__":
     for story in stories_without_tags:
         story_authors = final.original_table('item_authors', f"WHERE item_id={story['id']} and item_type='story'")
         # Add additional story processing here
-        final_stories.append(final.story_to_final_without_tags(story, story_authors))
+        if len(story_authors) > 0:
+            final_stories.append(final.story_to_final_without_tags(story, story_authors))
+        else: 
+            log.warning(f"Story with id {story['id']} has no authors, and will not be imported")
     final.insert_into_final('stories', final_stories)
 
     # BOOKMARKS
