@@ -21,8 +21,10 @@ class Sql(object):
     self.database = args.temp_db_database
 
 
-  def execute(self, script, parameters = ()):
-    self.cursor.execute(script, parameters)
+  def execute(self, database, script, parameters = ()):
+    cursor = self.conn.cursor()
+    cursor.execute(f"USE {database}")
+    cursor.execute(script, parameters)
     self.conn.commit()
 
 

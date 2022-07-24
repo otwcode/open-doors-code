@@ -1,3 +1,4 @@
+#!/bin/python3
 from shared_python.Args import Args
 from shared_python.Sql import Sql
 import re
@@ -83,6 +84,9 @@ def return_from_list(match) -> str:
         return BAN_TEXT
     raise Exception("Failed to resolve")
 
+def escape_for_sql(raw: str) -> str:
+    return raw.replace('"', '\\"').replace("\n", "\\n").replace("\t", "\\t")
+
 if __name__ == "__main__":
     args_obj = Args()
     args = args_obj.args_for_05()
@@ -129,5 +133,15 @@ if __name__ == "__main__":
             except:
                 return ask_user_for_action(email)
 
-        cleared, subs = email_regex.subn(replace_func, text)
-breakpoint()
+        cleared_text = email_regex.sub(replace_func, text)
+        cleared_notes = email_regex.sub(replace_func, notes)
+        if cleared_text != text or cleared_notes != notes:
+            update_query = f"""
+UPDATE chapters
+    SET 
+        text = %s ,
+        notes = %s
+    WHERE 
+        id = %s;
+            """.strip()
+            sql.execute(args.output_database, update_query, (cleared_text, cleared_notes, id))
