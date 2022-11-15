@@ -100,7 +100,7 @@ class FinalTables(object):
         return [self._dummy_chapter(story) for story in stories]
 
     def _dummy_chapter(self, story):
-        chapter = {k.lower(): v for k, v in story.iteritems()}
+        chapter = {k.lower(): v for k, v in story.items()}
         final_chapter = {
             'id': chapter['id'],
             'position': chapter.get('position', 1),
