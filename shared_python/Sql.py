@@ -51,8 +51,6 @@ class Sql(object):
     sqlFile = fd.read()
     fd.close()
 
-    # remove all comments
-    sqlFile = re.sub(r'(--|#|\/\*).*?\n', '', sqlFile)
     # replace placeholders and return all SQL commands (split on ';')
     sqlCommands = sqlFile.replace('$DATABASE$', database).split(';\n')
 
@@ -67,7 +65,9 @@ class Sql(object):
       # For example, if the tables do not yet exist, this will skip over
       # the DROP TABLE commands
       try:
-        lc_command = command.lower().strip().replace("\n", "")
+        # Strip out commented out lines
+        end_command = re.sub(r'(--|#|\/\*).*?\n', '', command)
+        lc_command = end_command.lower().strip().replace("\n", "")
         if initial_load and (lc_command.startswith("create database ") or lc_command.startswith("use ")):
           self.log.info("Skipping command - {0}".format(lc_command))
         elif lc_command is None or lc_command == '':

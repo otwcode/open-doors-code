@@ -8,7 +8,7 @@ CREATE TABLE item_tags (
   `tag_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`)
-) -- ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 INSERT INTO item_tags VALUES (1,333,'story',10),(2,444,'story',10),(3,333,'story',11),(4,444,'story',11),(5,555,'story',11);
 
@@ -25,6 +25,6 @@ CREATE TABLE tags (
   `ao3_tag_fandom` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`)
-) -- ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb3;
+);
 
 INSERT INTO tags VALUES (10,989,'original-tag-1','classes',NULL,'','','','',''),(11,345,'original-tag-2','classes',NULL,'','','','','');
