@@ -23,16 +23,9 @@ def _clean_email(author):
     return email
 
 
-if __name__ == "__main__":
-    args_obj = Args()
-    args = args_obj.args_for_05()
-    log = args_obj.logger_with_filename()
+def main(args, log):
     sql = Sql(args, log)
-    tags = Tags(args, sql, log)
     final = FinalTables(args, sql, log)
-    chaps = Chapters(args, sql, log)
-
-    coauthors = {}
 
     log.info("Creating final destination tables in {0}".format(args.output_database))
 
@@ -126,3 +119,9 @@ if __name__ == "__main__":
         log.info("Creating chapters table {0}.chapters from source stories table...".format(args.output_database))
         final_chapters = final.dummy_chapters(final_stories)
         final.insert_into_final('chapters', final_chapters)
+
+if __name__ == "__main__":
+    args_obj = Args()
+    args = args_obj.args_for_05()
+    log = args_obj.logger_with_filename()
+    main(args, log)
