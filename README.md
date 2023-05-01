@@ -213,6 +213,36 @@ for the second author, amend the first author, then put the second author ID int
 
 ## Other Scripts
 
+### Remove emails from Open Doors tables
+
+Scans the chapter for emails and removes some of them:
+
+- If the email is present in the `authors` table, the email is redacted automatically.
+- If the "email" does not contain alpha numeric characters, for example `~~~@~~~`, then it is preserved.
+- If the email is something different a prompt is shown to the user, for example:
+
+```
+	
+	<p>Lily, the Vampire Slayer</p>
+	
+	<p>by: Br@nw3n</p>
+	
+	<p>Prologue</p>
+	
+	<p>"Ernie!" Lily Evans
+
+Br@nw3n ([W]hitelist, [B]lacklist) ([A]ddress, [D]omain) [C]ontext [R]ewrite domain >
+```
+
+On it we can either type (and press enter):
+
+- `wa` - Allow this specific address, it will not be redacted and you will not be asked about it again.
+- `wd` - Same as above, but allows all addresses from this specific domain, use with emails like `luz@theowlhouse.bi`, where the domain `theowlhouse.bi` was made up by the author.
+- `ba` - Redact this specific address.
+- `bd` - Redact this domain, use with domains like `gmail.com`, where the emails are likely to be real.
+- `r` - Rewrite this email, does search and replace for this particular email.
+- `c` - show the context the email shows up in, the more `ccccccc`, the more context you get.
+
 ### Remove DNI from Open Doors tables
 
 Given a comma-separated list of story ids specified in the `story_ids_to_remove` parameter, deletes the corresponding
