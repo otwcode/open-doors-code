@@ -114,7 +114,7 @@ if __name__ == "__main__":
             """,
         )
     ):
-        print(f"{round(index / chapter_count * 100, 2)}%", end="\r")
+        print(f"{round(index / chapter_count * 100, 2)}%\t- chapter {id}", end="\r")
 
         def replace_func(email):
             start, end = email.span()
