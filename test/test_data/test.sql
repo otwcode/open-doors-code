@@ -16,7 +16,7 @@ CREATE TABLE tags (
   `id` int NOT NULL AUTO_INCREMENT,
   `original_tagid` int DEFAULT NULL,
   `original_tag` varchar(1024) DEFAULT NULL,
-  `original_type` varchar(255) DEFAULT NULL,
+  `original_table` varchar(255) DEFAULT NULL,
   `original_parent` varchar(255) DEFAULT NULL,
   `original_description` varchar(1024) DEFAULT NULL,
   `ao3_tag` varchar(1024) DEFAULT NULL,
