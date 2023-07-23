@@ -144,4 +144,4 @@ UPDATE chapters
     WHERE 
         id = %s;
             """.strip()
-            sql.execute(args.output_database, update_query, (cleared_text, cleared_notes, id))
+            sql.execute(update_query, (cleared_text, cleared_notes, id), args.output_database)
