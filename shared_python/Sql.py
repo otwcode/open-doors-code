@@ -21,8 +21,10 @@ class Sql(object):
     self.database = args.temp_db_database
 
 
-  def execute(self, script, parameters = ()):
-    self.cursor.execute(script, parameters)
+  def execute(self, script, parameters = (), database = None):
+    cursor = self.conn.cursor()
+    cursor.execute(f"USE {database or self.database}")
+    cursor.execute(script, parameters)
     self.conn.commit()
 
 
@@ -43,7 +45,6 @@ class Sql(object):
     cursor.execute(statement)
     self.conn.commit()
     return cursor.fetchall()
-
 
   def run_script_from_file(self, filename, database, initial_load = False):
     # Open and read the file as a single buffer
