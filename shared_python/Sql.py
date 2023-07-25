@@ -67,14 +67,14 @@ class Sql(object):
       # the DROP TABLE commands
       try:
         # Strip out commented out lines
-        end_command = re.sub(r'(--|#|/*).*?\n', '', command)
+        end_command = re.sub(r'(--|#|\/\*).*?\n', '', command)
         lc_command = end_command.lower().strip().replace("\n", "")
         if initial_load and (lc_command.startswith("create database ") or lc_command.startswith("use ")):
           self.log.info("Skipping command - {0}".format(lc_command))
         elif lc_command is None or lc_command == '':
           self.log.info(lc_command)
         else:
-          self.cursor.execute(command)
+          self.cursor.execute(lc_command)
       except OperationalError as e:
         self.log.info("Command skipped: {0} [{1}]".format(command, e))
 

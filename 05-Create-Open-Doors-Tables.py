@@ -23,16 +23,9 @@ def _clean_email(author):
     return email
 
 
-if __name__ == "__main__":
-    args_obj = Args()
-    args = args_obj.args_for_05()
-    log = args_obj.logger_with_filename()
+def main(args, log):
     sql = Sql(args, log)
-    tags = Tags(args, sql, log)
     final = FinalTables(args, sql, log)
-    chaps = Chapters(args, sql, log)
-
-    coauthors = {}
 
     log.info("Creating final destination tables in {0}".format(args.output_database))
 
@@ -74,8 +67,6 @@ if __name__ == "__main__":
     else:
         log.info("No bookmarks to remove")
 
-    chapters = final.original_table(table_names['chapters'], '')
-
     # STORIES
     log.info("Copying stories to final table {0}.stories...".format(args.output_database))
     final_stories = []
@@ -113,17 +104,27 @@ if __name__ == "__main__":
     final.insert_into_final('authors', final_authors)
 
     # CHAPTERS
+    chapters = final.original_table(table_names['chapters'], '')
     if chapters:
         dest_chapter_table = f"{args.output_database}.{table_names['chapters']}"
         log.info("Copying chapters table {0} from source chapters table...".format(dest_chapter_table))
         sql.execute("drop table if exists {0}".format(dest_chapter_table))
 
-        truncate_and_insert = "create table {0} select * from {1}.{2}".format(
+        truncate_and_insert = "create table {0} (unique(id), key(story_id)) select * from {1}.{2}".format(
             dest_chapter_table,
             args.temp_db_database,
             table_names['chapters'])
         sql.execute(truncate_and_insert)
+
+        add_auto_increment = "alter table {0} modify id int not null auto_increment".format(dest_chapter_table)
+        sql.execute(add_auto_increment)
     else:
         log.info("Creating chapters table {0}.chapters from source stories table...".format(args.output_database))
         final_chapters = final.dummy_chapters(final_stories)
         final.insert_into_final('chapters', final_chapters)
+
+if __name__ == "__main__":
+    args_obj = Args()
+    args = args_obj.args_for_05()
+    log = args_obj.logger_with_filename()
+    main(args, log)
