@@ -51,9 +51,9 @@ class TestStepFive(TestCase):
 
     def tearDown(self):
         drop_working = "drop database {}".format(self.args.temp_db_database)
-        self.sql.execute(drop_working)
+        self.sql.execute(drop_working, database=self.args.temp_db_database)
         drop_final = "drop database {}".format(self.args.output_database)
-        self.sql.execute(drop_final)
+        self.sql.execute(drop_final, database=self.args.output_database)
 
 if __name__ == '__main__':
     unittest.main()
