@@ -192,6 +192,6 @@ class Tags(object):
       cur += 1
       sys.stdout.write(f'\rCollecting tags for {item_type}: {cur}/{total}  (including Do Not Import)')
       sys.stdout.flush()
-      tags = self.sql.execute_dict(f"SELECT * FROM tags WHERE id in ({story_id[2]})")
+      tags = self.sql.execute_dict(f"SELECT * FROM tags WHERE id in ({story_id[2]}) AND ao3_tag != ''")
       tags_by_story_id[story_id[0]] = tags
     return tags_by_story_id
