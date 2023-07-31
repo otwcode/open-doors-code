@@ -38,7 +38,8 @@ class TestPopulate_tags(TestCase):
     'tags': [
       {'original_tag': 'a tag', 'ao3_tag': 'A Tag'}
     ],
-    'rating': [{'original_tag': 'PG', 'ao3_tag': 'General Audiences'}]
+    'rating': [{'original_tag': 'PG', 'ao3_tag': 'General Audiences'}],
+    'warnings': [{'original_tag': 'Violence', 'ao3_tag': 'Graphic Depictions Of Violence'}]
   }
 
   def test_default_fandom_ignored_if_fandoms_present(self):
@@ -51,6 +52,19 @@ class TestPopulate_tags(TestCase):
     story_tags = self.populate_tags.tags_for_story(1, tags_without_fandom)
     self.assertEqual('Fandom C (TV)', story_tags['fandoms'], 'Fandoms should be a comma-separated string of specified AO3 tags')
 
+  def test_cntw_added_if_warnings_present(self):
+    story_tags = self.populate_tags.tags_for_story(1, self.basic_tags)
+    self.assertCountEqual(
+      ['Graphic Depictions Of Violence', 'Choose Not To Use Archive Warnings'],
+      story_tags['warnings'].split(', '),
+      'Warnings should be a comma-separated string of AO3 warnings that includes CNTW'
+    )
+
+  def test_cntw_added_if_no_warnings_present(self):
+    tags_without_warnings = self.basic_tags.copy()
+    tags_without_warnings.pop('warnings')
+    story_tags = self.populate_tags.tags_for_story(1, tags_without_warnings)
+    self.assertEqual('Choose Not To Use Archive Warnings', story_tags['warnings'], 'Warnings should be a comma-separated string of AO3 warnings that includes CNTW')
 
 if __name__ == '__main__':
   unittest.main()

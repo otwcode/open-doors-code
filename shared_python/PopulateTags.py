@@ -1,3 +1,7 @@
+from collections import defaultdict
+
+CNTW = "Choose Not To Use Archive Warnings"
+
 class PopulateTags(object):
   def __init__(self, args, db, log, tags, final):
     self.args = args
@@ -26,11 +30,15 @@ class PopulateTags(object):
         categories += self.valid_tags('ao3_tag_category', tag_type_tags)
         if tag_type == 'fandoms':
           fandoms += tag_list
+        if tag_type == 'warnings' and CNTW not in tag_list:
+          tag_list.append(CNTW)
         story_tags[tag_type] = ', '.join(set(tag_list))
     if not fandoms:
       fandoms = [self.args.default_fandom]
     story_tags['categories'] = ', '.join(set(categories))
     story_tags['fandoms'] = ', '.join(set(fandoms))
+    if 'warnings' not in story_tags.keys():
+      story_tags['warnings'] = CNTW
     return story_tags
 
   def write_tags_for_story(self, tags_by_story_id, item_type='story'):
@@ -39,8 +47,6 @@ class PopulateTags(object):
 
       # group tags by type into comma-separated lists
       # generate and run SQL to populate story table
-      from collections import defaultdict
-
       tags_by_type = defaultdict(list)
       for tag in story_tags:
         tags_by_type[tag['ao3_tag_type']].append(tag)
