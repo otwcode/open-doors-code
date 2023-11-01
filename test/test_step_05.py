@@ -15,8 +15,9 @@ sys.path.append(parent)
 
 step_05 = importlib.import_module("05-Create-Open-Doors-Tables")
 
+
 def testArgs():
-    parser = argparse.ArgumentParser(description='Test an archive database')
+    parser = argparse.ArgumentParser(description="Test an archive database")
     args = parser.parse_args()
     setattr(args, "archive_type", "AA")
     setattr(args, "db_host", "localhost")
@@ -29,6 +30,7 @@ def testArgs():
     setattr(args, "story_ids_to_remove", "")
     setattr(args, "bookmark_ids_to_remove", "")
     return args
+
 
 class TestStepFive(TestCase):
     args = testArgs()
@@ -54,5 +56,6 @@ class TestStepFive(TestCase):
         drop_final = "drop database {}".format(self.args.output_database)
         self.sql.execute(drop_final, database=self.args.output_database)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()
