@@ -86,4 +86,4 @@ class Sql(object):
         SELECT * FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = '{0}' AND TABLE_NAME = '{1}' AND COLUMN_NAME = '{2}'
       """.format(database, table, col))
     result = self.cursor.fetchone()
-    return not(result is None)
+    return result is not None
