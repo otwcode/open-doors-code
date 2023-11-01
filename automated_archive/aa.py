@@ -3,6 +3,7 @@
 import datetime
 import codecs
 import re
+import os
 from html.parser import HTMLParser
 
 from pymysql import connect
@@ -115,7 +116,10 @@ def _create_mysql(args, FILES, log):
   cursor.execute(u"use {0}".format(DATABASE_NAME))
 
   sql = Sql(args)
-  sql.run_script_from_file('shared_python/create-open-doors-tables.sql', DATABASE_NAME)
+  codepath  = os.path.dirname(os.path.realpath(__file__))
+
+  sql.run_script_from_file(codepath + '/shared_python/create-open-doors-tables.sql',
+                           database=DATABASE_NAME)
   db.commit()
 
   authors = [(FILES[i].get('Author', '').strip(), FILES[i].get('Email', FILES[i].get('EmailAuthor', '')).lower().strip()) for i in FILES]
