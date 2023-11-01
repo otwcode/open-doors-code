@@ -203,7 +203,7 @@ class testTag_Validator(TestCase):
         self.assertEqual(tag, "tags", "foobar should prompt for manual correct followed by self-correction")
 
     @patch('builtins.input', side_effect=['foo', 'facts', 'tag'])
-    def test_validate_and_fix_tag_type_one_prompt_selfcorrect(self, mock_input):
+    def test_validate_and_fix_tag_type_one_prompt_selfcorrect_side_effects(self, mock_input):
         tag = self.tag_validator.validate_and_fix_tag_type("foobar")
         self.assertEqual(tag, "tags", "foobar should prompt for manual correction thrice with self-correction")
 
