@@ -1,6 +1,5 @@
 import logging
 import sys
-import os
 from colorlog import ColoredFormatter
 
 def logger(filename):

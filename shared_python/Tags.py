@@ -3,7 +3,7 @@ from html.parser import HTMLParser
 from logging import Logger
 
 import sys
-from pymysql import cursors, OperationalError
+from pymysql import OperationalError
 
 from shared_python.Sql import Sql
 from shared_python.TagValidator import TagValidator
