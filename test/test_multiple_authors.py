@@ -32,8 +32,7 @@ class TestMultipleAuthors(TestCase):
 						 'url': None, 'imported': 0, 'do_not_import': 0, 'ao3_url': None, 'import_notes': ''}
 
 		story_authors = [{'id': 4114, 'author_id': 1, 'item_id': 1, 'item_type': 'story'}, {'id': 4115, 'author_id': 2, 'item_id': 1, 'item_type': 'story'}, {'id': 4116, 'author_id': 3, 'item_id': 1, 'item_type': 'story'}, {'id': 4117, 'author_id': 4, 'item_id': 1, 'item_type': 'story'}, {'id': 5, 'author_id': 5, 'item_id': 1, 'item_type': 'story'}, {'id': 4119, 'author_id': 6, 'item_id': 1, 'item_type': 'story'}, {'id': 4120, 'author_id': 7, 'item_id': 1, 'item_type': 'story'}, {'id': 4121, 'author_id': 8, 'item_id': 1, 'item_type': 'story'}, {'id': 4122, 'author_id': 9, 'item_id': 1, 'item_type': 'story'}]
-		output_table_name = "stories"
-		
+
 		final_story = self.final_tables.story_to_final_without_tags(story, story_authors)
 		self.assertEqual(final_story['notes'], 'Creators: 1, 2, 3, 4, 5, 6, 7, 8 and 9')
 
