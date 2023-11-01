@@ -40,7 +40,7 @@ def ask_user_for_action(match) -> str:
     while True:
         try:
             return return_from_list(match)
-        except:
+        except:  # noqa: E722
             response = input(
                 f"\n{raw_email} ([W]hitelist, [B]lacklist) ([A]ddress, [D]omain) [C]ontext [R]ewrite domain >\n\t"
             ).lower()
@@ -130,7 +130,7 @@ if __name__ == "__main__":
                 addresses[raw_email] = False
             try: 
                 return return_from_list(email)
-            except:
+            except:  # noqa: E722
                 return ask_user_for_action(email)
 
         cleared_text = email_regex.sub(replace_func, text)

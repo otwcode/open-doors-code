@@ -76,7 +76,7 @@ class Tags(object):
         if story_tags_row[col] is not None:
           for val in re.split(r", ?", story_tags_row[col]):
             if val != '':
-              if type(tag_col_lookup[col]) is str: # Probably AA or a custom archive
+              if type(tag_col_lookup[col]) is str: # noqa: E721 # Probably AA or a custom archive
                 cleaned_tag = val.encode('utf-8').replace("'", "\'").strip()
 
                 values.append('({0}, "{1}", "{2}", "{3}")'

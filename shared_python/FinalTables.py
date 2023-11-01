@@ -29,7 +29,7 @@ class FinalTables(object):
     def _value(self, row):
         value = []
         for item in row:
-            if type(item) is str:
+            if type(item) is str:  # noqa: E721
                 value.append('"' + self._escape_unescape(item) + '"')
             elif type(item) is datetime.datetime:
                 value.append('"' + str(item) + '"')

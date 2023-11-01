@@ -88,7 +88,7 @@ def main(args, log):
             bookmark_authors = final.original_table('item_authors',
                                                     f"WHERE item_id={bookmark['id']} and item_type='story_link'")
             final_bookmarks.append(final.story_to_final_without_tags(bookmark, bookmark_authors, False))
-        if final_bookmarks: final.insert_into_final('story_links', final_bookmarks)
+        if final_bookmarks: final.insert_into_final('story_links', final_bookmarks)  # noqa: E701
 
     # AUTHORS
     log.info("Copying authors to final table {0}.authors, cleaning emails and removing authors with no works...".format(
