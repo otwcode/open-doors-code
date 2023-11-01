@@ -35,7 +35,9 @@ def main(args, log):
     }
     filter = 'WHERE id NOT IN '
 
-    sql.run_script_from_file('shared_python/create-open-doors-tables.sql',
+    codepath  = os.path.dirname(os.path.realpath(__file__))
+
+    sql.run_script_from_file(codepath + '/shared_python/create-open-doors-tables.sql',
                              database=args.output_database)
 
     # Filter out DNI stories - story_ids_to_remove must be comma-separated list of DNI ids
