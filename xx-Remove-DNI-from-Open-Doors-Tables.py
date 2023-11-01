@@ -1,12 +1,8 @@
 # encoding: utf-8
-import csv
 import os
 
 from shared_python.Args import Args
-from shared_python.Chapters import Chapters
-from shared_python.FinalTables import FinalTables
 from shared_python.Sql import Sql
-from shared_python.Tags import Tags
 
 if __name__ == "__main__":
   args_obj = Args()

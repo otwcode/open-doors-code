@@ -3,7 +3,7 @@ from html.parser import HTMLParser
 from logging import Logger
 
 import sys
-from pymysql import cursors, OperationalError
+from pymysql import OperationalError
 
 from shared_python.Sql import Sql
 from shared_python.TagValidator import TagValidator
@@ -157,7 +157,7 @@ class Tags(object):
           '{fandom}', '{tag}', '{tag_id}')
         """)
         # get last auto increment tag id
-        sql_dict = self.sql.execute_dict(f"""select LAST_INSERT_ID();""")
+        sql_dict = self.sql.execute_dict("""select LAST_INSERT_ID();""")
         new_tag_id = sql_dict[0]['LAST_INSERT_ID()']
         # get all associated items from item_tags
         items = self.sql.execute_dict(f"""SELECT item_id, item_type 

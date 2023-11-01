@@ -1,7 +1,6 @@
 import csv
 from shared_python.Args import Args
 from shared_python.Sql import Sql
-from html.parser import HTMLParser
 import html
 
 from shared_python.Tags import Tags

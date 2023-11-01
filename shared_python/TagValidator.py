@@ -1,4 +1,3 @@
-from logging import Logger
 
 class TagValidator(object):
     def __init__(self, log):

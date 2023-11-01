@@ -136,7 +136,7 @@ if __name__ == "__main__":
         cleared_text = email_regex.sub(replace_func, text)
         cleared_notes = email_regex.sub(replace_func, notes)
         if cleared_text != text or cleared_notes != notes:
-            update_query = f"""
+            update_query = """
 UPDATE chapters
     SET 
         text = %s ,

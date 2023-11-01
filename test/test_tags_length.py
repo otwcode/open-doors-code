@@ -1,7 +1,5 @@
-from collections import defaultdict
 from unittest import TestCase
 import unittest
-from unittest.mock import MagicMock
 from shared_python.Sql import Sql
 from shared_python.Logging import logger
 from shared_python.FinalTables import FinalTables
@@ -62,7 +60,7 @@ class TestTagsLength(TestCase):
 		self.final_tables.populate_story_tags(story_id, output_table_name, story_tags)
 		
 		extract_summary = self.sql.execute_and_fetchall(self.args.temp_db_database,
-                              f"""SELECT tags FROM stories""")
+                              """SELECT tags FROM stories""")
 		self.assertEqual(extract_summary[0][0], long_tags)
 
 if __name__ == '__main__':

@@ -1,4 +1,3 @@
-from collections import defaultdict
 from unittest import TestCase
 import unittest
 from unittest.mock import MagicMock

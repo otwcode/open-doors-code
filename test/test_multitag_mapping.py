@@ -1,7 +1,5 @@
-from collections import defaultdict
 from unittest import TestCase
 import unittest
-from unittest.mock import MagicMock
 from shared_python.Sql import Sql
 from shared_python.Logging import logger
 from shared_python.Tags import Tags
