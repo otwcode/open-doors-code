@@ -45,7 +45,7 @@ class TestPercentSymbol(TestCase):
 			]
 		self.final_tables.insert_into_final("stories", test_item)
 		extract_summary = self.sql.execute_and_fetchall(self.args.temp_db_database,
-                              f"""SELECT summary FROM stories""")
+                              """SELECT summary FROM stories""")
 		
 		self.assertEqual(extract_summary[0][0], '<p>This is a story summary with percent % symobol</p>')
 
