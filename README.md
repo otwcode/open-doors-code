@@ -49,6 +49,7 @@ story link information into spreadsheets used for searching. (all)
 - 04 - Map the tags in the `tags` table to AO3 tags suggested by wranglers. (all)
 - 05 - Create the final tables that will be used for the temp site and copy all the authors, stories and story links. (all)
 - 06 - Copy the AO3 tags into the final story and story link rows. (all)
+- 08 - Audit the final tables to find common problems. (all)
 
 At this point, the final database is ready to be loaded into a [temporary website](https://github.com/otwcode/open-doors-temp-site) that will be used to feed the works into
 the Archive using its mass import API.
@@ -184,6 +185,12 @@ fields in the `stories` or `bookmarks` databases.
 *Notes*:
 - The output for this command  (eg "Getting all tags per story...429/429 stories") will report the number of stories in 
 the tag table, which may be more than the number of stories you have after removing DNI in the previous stage.
+
+### Step 08 - Audit final tables for common problems
+
+|   python 08-Check-ODAP-Tables.py -p <archive name>.yml
+
+This script performs checks on common reasons for Archive rejection, including checking for chapters that are too long, stories that have too many chapters, etc. It makes no attempt to fix problems that arise; you must do that manually.  Also note, it will only perform each check (aligned to the old JIRA tickets O, P, Q, R, and S) if no problems have been found on previous steps.  If you encounter errors in any step, you will need to repeat running the script and fixing the errors until it exits cleanly.
 
 ### Common problems to look out for when processing chapters
 
