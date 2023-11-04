@@ -128,7 +128,7 @@ def main(args, log):
                 final.story_to_final_without_tags(bookmark, bookmark_authors, False)
             )
         if final_bookmarks:
-            final.insert_into_final("story_links", final_bookmarks)  # noqa: E701
+            final.insert_into_final("story_links", final_bookmarks)
 
     # AUTHORS
     log.info(

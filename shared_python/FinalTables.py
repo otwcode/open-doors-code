@@ -36,9 +36,9 @@ class FinalTables(object):
     def _value(self, row):
         value = []
         for item in row:
-            if type(item) is str:  # noqa: E721
+            if isinstance(item, str):
                 value.append('"' + self._escape_unescape(item) + '"')
-            elif type(item) is datetime.datetime:
+            elif isinstance(item, datetime.datetime):
                 value.append('"' + str(item) + '"')
             elif item is None:
                 value.append("null")
