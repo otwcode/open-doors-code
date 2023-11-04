@@ -10,26 +10,36 @@ email_regex = re.compile(
     r"([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\"([]!#-[^-~ \t]|(\\[\t -~]))+\")@([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\[[\t -Z^-~]*])"
 )
 
+
 def print_context(match, amount: int):
     start, end = match.span()
-    pre_context = "\t" + match.string[max(start - amount, 0) : start].replace('\n', '\n\t')
-    value = match.string[start : end]
-    post_context = match.string[end : end + amount].replace('\n', '\n\t')
-    print_formatted_text(FormattedText([
-        ('', pre_context),
-        ('#ff0000 bold', value),
-        ('', post_context),
-    ]))
+    pre_context = "\t" + match.string[max(start - amount, 0) : start].replace(
+        "\n", "\n\t"
+    )
+    value = match.string[start:end]
+    post_context = match.string[end : end + amount].replace("\n", "\n\t")
+    print_formatted_text(
+        FormattedText(
+            [
+                ("", pre_context),
+                ("#ff0000 bold", value),
+                ("", post_context),
+            ]
+        )
+    )
+
 
 def does_contain_letters(text: str) -> bool:
-    return any(x in text for x in 'qwertyuiopasdfghjklzxcvbnm') 
+    return any(x in text for x in "qwertyuiopasdfghjklzxcvbnm")
+
 
 def is_mailto(match) -> bool:
     start, _ = match.span()
-    mailto = 'mailto:'
+    mailto = "mailto:"
     if len(mailto) > start:
         return False
     return mailto == match.string[start - len(mailto) : start]
+
 
 def ask_user_for_action(match) -> str:
     start, end = match.span()
@@ -40,7 +50,7 @@ def ask_user_for_action(match) -> str:
     while True:
         try:
             return return_from_list(match)
-        except:
+        except:  # noqa: E722
             response = input(
                 f"\n{raw_email} ([W]hitelist, [B]lacklist) ([A]ddress, [D]omain) [C]ontext [R]ewrite domain >\n\t"
             ).lower()
@@ -51,9 +61,7 @@ def ask_user_for_action(match) -> str:
                 new_email = input("Enter new email: ")
                 if "@" in new_email:
                     addresses[raw_email] = new_email
-            elif any(x in response for x in "wb") and any(
-                x in response for x in "ad"
-            ):
+            elif any(x in response for x in "wb") and any(x in response for x in "ad"):
                 should_block = "b" in response
                 if "d" in response:
                     domains[domain] = not should_block
@@ -65,6 +73,7 @@ def ask_user_for_action(match) -> str:
 BAN_TEXT = "[email address redacted]"
 domains = {}
 addresses = {}
+
 
 def return_from_list(match) -> str:
     start, end = match.span()
@@ -84,8 +93,10 @@ def return_from_list(match) -> str:
         return BAN_TEXT
     raise Exception("Failed to resolve")
 
+
 def escape_for_sql(raw: str) -> str:
     return raw.replace('"', '\\"').replace("\n", "\\n").replace("\t", "\\t")
+
 
 if __name__ == "__main__":
     args_obj = Args()
@@ -100,7 +111,7 @@ if __name__ == "__main__":
     ]
     chapter_count = int(
         sql.execute_and_fetchall(
-            args.output_database, "SELECT COUNT(*) FROM chapters"
+            args.output_database, """SELECT COUNT(*) FROM chapters"""
         )[0][0]
     )
     for index, (id, title, text, notes) in enumerate(
@@ -128,9 +139,9 @@ if __name__ == "__main__":
             if is_mailto(email):
                 # Mailto links are presumed to be real
                 addresses[raw_email] = False
-            try: 
+            try:
                 return return_from_list(email)
-            except:
+            except:  # noqa: E722
                 return ask_user_for_action(email)
 
         cleared_text = email_regex.sub(replace_func, text)
@@ -144,4 +155,6 @@ UPDATE chapters
     WHERE 
         id = %s;
             """.strip()
-            sql.execute(update_query, (cleared_text, cleared_notes, id), args.output_database)
+            sql.execute(
+                update_query, (cleared_text, cleared_notes, id), args.output_database
+            )

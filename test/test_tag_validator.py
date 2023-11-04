@@ -5,6 +5,7 @@ from unittest.mock import patch
 from shared_python.Logging import logger
 from shared_python.TagValidator import TagValidator
 
+
 class testTag_Validator(TestCase):
     log = logger("test")
     tag_validator = TagValidator(log)
@@ -78,7 +79,9 @@ class testTag_Validator(TestCase):
     # Warning Dictionary Tests
     def test_identify_warning_choose_no_archive_warnings(self):
         tag = self.tag_validator.identify_warning("Choose Not To Use Archive Warnings")
-        self.assertEqual(tag, 1, "warning Choose Not To Use Archive Warnings should be 1")
+        self.assertEqual(
+            tag, 1, "warning Choose Not To Use Archive Warnings should be 1"
+        )
 
     def test_identify_warning_graphic_violence(self):
         tag = self.tag_validator.identify_warning("Graphic Depictions Of Violence")
@@ -164,7 +167,9 @@ class testTag_Validator(TestCase):
 
     def test_validate_and_fix_tag_type_relationships(self):
         tag = self.tag_validator.validate_and_fix_tag_type("relationships")
-        self.assertEqual(tag, "relationships", "relationships should pass with no fixes")
+        self.assertEqual(
+            tag, "relationships", "relationships should pass with no fixes"
+        )
 
     def test_validate_and_fix_tag_type_tags(self):
         tag = self.tag_validator.validate_and_fix_tag_type("tags")
@@ -177,11 +182,15 @@ class testTag_Validator(TestCase):
 
     def test_validate_and_fix_tag_type_correct_extra_s(self):
         tag = self.tag_validator.validate_and_fix_tag_type("ratings")
-        self.assertEqual(tag, "rating", "ratings should pass with successful self-correction")
+        self.assertEqual(
+            tag, "rating", "ratings should pass with successful self-correction"
+        )
 
     def test_validate_and_fix_tag_type_correct_wrong_case(self):
         tag = self.tag_validator.validate_and_fix_tag_type("Rating")
-        self.assertEqual(tag, "rating", "Rating should pass with successful self-correction")
+        self.assertEqual(
+            tag, "rating", "Rating should pass with successful self-correction"
+        )
 
     def test_validate_and_fix_tag_type_correct_wrong_case_and_missing_s(self):
         tag = self.tag_validator.validate_and_fix_tag_type("Tag")
@@ -189,23 +198,39 @@ class testTag_Validator(TestCase):
 
     def test_validate_and_fix_tag_type_correct_wrong_case_and_extra_s(self):
         tag = self.tag_validator.validate_and_fix_tag_type("Ratings")
-        self.assertEqual(tag, "rating", "Ratings should pass with successful self-correction")
+        self.assertEqual(
+            tag, "rating", "Ratings should pass with successful self-correction"
+        )
 
     # Validate and Fix Tag Type Tests: Pass with Prompts
-    @patch('builtins.input', return_value='tags')
+    @patch("builtins.input", return_value="tags")
     def test_validate_and_fix_tag_type_one_prompt_no_selfcorrect(self, mock_input):
         tag = self.tag_validator.validate_and_fix_tag_type("foobar")
-        self.assertEqual(tag, "tags", "foobar should prompt for manual correction without self-correction")
+        self.assertEqual(
+            tag,
+            "tags",
+            "foobar should prompt for manual correction without self-correction",
+        )
 
-    @patch('builtins.input', return_value='tag')
+    @patch("builtins.input", return_value="tag")
     def test_validate_and_fix_tag_type_one_prompt_selfcorrect(self, mock_input):
         tag = self.tag_validator.validate_and_fix_tag_type("foobar")
-        self.assertEqual(tag, "tags", "foobar should prompt for manual correct followed by self-correction")
+        self.assertEqual(
+            tag,
+            "tags",
+            "foobar should prompt for manual correct followed by self-correction",
+        )
 
-    @patch('builtins.input', side_effect=['foo', 'facts', 'tag'])
-    def test_validate_and_fix_tag_type_one_prompt_selfcorrect_side_effects(self, mock_input):
+    @patch("builtins.input", side_effect=["foo", "facts", "tag"])
+    def test_validate_and_fix_tag_type_one_prompt_selfcorrect_side_effects(
+        self, mock_input
+    ):
         tag = self.tag_validator.validate_and_fix_tag_type("foobar")
-        self.assertEqual(tag, "tags", "foobar should prompt for manual correction thrice with self-correction")
+        self.assertEqual(
+            tag,
+            "tags",
+            "foobar should prompt for manual correction thrice with self-correction",
+        )
 
     # Validate and Fix Tag Tests: Pass with No Self Correction or Prompts
     def test_validate_and_fix_tag_rating(self):
@@ -225,16 +250,23 @@ class testTag_Validator(TestCase):
         self.assertEqual(tag, "Kirk/Spock", "Kirk/Spock should pass with no fixes")
 
     # Validate and Fix Tag Tests: Pass with Prompts
-    @patch('builtins.input', return_value='Not Rated')
+    @patch("builtins.input", return_value="Not Rated")
     def test_validate_and_fix_tag_type_one_prompt(self, mock_input):
         tag = self.tag_validator.validate_and_fix_tag("not ated", "rating")
-        self.assertEqual(tag, "Not Rated", "not ated should prompt for manual correction to Not Rated")
+        self.assertEqual(
+            tag,
+            "Not Rated",
+            "not ated should prompt for manual correction to Not Rated",
+        )
 
-    @patch('builtins.input', side_effect=['mlm', 'M/M'])
+    @patch("builtins.input", side_effect=["mlm", "M/M"])
     def test_validate_and_fix_tag_two_prompts(self, mock_input):
         tag = self.tag_validator.validate_and_fix_tag("male x male", "categories")
-        self.assertEqual(tag, "M/M", "male x male should prompt twice for manual correction to M/M")
+        self.assertEqual(
+            tag, "M/M", "male x male should prompt twice for manual correction to M/M"
+        )
 
-if __name__ == '__main__':
-  print('here')
-  unittest.main()
+
+if __name__ == "__main__":
+    print("here")
+    unittest.main()
