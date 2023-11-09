@@ -10,7 +10,7 @@ warnings.filterwarnings("ignore", category=Warning)
 class Sql(object):
     def __init__(self, args, log):
         self.tag_count = 0
-        conn = connect(args.db_host, args.db_user, args.db_password)
+        conn = connect(host=args.db_host, user=args.db_user, password=args.db_password)
         cursor = conn.cursor()
         cursor.execute(
             "CREATE DATABASE IF NOT EXISTS `{0}`".format(args.temp_db_database)
@@ -18,10 +18,10 @@ class Sql(object):
         self.log = log
 
         self.conn = connect(
-            args.db_host,
-            args.db_user,
-            args.db_password,
-            args.temp_db_database,
+            host=args.db_host,
+            user=args.db_user,
+            password=args.db_password,
+            database=args.temp_db_database,
             charset="utf8",
             use_unicode=True,
             autocommit=True,
