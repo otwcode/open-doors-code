@@ -256,3 +256,15 @@ class Args(object):
             )
         self._print_args(self.args)
         return self.args
+
+
+def args_for_08(self):
+    if self.args.output_database is None:
+        self.args.output_database = input(
+            'Name of the database the final tables should be created in (default "od_sgf"):'
+        )
+        self.args.output_database = (
+            "od_sgf" if self.args.output_database == "" else self.args.output_database
+        )
+    self._print_args(self.args)
+    return self.args
