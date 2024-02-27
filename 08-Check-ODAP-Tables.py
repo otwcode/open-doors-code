@@ -144,4 +144,71 @@ if __name__ == "__main__":
         log.error("Found at least one story with too many chapters; ending audit here.")
         sys.exit(5)
 
+    ##
+    ## Check for empty chapters
+    ##
+
+    log.debug("Checking for empty chapters.")
+    found_error = False
+
+    empty_chap = sql.execute_dict(
+        "SELECT id as chap, story_id as sid FROM chapters WHERE text = '' or text = NULL",
+    )
+
+    if empty_chap:
+        found_error = True
+        for story in empty_chap:
+            log.error(
+                f"Found chapter {story['chap']} in story {story['sid']} that is empty."
+            )
+
+    if found_error:
+        log.error("Found at least one empty chapter; ending audit here.")
+        sys.exit(5)
+
+    ##
+    ## Check for malformed author names
+    ##
+
+    log.debug("Checking for malformed author names.")
+    found_error = False
+
+    bad_author = sql.execute_dict(
+        "SELECT id as au, name FROM authors WHERE name = '' OR name = NULL OR name LIKE '-'"
+    )
+
+    if bad_author:
+        found_error = True
+        for author in bad_author:
+            log.error(
+                f"Found author {author['au']} with illegal name: '{author['name']}'"
+            )
+
+    if found_error:
+        log.error("Found at least one bad author name; ending audit here.")
+        sys.exit(6)
+
+    ##
+    ## Check for malformed author emails
+    ##
+
+    log.debug("Checking for malformed author emails.")
+    found_error = False
+
+    bad_email = sql.execute_dict(
+        # The two percents are because the string is interpreted as a format-string, but we want the wildcard to make it to SQL itself
+        "SELECT id as au, email FROM authors WHERE email = '' OR email = NULL OR email LIKE 'mailto:%%'"
+    )
+
+    if bad_email:
+        found_error = True
+        for email in bad_email:
+            log.error(
+                f"Found author {email['au']} with illegal email address:'{email['email']}'"
+            )
+
+    if found_error:
+        log.error("Found at least one bad author email; ending audit here.")
+        sys.exit(7)
+
     log.info("All checks completed successfully.")
