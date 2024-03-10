@@ -6,8 +6,11 @@ from prompt_toolkit import print_formatted_text
 from prompt_toolkit.formatted_text import FormattedText
 from prompt_toolkit.shortcuts import clear
 
+# This regex is pulled from the HTML5 spec. Though it is technically not
+# compliant with RFC 5322 ("a willful violation"), it's good enough for our
+# purposes.
 email_regex = re.compile(
-    r"([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\"([]!#-[^-~ \t]|(\\[\t -~]))+\")@([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\[[\t -Z^-~]*])"
+    r"([a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+)@([a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*)"
 )
 
 
@@ -44,7 +47,7 @@ def is_mailto(match) -> bool:
 def ask_user_for_action(match) -> str:
     start, end = match.span()
     raw_email = match.string[start:end]
-    domain = match.group(5)
+    domain = match.group(2)
     clear()
     print_context(match, 50)
     while True:
@@ -85,7 +88,7 @@ def return_from_list(match) -> str:
         return raw_email
     elif address_entry is not None:
         return address_entry
-    domain = match.group(5)
+    domain = match.group(2)
     domain_entry = domains.get(domain)
     if domain_entry is True:
         return raw_email
