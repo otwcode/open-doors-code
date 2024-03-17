@@ -211,4 +211,24 @@ if __name__ == "__main__":
         log.error("Found at least one bad author email; ending audit here.")
         sys.exit(7)
 
+    ##
+    ## Check for stories without chapters
+    ##
+
+    log.debug("Checking for stories without any chapters.")
+    found_error = False
+
+    empty_stories = sql.execute_dict(
+        "SELECT s.id as sid FROM stories s LEFT JOIN chapters c ON c.story_id = s.id WHERE c.story_id IS NULL"
+    )
+
+    if empty_stories:
+        found_error = True
+        for story in empty_stories:
+            log.error(f"Found story with no chapters: {story['sid']}")
+
+    if found_error:
+        log.error("Found at least one story with no chapters; ending audit here.")
+        sys.exit(8)
+
     log.info("All checks completed successfully.")
