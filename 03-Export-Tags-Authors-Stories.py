@@ -22,6 +22,7 @@ def write_csv(data, filename, columns):
         fp.close()
 
 
+
 if __name__ == "__main__":
     """
   This step exports the Tag Wrangling and Authors with stories CSV files which you then have to import into Google

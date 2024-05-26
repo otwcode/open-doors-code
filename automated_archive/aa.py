@@ -4,6 +4,7 @@ import datetime
 import codecs
 import re
 import os
+from pathlib import Path
 from html.parser import HTMLParser
 
 from pymysql import connect
@@ -123,7 +124,7 @@ def _extract_fandoms(args, record):
 
 
 def _create_mysql(args, FILES, log):
-    db = connect(args.db_host, args.db_user, args.db_password, "")
+    db = connect(host=args.db_host, user=args.db_user, password=args.db_password, db="")
     cursor = db.cursor()
     DATABASE_NAME = args.temp_db_database
 
@@ -132,12 +133,10 @@ def _create_mysql(args, FILES, log):
     cursor.execute("create database {0};".format(DATABASE_NAME))
     cursor.execute("use {0}".format(DATABASE_NAME))
 
-    sql = Sql(args)
-    codepath = os.path.dirname(os.path.realpath(__file__))
+    sql = Sql(args, log)
+    script_path = Path(__file__).parent.parent / "shared_python" / "create-open-doors-tables.sql"
 
-    sql.run_script_from_file(
-        codepath + "/shared_python/create-open-doors-tables.sql", database=DATABASE_NAME
-    )
+    sql.run_script_from_file(script_path, database=DATABASE_NAME)
     db.commit()
 
     authors = [
