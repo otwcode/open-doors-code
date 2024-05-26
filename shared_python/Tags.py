@@ -94,7 +94,7 @@ class Tags(object):
                                 tag_col_lookup[col], str
                             ):  # Probably AA or a custom archive
                                 cleaned_tag = (
-                                    val.encode("utf-8").replace("'", "'").strip()
+                                    val.replace("'", "'").strip()
                                 )
 
                                 values.append(
