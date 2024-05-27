@@ -3,7 +3,6 @@
 import datetime
 import codecs
 import re
-import os
 from pathlib import Path
 from html.parser import HTMLParser
 
