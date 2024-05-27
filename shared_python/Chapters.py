@@ -82,7 +82,7 @@ class Chapters(object):
                     # look up the author id and add that one to the file_names list
                     sql_author_id = self.sql.execute_and_fetchall(
                         self.sql.database,
-                        "SELECT author_id FROM chapters WHERE id = {0}".format(cid)
+                        "SELECT author_id FROM chapters WHERE id = {0}".format(cid),
                     )
                     if len(sql_author_id) > 0:
                         author_id = sql_author_id[0][0]

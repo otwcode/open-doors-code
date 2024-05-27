@@ -133,7 +133,9 @@ def _create_mysql(args, FILES, log):
     cursor.execute("use {0}".format(DATABASE_NAME))
 
     sql = Sql(args, log)
-    script_path = Path(__file__).parent.parent / "shared_python" / "create-open-doors-tables.sql"
+    script_path = (
+        Path(__file__).parent.parent / "shared_python" / "create-open-doors-tables.sql"
+    )
 
     sql.run_script_from_file(script_path, database=DATABASE_NAME)
     db.commit()

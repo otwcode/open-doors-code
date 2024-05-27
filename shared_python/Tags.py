@@ -93,9 +93,7 @@ class Tags(object):
                             if isinstance(
                                 tag_col_lookup[col], str
                             ):  # Probably AA or a custom archive
-                                cleaned_tag = (
-                                    val.replace("'", "'").strip()
-                                )
+                                cleaned_tag = val.replace("'", "'").strip()
 
                                 values.append(
                                     '({0}, "{1}", "{2}", "{3}")'.format(

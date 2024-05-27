@@ -55,7 +55,9 @@ class Sql(object):
         self.conn.commit()
         return cursor.fetchall()
 
-    def run_script_from_file(self, filename: Union[str, Path], database, initial_load=False):
+    def run_script_from_file(
+        self, filename: Union[str, Path], database, initial_load=False
+    ):
         # Open and read the file as a single buffer
         fd = open(filename, "r")
         sqlFile = fd.read()
