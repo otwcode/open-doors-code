@@ -22,14 +22,16 @@ def _clean_file(filepath, log):
     :param filepath: Path to ARCHIVE_DB.pl
     :return: Python dictionary keyed by original story id
     """
-    for i, encoding in enumerate(["utf-8","ascii","Latin-1","Windows-1252"]):
+    for i, encoding in enumerate(["utf-8", "ascii", "Latin-1", "Windows-1252"]):
         try:
             archive_db = codecs.open(filepath, "r", encoding=encoding).read()
             break
-        except:
+        except:  # noqa: E722
             log.error(f"{encoding} encoding failed to read ARCHIVE_DB.pl")
             if i == 3:
-                raise RuntimeError("ARCHIVE_DB.pl can't be read by any of the default encodings, please fix the file and try again.")
+                raise RuntimeError(
+                    "ARCHIVE_DB.pl can't be read by any of the default encodings, please fix the file and try again."
+                )
 
     # Manually escape single quote entity and reformat file as a Python dictionary
     step1 = html.unescape(archive_db.replace("&#39;", "\\&#39;"))
@@ -128,17 +130,15 @@ def _extract_fandoms(args, record):
     return tags.strip(", ")
 
 
-def _extract_date(args, record):
+def _extract_date(args, record, log):
     date_string = record.get(
         "PrintTime",
         record.get(
             "DatePrint",
-            record.get(
-                "Date", str(datetime.now().strftime("%m/%d/%y"))
-            ),
+            record.get("Date", str(datetime.now().strftime("%m/%d/%y"))),
         ),
     )
-    
+
     dt = None
     try:
         # If the date is in the form of a Unix timestamp
@@ -146,9 +146,11 @@ def _extract_date(args, record):
             dt = datetime.fromtimestamp(int(date_string))
         else:
             dt = datetime.strptime(date_string, "%m/%d/%y")
-    except:
-        log.error("Failed to parse date value: "+date_string)
-    
+    except Exception as e:
+        log.error(
+            f"Failed to parse date value '{date_string}' due to exception: {str(e)}"
+        )
+
     return dt.strftime("%Y-%m-%d") if dt else ""
 
 
@@ -195,7 +197,7 @@ def _create_mysql(args, FILES, log):
             FILES[i].get("Summary", "").replace("'", "\\'"),
             _extract_tags(args, FILES[i]),
             _extract_characters(args, FILES[i]),
-            _extract_date(args, FILES[i]),
+            _extract_date(args, FILES[i], log),
             FILES[i].get("Location", "").replace("'", "\\'"),
             FILES[i]
             .get("LocationURL", FILES[i].get("StoryURL", ""))
@@ -203,7 +205,9 @@ def _create_mysql(args, FILES, log):
             FILES[i].get("Notes", "").replace("'", "\\'"),
             _extract_relationships(args, FILES[i]),
             FILES[i].get("Rating", ""),
-            FILES[i].get("Warnings", FILES[i].get("OptionalWarnings", "")).replace("'", "\\'"),
+            FILES[i]
+            .get("Warnings", FILES[i].get("OptionalWarnings", ""))
+            .replace("'", "\\'"),
             FILES[i].get("Author", "").strip(),
             FILES[i].get("Email", FILES[i].get("EmailAuthor", "")).lower().strip(),
             FILES[i].get("FileType", args.chapters_file_extensions)
@@ -264,7 +268,7 @@ def _create_mysql(args, FILES, log):
             authorid = result[0][0]
             item_dict[original_id] = {
                 "authorid": authorid,
-                "itemtype": "story_link" if table_name == "story_links" else "story"
+                "itemtype": "story_link" if table_name == "story_links" else "story",
             }
 
             stor = """
@@ -308,19 +312,19 @@ def _create_mysql(args, FILES, log):
             )
             raise
     db.commit()
-    
+
     for itemid, item_info in item_dict.items():
         try:
             item_auth = """
             INSERT INTO item_authors (author_id, item_id, item_type)
             VALUES({0}, {1}, '{2}');\n""".format(
-                item_info["authorid"],
-                itemid,
-                item_info["itemtype"]
+                item_info["authorid"], itemid, item_info["itemtype"]
             )
             cursor.execute(item_auth)
         except:
-            log.error(f"Failed to insert item_authors for {item_info['itemtype']} {itemid} with author {item_info['authorid']}")
+            log.error(
+                f"Failed to insert item_authors for {item_info['itemtype']} {itemid} with author {item_info['authorid']}"
+            )
             raise
     db.commit()
 
