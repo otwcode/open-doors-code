@@ -15,7 +15,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ macos-latest, windows-latest ]
+        os: [ macos-13, windows-latest ] # Using macos-13 since macos-latest no longer supports 3.8
 
     steps:
       - uses: actions/checkout@v2
