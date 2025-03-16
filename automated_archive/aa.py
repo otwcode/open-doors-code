@@ -1,10 +1,10 @@
 # -- coding: utf-8 --
 
-import datetime
+from datetime import datetime
 import codecs
 import re
-from pathlib import Path
-from html.parser import HTMLParser
+import html
+import urllib.request
 
 from pymysql import connect
 
@@ -22,11 +22,17 @@ def _clean_file(filepath, log):
     :param filepath: Path to ARCHIVE_DB.pl
     :return: Python dictionary keyed by original story id
     """
-    h = HTMLParser()
-    archive_db = codecs.open(filepath, "r", encoding="utf-8").read()
+    for i, encoding in enumerate(["utf-8","ascii","Latin-1","Windows-1252"]):
+        try:
+            archive_db = codecs.open(filepath, "r", encoding=encoding).read()
+            break
+        except:
+            log.error(f"{encoding} encoding failed to read ARCHIVE_DB.pl")
+            if i == 3:
+                raise RuntimeError("ARCHIVE_DB.pl can't be read by any of the default encodings, please fix the file and try again.")
 
     # Manually escape single quote entity and reformat file as a Python dictionary
-    step1 = h.unescape(archive_db.replace("&#39;", "\\&#39;"))
+    step1 = html.unescape(archive_db.replace("&#39;", "\\&#39;"))
 
     # Indent the file with a single tab instead of whatever is currently used
     step15 = re.sub(r"^\s+", "\t", step1)
@@ -122,6 +128,30 @@ def _extract_fandoms(args, record):
     return tags.strip(", ")
 
 
+def _extract_date(args, record):
+    date_string = record.get(
+        "PrintTime",
+        record.get(
+            "DatePrint",
+            record.get(
+                "Date", str(datetime.now().strftime("%m/%d/%y"))
+            ),
+        ),
+    )
+    
+    dt = None
+    try:
+        # If the date is in the form of a Unix timestamp
+        if date_string.isdigit():
+            dt = datetime.fromtimestamp(int(date_string))
+        else:
+            dt = datetime.strptime(date_string, "%m/%d/%y")
+    except:
+        log.error("Failed to parse date value: "+date_string)
+    
+    return dt.strftime("%Y-%m-%d") if dt else ""
+
+
 def _create_mysql(args, FILES, log):
     db = connect(host=args.db_host, user=args.db_user, password=args.db_password, db="")
     cursor = db.cursor()
@@ -132,12 +162,13 @@ def _create_mysql(args, FILES, log):
     cursor.execute("create database {0};".format(DATABASE_NAME))
     cursor.execute("use {0}".format(DATABASE_NAME))
 
-    sql = Sql(args, log)
-    script_path = (
-        Path(__file__).parent.parent / "shared_python" / "create-open-doors-tables.sql"
-    )
+    # Instead of duplicating this file in the repo grab it from the master branch of eFiction
+    url = "https://raw.githubusercontent.com/otwcode/open-doors-eFiction/refs/heads/master/opendoors/open-doors-tables-working.sql"
+    with urllib.request.urlopen(url) as response:
+        script = response.read().decode()
 
-    sql.run_script_from_file(script_path, database=DATABASE_NAME)
+    sql = Sql(args, log)
+    sql.run_sql_file(script, database=DATABASE_NAME)
     db.commit()
 
     authors = [
@@ -164,18 +195,7 @@ def _create_mysql(args, FILES, log):
             FILES[i].get("Summary", "").replace("'", "\\'"),
             _extract_tags(args, FILES[i]),
             _extract_characters(args, FILES[i]),
-            datetime.datetime.strptime(
-                FILES[i].get(
-                    "PrintTime",
-                    FILES[i].get(
-                        "DatePrint",
-                        FILES[i].get(
-                            "Date", str(datetime.datetime.now().strftime("%m/%d/%y"))
-                        ),
-                    ),
-                ),
-                "%m/%d/%y",
-            ).strftime("%Y-%m-%d"),
+            _extract_date(args, FILES[i]),
             FILES[i].get("Location", "").replace("'", "\\'"),
             FILES[i]
             .get("LocationURL", FILES[i].get("StoryURL", ""))
@@ -183,7 +203,7 @@ def _create_mysql(args, FILES, log):
             FILES[i].get("Notes", "").replace("'", "\\'"),
             _extract_relationships(args, FILES[i]),
             FILES[i].get("Rating", ""),
-            FILES[i].get("Warnings", "").replace("'", "\\'"),
+            FILES[i].get("Warnings", FILES[i].get("OptionalWarnings", "")).replace("'", "\\'"),
             FILES[i].get("Author", "").strip(),
             FILES[i].get("Email", FILES[i].get("EmailAuthor", "")).lower().strip(),
             FILES[i].get("FileType", args.chapters_file_extensions)
@@ -196,6 +216,7 @@ def _create_mysql(args, FILES, log):
 
     cur = 0
     total = len(FILES)
+    item_dict = {}
     for (
         original_id,
         title,
@@ -225,7 +246,7 @@ def _create_mysql(args, FILES, log):
                 table_name = "stories"
             else:
                 filename = url
-                table_name = "bookmarks"
+                table_name = "story_links"
 
             # Clean up fandoms and add default fandom if it exists
             final_fandoms = fandoms.replace("'", r"\'")
@@ -241,10 +262,14 @@ def _create_mysql(args, FILES, log):
                 if element[1] == author and element[2] == email
             ]
             authorid = result[0][0]
+            item_dict[original_id] = {
+                "authorid": authorid,
+                "itemtype": "story_link" if table_name == "story_links" else "story"
+            }
 
             stor = """
-        INSERT INTO {0} (id, fandoms, title, summary, tags, characters, date, url, notes, relationships, rating, warnings, author_id)
-        VALUES({1}, '{2}', '{3}', '{4}', '{5}', '{6}', '{7}', '{8}', '{9}', '{10}', '{11}', '{12}', '{13}');\n""".format(
+        INSERT INTO {0} (id, fandoms, title, summary, tags, characters, date, url, notes, relationships, rating, warnings)
+        VALUES({1}, '{2}', '{3}', '{4}', '{5}', '{6}', '{7}', '{8}', '{9}', '{10}', '{11}', '{12}');\n""".format(
                 table_name,
                 original_id,
                 final_fandoms.replace(r"\\", "\\"),
@@ -258,7 +283,6 @@ def _create_mysql(args, FILES, log):
                 pairings,
                 rating,
                 warnings,
-                authorid,
             )
             cursor.execute(stor)
         except:
@@ -282,6 +306,21 @@ def _create_mysql(args, FILES, log):
                     authorid,
                 )
             )
+            raise
+    db.commit()
+    
+    for itemid, item_info in item_dict.items():
+        try:
+            item_auth = """
+            INSERT INTO item_authors (author_id, item_id, item_type)
+            VALUES({0}, {1}, '{2}');\n""".format(
+                item_info["authorid"],
+                itemid,
+                item_info["itemtype"]
+            )
+            cursor.execute(item_auth)
+        except:
+            log.error(f"Failed to insert item_authors for {item_info['itemtype']} {itemid} with author {item_info['authorid']}")
             raise
     db.commit()
 

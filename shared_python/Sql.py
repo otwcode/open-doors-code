@@ -1,6 +1,4 @@
 import re
-from pathlib import Path
-from typing import Union
 import warnings
 
 # ignore unhelpful MySQL warnings
@@ -56,13 +54,17 @@ class Sql(object):
         return cursor.fetchall()
 
     def run_script_from_file(
-        self, filename: Union[str, Path], database, initial_load=False
+        self, filename, database, initial_load=False
     ):
         # Open and read the file as a single buffer
         fd = open(filename, "r")
         sqlFile = fd.read()
         fd.close()
+        self.run_sql_file(sqlFile, database, initial_load)
 
+    def run_sql_file(
+        self, sqlFile, database, initial_load=False
+    ):
         # replace placeholders and return all SQL commands (split on ';')
         sqlCommands = sqlFile.replace("$DATABASE$", database).split(";\n")
 
