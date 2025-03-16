@@ -1,4 +1,5 @@
 import re
+from collections import defaultdict
 from html.parser import HTMLParser
 from logging import Logger
 
@@ -83,8 +84,9 @@ class Tags(object):
             )
         )
 
+        tags_to_insert = {}
+        tags_to_story_ids = defaultdict(list)
         for story_tags_row in data:
-            values = []
             for col in tag_columns:
                 needs_fandom = col in tags_with_fandoms
                 if story_tags_row[col] is not None:
@@ -93,25 +95,36 @@ class Tags(object):
                             if isinstance(
                                 tag_col_lookup[col], str
                             ):  # Probably AA or a custom archive
-                                cleaned_tag = val.replace("'", "'").strip()
-
-                                values.append(
-                                    '({0}, "{1}", "{2}", "{3}")'.format(
-                                        story_tags_row[story_id_col_name],
-                                        re.sub(r'(?<!\\)"', '\\"', cleaned_tag),
+                                cleaned_tag = re.sub(r'(?<!\\)"', '\\"', val.replace("'", "'").strip())
+                                tags_to_story_ids[cleaned_tag].append(story_tags_row[story_id_col_name])
+                                tags_to_insert[cleaned_tag] = '("{0}", "{1}", "{2}")'.format(
+                                        cleaned_tag,
                                         tag_col_lookup[col],
                                         story_tags_row["fandoms"]
                                         if needs_fandom
                                         else "",
-                                    )
                                 )
 
-            if len(values) > 0:
-                self.sql.execute(
-                    """
-               INSERT INTO tags (storyid, original_tag, original_table, ao3_tag_fandom) VALUES {0}
-             """.format(", ".join(values))
-                )
+        if len(tags_to_insert) > 0:
+            self.sql.execute(
+                """
+           INSERT INTO tags (original_tag, original_type, ao3_tag_fandom) VALUES {0}
+         """.format(", ".join(tags_to_insert.values()))
+            )
+            
+            tag_data = self.sql.execute_dict(
+                "SELECT id, original_tag FROM tags"
+            )
+            for tag_row in tag_data:
+                story_ids = set(tags_to_story_ids[tag_row["original_tag"]])
+                for story_id in story_ids:
+                    self.sql.execute("""
+                    INSERT INTO item_tags (item_id, item_type, tag_id) VALUES ({0}, "{1}", {2})
+                    """.format(
+                        story_id,
+                        "story_link" if table_name == "story_links" else "story",
+                        tag_row["id"]
+                    ))
 
     def distinct_tags(self, database):
         """

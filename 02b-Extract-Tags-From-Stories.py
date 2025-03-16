@@ -22,7 +22,6 @@ if __name__ == "__main__":
             args.temp_db_database
         )
     )
-    tags.create_tags_table()
 
     tag_col_list = {}
     stories_id_name = ""
