@@ -143,6 +143,8 @@ class Chapters(object):
         else:
             for _, chapter_path in file_paths.items():
                 path = chapter_path.replace(self.args.chapters_path, "")[1:]
+                if os.sep == "\\":  # if this script is run on windows
+                    path = path.replace("\\", "/")
                 with codecs.open(chapter_path, "r", encoding=char_encoding) as c:
                     try:
                         cur = Common.print_progress(cur, total)
