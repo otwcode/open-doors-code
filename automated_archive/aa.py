@@ -22,16 +22,10 @@ def _clean_file(filepath, log):
     :param filepath: Path to ARCHIVE_DB.pl
     :return: Python dictionary keyed by original story id
     """
-    for i, encoding in enumerate(["utf-8", "ascii", "Latin-1", "Windows-1252"]):
-        try:
-            archive_db = codecs.open(filepath, "r", encoding=encoding).read()
-            break
-        except:  # noqa: E722
-            log.error(f"{encoding} encoding failed to read ARCHIVE_DB.pl")
-            if i == 3:
-                raise RuntimeError(
-                    "ARCHIVE_DB.pl can't be read by any of the default encodings, please fix the file and try again."
-                )
+    encoding = input('Encoding for the ARCHIVE_DB.pl file (default: "utf-8"): ')
+    if encoding is None or encoding == "":
+        encoding = "utf-8"
+    archive_db = codecs.open(filepath, "r", encoding=encoding).read()
 
     # Manually escape single quote entity and reformat file as a Python dictionary
     step1 = html.unescape(archive_db.replace("&#39;", "\\&#39;"))
