@@ -22,7 +22,7 @@ def _clean_file(filepath, log):
     :param filepath: Path to ARCHIVE_DB.pl
     :return: Python dictionary keyed by original story id
     """
-    encoding = input('Encoding for the ARCHIVE_DB.pl file (default: "utf-8"): ')
+    encoding = input('Encoding for the ARCHIVE_DB.pl file, e.g. "utf-8", "latin_1", "cp1252" (default: "utf-8"): ')
     if encoding is None or encoding == "":
         encoding = "utf-8"
     archive_db = codecs.open(filepath, "r", encoding=encoding).read()
