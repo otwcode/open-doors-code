@@ -96,7 +96,9 @@ class Tags(object):
                                 tag_col_lookup[col], str
                             ):  # Probably AA or a custom archive
                                 cleaned_tag = re.sub(
-                                    r'(?<!\\)"', '\\"', val.replace("'", "'").strip()
+                                    r'(?<!\\)"',
+                                    '\\"',
+                                    val.replace("'", "'").strip(),
                                 )
                                 tags_to_story_ids[cleaned_tag].append(
                                     story_tags_row[story_id_col_name]
