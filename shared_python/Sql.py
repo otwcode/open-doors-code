@@ -58,7 +58,9 @@ class Sql(object):
         fd = open(filename, "r")
         sqlFile = fd.read()
         fd.close()
+        self.run_sql_file(sqlFile, database, initial_load)
 
+    def run_sql_file(self, sqlFile, database, initial_load=False):
         # replace placeholders and return all SQL commands (split on ';')
         sqlCommands = sqlFile.replace("$DATABASE$", database).split(";\n")
 

@@ -81,7 +81,8 @@ class Chapters(object):
                 for cid, duplicate in duplicate_chapters.items():
                     # look up the author id and add that one to the file_names list
                     sql_author_id = self.sql.execute_and_fetchall(
-                        "SELECT author_id FROM chapters WHERE id = {0}".format(cid)
+                        self.sql.database,
+                        "SELECT author_id FROM chapters WHERE id = {0}".format(cid),
                     )
                     if len(sql_author_id) > 0:
                         author_id = sql_author_id[0][0]
@@ -142,6 +143,8 @@ class Chapters(object):
         else:
             for _, chapter_path in file_paths.items():
                 path = chapter_path.replace(self.args.chapters_path, "")[1:]
+                if os.sep == "\\":  # if this script is run on windows
+                    path = path.replace("\\", "/")
                 with codecs.open(chapter_path, "r", encoding=char_encoding) as c:
                     try:
                         cur = Common.print_progress(cur, total)
