@@ -2,7 +2,7 @@ PyMySQL==1.1.0
 Cython==3.0.5
 pyOpenSSL==23.3.0
 backports.functools_lru_cache==1.6.6
-certifi==2023.7.22
+certifi==2024.7.4
 charade==1.0.3
 Genshi==0.7.7
 ipaddr==2.2.0
