@@ -51,6 +51,7 @@ if __name__ == "__main__":
             cols["ao3_tag_category"],
             cols["original_description"],
             "TW Notes",
+            "Used in Archive?",
         ],
     )
 
