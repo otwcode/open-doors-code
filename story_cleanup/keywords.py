@@ -2,49 +2,28 @@ class Keywords:
     def __init__(self):
         self.notes = [
             "note",
-            "Note",
-            "notes",
-            "Notes",
-            "A/n",
             "a/n",
-            "A/N",
             "disclaimer",
-            "Disclaimer",
-            "DISCLAIMER",
+            "tumblr",
+            "author"
         ]
         self.warnings = [
             "warning",
-            "Warning",
-            "warnings",
-            "Warnings",
             "cw",
-            "CW",
             "content warning",
-            "Content Warning",
             "trigger warning",
-            "Trigger Warning",
-            "Content warning",
-            "Trigger warning",
             "tw",
-            "TW",
         ]
         self.summary = [
             "summary",
-            "Summary",
             "summaries",
-            "Summaries",
             "prompt",
-            "Prompt",
+            "synopsis"
         ]
         self.commercial = [
-            "Patreon",
             "patreon",
-            "mailto",
-            "Ko-fi",
             "ko-fi",
-            "Ko-Fi",
-            "gofundme",
-            "GoFundMe",
+            "kofundme",
         ]
         # self.ratings
         # self.wordcount
@@ -67,6 +46,7 @@ class Keywords:
                     "unsupported type: must be 'notes', 'warnings', 'summary', or 'commercial'; check config file"
                 )
         for k in keywords:
-            if k in text:
+        # eventually, a regex would be more efficient here, but with the line-by-line parsing built in this works for now
+            if k in text.lower():
                 return True
         return False
