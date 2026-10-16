@@ -220,6 +220,23 @@ for the second author, amend the first author, then put the second author ID int
 
 ## Other Scripts
 
+### Edit a chapter (split or trim)
+
+    python chapter_editor.py -p <archive name>.yml --chapter_id <id>
+
+A GUI tool for editing oversized or malformed chapters in the output database. It requires a display (not headless). The chapter text is rendered as readable text (HTML tags stripped) in a scrollable window.
+
+**Split** — click anywhere in the text to set a split point. The character counts before and after are shown. Click **Split at click point** to:
+- Update the original chapter with the text before the split point; its title becomes `[TITLE] Part 1`
+- Insert a new chapter immediately after with the text from the split point onwards; its title becomes `[TITLE] Part 2`
+- Increment the `position` of all subsequent chapters in the same story
+
+**Trim** — click and drag to select the text you want to keep. Click **Trim to selection** to replace the chapter text with only the selected portion. No new chapter is created and chapter positions are not changed.
+
+Both operations commit atomically and roll back on error.
+
+Note: requires `tkinter` (Python must be compiled with Tcl/Tk support) plus `pymysql` and `pyyaml`.
+
 ### Remove emails from Open Doors tables
 
 Scans the chapter for emails and removes some of them:
