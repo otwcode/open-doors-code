@@ -263,3 +263,24 @@ class Args(object):
             )
             self._print_args(self.args)
         return self.args
+
+    def args_for_sn_extraction(self):
+        if self.args.chapters_path is None:
+            self.args.chapters_path = input(
+                "Location of the text files containing the stories:"
+            )
+        if self.args.remove_option is not None:
+            if self.args.chapters_backup_path is None:
+                self.args.chapters_backup_path = input(
+                    "Desired location (full path) of the original text backup"
+                )
+            if os.path.exists(self.args.chapters_backup_path):
+                os.rmdir(self.args.chapters_backup_path)
+
+        if self.args.output_csv is None:
+            self.args.output_csv = input("Output path for the extracted CSV")
+        if self.args.scan_types is None:
+            self.args.scan_types = ["notes", "warnings", "summary", "commercial"]
+
+        self._print_args(self.args)
+        return self.args

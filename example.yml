@@ -28,3 +28,13 @@ bookmark_ids_to_remove: /path/to/ids to remove.txt
 # Chapter file location
 chapters_path: /path/to/chapter/files/stories
 chapters_file_extensions: txt, html
+
+
+
+# options for story cleanup
+# leave blank to ignore story files; any value here will remove flagged text from the original
+remove_option:
+chapters_backup_path: /path/to/backup/chapter/story/output/files
+output_csv: /path/to/output/Desired_CSV_name.csv
+# Comma-separated list of types to scan for
+scan_types: [notes, warnings, summary, commercial]
