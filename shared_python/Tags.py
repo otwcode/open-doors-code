@@ -141,16 +141,24 @@ class Tags(object):
             database,
             """
       SELECT DISTINCT
-        id as "Original Tag ID",
-        original_tag as "Original Tag Name",
-        original_type as "Original Tag Type",
-        original_parent as "Original Parent Tag",
-        ao3_tag_fandom as "Related Fandom",
-        ao3_tag as "Recommended AO3 Tag",
-        ao3_tag_type as "Recommended AO3 Type",
-        ao3_tag_category as "Recommended AO3 Category",
-        original_description as "Original Description",
-        '' as "TW Notes" FROM tags
+        t.id as "Original Tag ID",
+        t.original_tag as "Original Tag Name",
+        t.original_type as "Original Tag Type",
+        t.original_parent as "Original Parent Tag",
+        t.ao3_tag_fandom as "Related Fandom",
+        t.ao3_tag as "Recommended AO3 Tag",
+        t.ao3_tag_type as "Recommended AO3 Type",
+        t.ao3_tag_category as "Recommended AO3 Category",
+        t.original_description as "Original Description",
+        '' as "TW Notes",
+        CASE
+                WHEN EXISTS (
+                    SELECT 1 FROM item_tags it
+                    WHERE it.tag_id = t.id AND it.item_type = 'story'
+                ) THEN "Yes"
+                ELSE "No"
+            END AS "Used in Archive?"
+        FROM tags t
       """,
         )
 
@@ -206,7 +214,7 @@ class Tags(object):
                 new_tag_id = sql_dict[0]["LAST_INSERT_ID()"]
                 # get all associated items from item_tags
                 items = self.sql.execute_dict(
-                    f"""SELECT item_id, item_type 
+                    f"""SELECT item_id, item_type
                         FROM item_tags WHERE tag_id = {row['Original Tag ID']}"""
                 )
 
