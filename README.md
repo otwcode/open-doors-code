@@ -44,12 +44,11 @@ the file if it is needed for a given stage.
 - 01 - Load the original data into a temporary database for processing (AA only)
 - 01.5 - Load chapters into the chapters table of the temporary database (AA and custom only)
 - 02 - Extract tags from stories and story links into a new `tags` table. (AA and custom only)
-- 03 - Export the distinct tags into a spreadsheet to enable wranglers to map tags to AO3 tags, and export story and
-story link information into spreadsheets used for searching. (all)
-- 04 - Map the tags in the `tags` table to AO3 tags suggested by wranglers. (all)
-- 05 - Create the final tables that will be used for the temp site and copy all the authors, stories and story links. (all)
-- 06 - Copy the AO3 tags into the final story and story link rows. (all)
-- 08 - Audit the final tables to find common problems. (all)
+- 03 - Export the distinct tags into a spreadsheet to enable wranglers to map tags to AO3 tags, and export story and story link information into spreadsheets used for searching. (all)
+- 04 - Create the final tables that will be used for the temp site and copy all the authors, stories and story links. (all)
+- 05 - Audit the final tables to find common problems. (all)
+- 06 - Map the tags in the `tags` table to AO3 tags suggested by wranglers. (all)
+- 07 - Copy the AO3 tags into the final story and story link rows. (all)
 
 At this point, the final database is ready to be loaded into a [temporary website](https://github.com/otwcode/open-doors-temp-site) that will be used to feed the works into
 the Archive using its mass import API.
@@ -91,11 +90,11 @@ archives needs to be loaded manually or using custom scripts into `authors`, `st
 and `stories` tables matching [the Open Doors table schema](shared_python/create-open-doors-tables.sql) in the
 `temp_db_database`.
 
-### Step 02a - Load Chapters into the chapters table [NEEDS REVISION]
+### Step 01.5 - Load Chapters into the chapters table [NEEDS REVISION]
 
-    python 02-Load-Chapters-to-Open-Doors-Table.py -p <archive name>.yml
+    python 01a-Load-Chapters-to-Open-Doors-Table.py -p <archive name>.yml
 
-Loads the chapter contents in the output database (this can be run at any point after stage 05). It does this by going
+Loads the chapter contents in the output database (this can be run at any point after stage 04). It does this by going
 through all the files in the `chapters_path` and trying to find an entry in the chapters table that has the same
 `url`. It then copied the contents of the file into the `text` column for that row.
 
@@ -116,7 +115,7 @@ If there are duplicate chapters (for example if co-authored stories were listed 
 try to deduplicate them by only keeping the duplicate whose `author_id` is the same as the `author_id` in the `story` table.
 It will list duplicates it has found in the console output.
 
-### Step 02b - Extract tags from the original stories (AA and custom)
+### Step 02 - Extract tags from the original stories (AA and custom)
 
     python 02-Extract-Tags-From-Stories.py -p <archive name>.yml
 
@@ -141,23 +140,14 @@ Before an external archive can be imported, the following two steps need to be p
 1. the external archive's tags have to be mapped to the Archive's existing tags. This saves tag wranglers from having to
 map the external tags manually to the correct ones.
 
-2. all the stories from the original archive have to searched for on the Archive to prevent importing duplicates.
+2. all the stories from the original archive have to be searched for on the Archive to prevent importing duplicates.
 
 This step exports those two CSV files which you then have to import into Google Spreadsheet and share with the rest of the Open Doors committee.
 
 
-### Step 04 - Reimport the Tag Wrangling sheet and map the original tags to the new AO3 tags
+### Step 04 - Create the Open Doors tables
 
-    python 04-Rename-Tags.py -p <archive name>.yml
-
-When Tag Wrangling have finished mapping the tags in Google Drive, export the Google spreadsheet as a CSV file and make
-sure its path is specified in `tag_input_file`. This script then copies the AO3 tags from that file into the
-`tags` table in the temporary database.
-
-
-### Step 05 - Create the Open Doors tables
-
-    python 05-Create-Open-Doors-Tables.py -p <archive name>.yml
+    python 04-Create-Open-Doors-Tables.py -p <archive name>.yml
 
 This script creates the tables for the temporary import site and populates them based on the data in the temporary
 database. It also filters out authors without stories, and if .txt files of comma-separated ids (no final comma) are specified in
@@ -171,24 +161,12 @@ until you are sure you are finished with this stage.
 *Notes*:
 - The `stories` and `bookmarks` tables will not contain any tags at all after this stage. These aren't added
 until you run step 06.
-- The `chapters` table will not contain the story contents, which are loaded in step 07.
+- The `chapters` table will not contain the story contents, which are loaded in step 05.
 
 
-### Step 06 - Copy AO3 tags into the stories table
+### Step 05 - Audit final tables for common problems
 
-    python 06-Update-Tags-In-Story-Table.py -p <archive name>.yml
-
-This script matches up the AO3 tags from the `tags` table with the corresponding stories. Note
-that unlike the other scripts, this one does not destroy any databases or tables, though it does overwrite the tag
-fields in the `stories` or `bookmarks` databases.
-
-*Notes*:
-- The output for this command  (eg "Getting all tags per story...429/429 stories") will report the number of stories in 
-the tag table, which may be more than the number of stories you have after removing DNI in the previous stage.
-
-### Step 08 - Audit final tables for common problems
-
-|   python 08-Check-ODAP-Tables.py -p <archive name>.yml
+   python 05-Check-ODAP-Tables.py -p <archive name>.yml
 
 This script performs checks on common reasons for Archive rejection, including checking for chapters that are too long, stories that have too many chapters, etc. It makes no attempt to fix problems that arise; you must do that manually.  Also note, it will only perform each check (aligned to the old JIRA tickets O, P, Q, R, and S) if no problems have been found on previous steps.  If you encounter errors in any step, you will need to repeat running the script and fixing the errors until it exits cleanly.
 
@@ -218,6 +196,27 @@ for the second author, amend the first author, then put the second author ID int
 - The author table may need to be de-duped
 
 
+### Step 06 - Reimport the Tag Wrangling sheet and map the original tags to the new AO3 tags
+
+    python 06-Rename-Tags.py -p <archive name>.yml
+
+When Tag Wrangling have finished mapping the tags in Google Drive, export the Google spreadsheet as a CSV file and make
+sure its path is specified in `tag_input_file`. This script then copies the AO3 tags from that file into the
+`tags` table in the temporary database.
+
+### Step 07 - Copy AO3 tags into the stories table
+
+    python 07-Update-Tags-In-Story-Table.py -p <archive name>.yml
+
+This script matches up the AO3 tags from the `tags` table with the corresponding stories. Note
+that unlike the other scripts, this one does not destroy any databases or tables, though it does overwrite the tag
+fields in the `stories` or `bookmarks` databases.
+
+*Notes*:
+- The output for this command  (eg "Getting all tags per story...429/429 stories") will report the number of stories in 
+the tag table, which may be more than the number of stories you have after removing DNI in the previous stage.
+
+
 ## Other Scripts
 
 ### Remove emails from Open Doors tables
@@ -229,14 +228,14 @@ Scans the chapter for emails and removes some of them:
 - If the email is something different a prompt is shown to the user, for example:
 
 ```
-	
-	<p>Lily, the Vampire Slayer</p>
-	
-	<p>by: Br@nw3n</p>
-	
-	<p>Prologue</p>
-	
-	<p>"Ernie!" Lily Evans
+    
+    <p>Lily, the Vampire Slayer</p>
+    
+    <p>by: Br@nw3n</p>
+    
+    <p>Prologue</p>
+    
+    <p>"Ernie!" Lily Evans
 
 Br@nw3n ([W]hitelist, [B]lacklist) ([A]ddress, [D]omain) [C]ontext [R]ewrite domain >
 ```
@@ -294,3 +293,6 @@ command line using the flags specified. For example:
     python 01-Load-into-Mysql.py -dh localhost -du root -dd od_dsa -a AA -i /Users/me/Documents/ARCHIVE_DB.pl
 
 You will be prompted for any missing settings when you run each stage.
+
+
+
