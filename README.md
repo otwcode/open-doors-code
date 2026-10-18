@@ -42,18 +42,18 @@ the file if it is needed for a given stage.
 ## High-level overview of each step
 
 - 01 - Load the original data into a temporary database for processing (AA only)
-- 01.5 - Load chapters into the chapters table of the temporary database (AA and custom only)
-- 02 - Extract tags from stories and story links into a new `tags` table. (AA and custom only)
-- 03 - Export the distinct tags into a spreadsheet to enable wranglers to map tags to AO3 tags, and export story and story link information into spreadsheets used for searching. (all)
-- 04 - Create the final tables that will be used for the temp site and copy all the authors, stories and story links. (all)
-- 05 - Audit the final tables to find common problems. (all)
-- 06 - Map the tags in the `tags` table to AO3 tags suggested by wranglers. (all)
-- 07 - Copy the AO3 tags into the final story and story link rows. (all)
+- 02 - Load chapters into the chapters table of the temporary database (AA and custom only)
+- 03 - Extract tags from stories and story links into a new `tags` table. (AA and custom only)
+- 04 - Export the distinct tags into a spreadsheet to enable wranglers to map tags to AO3 tags, and export story and story link information into spreadsheets used for searching. (all)
+- 05 - Create the final tables that will be used for the temp site and copy all the authors, stories and story links. (all)
+- 06 - Check the final tables to find common problems. (all)
+- 07 - Map the tags in the `tags` table to AO3 tags suggested by wranglers. (all)
+- 08 - Copy the AO3 tags into the final story and story link rows. (all)
 
 At this point, the final database is ready to be loaded into a [temporary website](https://github.com/otwcode/open-doors-temp-site) that will be used to feed the works into
 the Archive using its mass import API.
 
-### Step 01 - Load the original database into MySQL (AA and custom)
+### Step 01 - Load the original database into MySQL (AA)
 
 This step populates a set of temporary tables which will be used for later processes.
 
@@ -61,11 +61,11 @@ This step populates a set of temporary tables which will be used for later proce
 
     python 01-Load-Automated-Archive-into-Mysql.py -p <archive name>.yml
 
-This imports the Automated Archive ARCHIVE_DB.pl file specified in the `db_input_file` property into the 
+This imports the Automated Archive `ARCHIVE_DB.pl` file specified in the `db_input_file` property into the 
 `temp_db_database` on your MySQL server using the `db_host`, `db_user` and `db_password` properties. The destination 
 database will be destroyed and recreated every time you run the script, so you can safely rerun it as often as needed.
 
-*Import problems*: Some ARCHIVE_DB.pl files contain formatting that breaks the import. Common problems include, but are not limited to:
+*Import problems*: Some `ARCHIVE_DB.pl` files contain formatting that breaks the import. Common problems include, but are not limited to:
 - unescaped single quotes
 - irregular indents
 - line breaks within fields
@@ -73,37 +73,37 @@ database will be destroyed and recreated every time you run the script, so you c
 - HTML entities
 
 You will get a Python error when something breaks the import; this will include a snippet of the record that could not
-be processed, so use that to find the record in the ARCHIVE_DB.pl and look for problems like the above. You will have
+be processed, so use that to find the record in the `ARCHIVE_DB.pl` and look for problems like the above. You will have
 to manually edit the file in your text editor to resolve these issues.
 
 *Fields*: All the field names found in the file will be listed in the console output when you run this step, allowing you
-to populate the tag fields (see below) with all the relevant fields in the ARCHIVE_DB.pl file.
+to populate the tag fields (see below) with all the relevant fields in the `ARCHIVE_DB.pl` file.
 
 *Tag fields*: As the metadata in AA files is customisable, you can use the `tag_fields`, `character_fields`,
-`relationship_fields` and `fandom_fields` properties to map fields in the ARCHIVE_DB.pl to the right tag columns in the
+`relationship_fields` and `fandom_fields` properties to map fields in the `ARCHIVE_DB.pl` to the right tag columns in the
 temporary database table.
 
 ##### Custom archives
 
-The step 01 script can't be used with archives which do not use Automated Archive or eFiction. The metadata for custom
-archives needs to be loaded manually or using custom scripts into `authors`, `story_links`, `chapters`
-and `stories` tables matching [the Open Doors table schema](shared_python/create-open-doors-tables.sql) in the
+The step 01 script can't be used with archives which do not use Automated Archive, and eFiction is handled separately. 
+The metadata for custom archives needs to be loaded manually or using custom scripts into `authors`, `story_links`, 
+`chapters` and `stories` tables matching [the Open Doors table schema](shared_python/create-open-doors-tables.sql) in the
 `temp_db_database`.
 
-### Step 01.5 - Load Chapters into the chapters table [NEEDS REVISION]
+### Step 02 - Load Chapters into the chapters table
 
-    python 01a-Load-Chapters-to-Open-Doors-Table.py -p <archive name>.yml
+    python 02-Load-Chapters-to-Working-Table.py -p <archive name>.yml
 
-Loads the chapter contents in the output database (this can be run at any point after stage 04). It does this by going
-through all the files in the `chapters_path` and trying to find an entry in the chapters table that has the same
-`url`. It then copied the contents of the file into the `text` column for that row.
+Loads the chapter contents in the output database. It does this by going through all the files in the `chapters_path` 
+and trying to find an entry in the chapters table that has the same `url`. It then copies the contents of the file into 
+the `text` column for that row.
 
 You will be prompted to answer two questions:
 
     Chapter file names are chapter ids? Y/N
 
-Look at the file names in `chapters_path`  and compare against the `chapterid` column in the database. For AA or other databases they probably are more likely to be a human
-readable name instead (N).
+Look at the file names in `chapters_path`  and compare against the `chapterid` column in the database. For AA or other 
+databases, they probably are more likely to be a human readable name instead (N).
 
     Importing chapters: pick character encoding (check for curly quotes):
     1 = Windows 1252
@@ -115,9 +115,9 @@ If there are duplicate chapters (for example if co-authored stories were listed 
 try to deduplicate them by only keeping the duplicate whose `author_id` is the same as the `author_id` in the `story` table.
 It will list duplicates it has found in the console output.
 
-### Step 02 - Extract tags from the original stories (AA and custom)
+### Step 03 - Extract tags from the original stories (AA and custom)
 
-    python 02-Extract-Tags-From-Stories.py -p <archive name>.yml
+    python 03-Extract-Tags-From-Stories.py -p <archive name>.yml
 
 This script creates a table called `tags` in the temporary database and denormalises all the tags for every story and story link.
 This table is the basis for the Tag Wrangling sheet and is used to map the tags back to the story when the final
@@ -131,9 +131,9 @@ For multi-fandom archives that specify the fandoms for each story, the `fields_w
 specify that tags from the listed columns should be exported with the fandom.
 
 
-### Step 03 - Export tags, authors and stories (all: eFiction, Automated Archive and custom)
+### Step 04 - Export tags, authors and stories (all: eFiction, Automated Archive and custom)
 
-    python 03-Export-Tags-Authors-Stories.py -p <archive name>.yml
+    python 04-Export-Tags-Authors-Stories.py -p <archive name>.yml
 
 Before an external archive can be imported, the following two steps need to be performed:
 
@@ -145,9 +145,9 @@ map the external tags manually to the correct ones.
 This step exports those two CSV files which you then have to import into Google Spreadsheet and share with the rest of the Open Doors committee.
 
 
-### Step 04 - Create the Open Doors tables
+### Step 05 - Create the Open Doors tables
 
-    python 04-Create-Open-Doors-Tables.py -p <archive name>.yml
+    python 05-Create-Open-Doors-Tables.py -p <archive name>.yml
 
 This script creates the tables for the temporary import site and populates them based on the data in the temporary
 database. It also filters out authors without stories, and if .txt files of comma-separated ids (no final comma) are specified in
@@ -160,17 +160,16 @@ until you are sure you are finished with this stage.
 
 *Notes*:
 - The `stories` and `bookmarks` tables will not contain any tags at all after this stage. These aren't added
-until you run step 06.
-- The `chapters` table will not contain the story contents, which are loaded in step 05.
+until you run step 07.
 
 
-### Step 05 - Audit final tables for common problems
+### Step 06 - Audit final tables for common problems
 
-   python 05-Check-ODAP-Tables.py -p <archive name>.yml
+   python 06-Check-ODAP-Tables.py -p <archive name>.yml
 
 This script performs checks on common reasons for Archive rejection, including checking for chapters that are too long, stories that have too many chapters, etc. It makes no attempt to fix problems that arise; you must do that manually.  Also note, it will only perform each check (aligned to the old JIRA tickets O, P, Q, R, and S) if no problems have been found on previous steps.  If you encounter errors in any step, you will need to repeat running the script and fixing the errors until it exits cleanly.
 
-### Common problems to look out for when processing chapters
+#### Common problems to look out for when processing chapters
 
 *Tip*: Some of these problems might be easier to fix by loading the chapters into MySQL and then exporting the `chapters`
 table as a MySQL dump. You can then perform edit-replace operations on all the chapters at once (though be very careful
@@ -196,17 +195,17 @@ for the second author, amend the first author, then put the second author ID int
 - The author table may need to be de-duped
 
 
-### Step 06 - Reimport the Tag Wrangling sheet and map the original tags to the new AO3 tags
+### Step 07 - Reimport the Tag Wrangling sheet and map the original tags to the new AO3 tags
 
-    python 06-Rename-Tags.py -p <archive name>.yml
+    python 07-Rename-Tags.py -p <archive name>.yml
 
 When Tag Wrangling have finished mapping the tags in Google Drive, export the Google spreadsheet as a CSV file and make
 sure its path is specified in `tag_input_file`. This script then copies the AO3 tags from that file into the
 `tags` table in the temporary database.
 
-### Step 07 - Copy AO3 tags into the stories table
+### Step 08 - Copy AO3 tags into the stories table
 
-    python 07-Update-Tags-In-Story-Table.py -p <archive name>.yml
+    python 08-Update-Tags-In-Story-Table.py -p <archive name>.yml
 
 This script matches up the AO3 tags from the `tags` table with the corresponding stories. Note
 that unlike the other scripts, this one does not destroy any databases or tables, though it does overwrite the tag
@@ -214,7 +213,7 @@ fields in the `stories` or `bookmarks` databases.
 
 *Notes*:
 - The output for this command  (eg "Getting all tags per story...429/429 stories") will report the number of stories in 
-the tag table, which may be more than the number of stories you have after removing DNI in the previous stage.
+the `tags` table, which may be more than the number of stories you have after removing DNI in a previous stage.
 
 
 ## Other Scripts
