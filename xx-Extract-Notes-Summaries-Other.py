@@ -7,8 +7,6 @@ from shared_python.Common import recursive_story_listdir
 from story_cleanup.outputs import OutputCSV, OutputStoryFiles
 from story_cleanup.parsing import Parser
 
-
-# TODO: improve logging
 """
 For archives where authors' notes and summaries are in the main body of text, this script scans for and removes them
 note that this does /not/ load fields into the database tables, only extracts them to a CSV (and deletes if necessary)
@@ -22,6 +20,7 @@ if __name__ == "__main__":
 
     options = args.scan_types
     to_remove = args.remove_option
+    additional_keywords = args.additional_keywords
 
     csv = OutputCSV(args.output_csv, options)
     j = int(
@@ -32,6 +31,11 @@ if __name__ == "__main__":
         shutil.copytree(args.chapters_path, args.chapters_backup_path)
         rewrite = OutputStoryFiles(args.chapters_path)
 
+    if additional_keywords:
+        keywords = Keywords(additional_keywords)
+    else:
+        keywords = Keywords()
+
     try:
         # TODO: function that queries db for chapter and filenames
         if j == 0:
@@ -41,7 +45,7 @@ if __name__ == "__main__":
             fname = os.path.join(args.chapters_path, s)
             with open(fname, "r") as f:
                 text = f.readlines()
-            parser = Parser(text, options)
+            parser = Parser(keywords, text, options)
             hits = parser.parse_lines()
 
             if to_remove is not None:

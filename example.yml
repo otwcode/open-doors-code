@@ -37,4 +37,12 @@ remove_option:
 chapters_backup_path: /path/to/backup/chapter/story/output/files
 output_csv: /path/to/output/Desired_CSV_name.csv
 # Comma-separated list of types to scan for
-scan_types: [notes, warnings, summary, commercial]
+scan_types: [notes, warnings, summary, commercial, pairing, rating, wordcount]
+additional_keywords:
+  - notes: path/to/additional_notes_keywords.txt
+  - warnings: path/to/additional_warnings_keywords.txt
+  - summary: path/to/additional_summary_keywords.txt
+  - commercial:
+  - pairing: 
+  - rating: 
+  - wordcount: 

@@ -20,10 +20,8 @@ class Messaging:
         match type:
             case "summary":
                 print(self.summary_color + f"{type}:\n" + self.reset + self.text)
-            case "notes":
+            case "notes" | "rating" | "wordcount" | "pairing" | "warnings":
                 print(self.notes_color + f"{type}:\n" + self.reset + self.text)
-            case "warnings":
-                print(self.warning_color + f"{type}:\n" + self.reset + self.text)
             case "commercial":
                 print(self.commercial_color + f"{type}:\n" + self.reset + self.text)
         r = input(

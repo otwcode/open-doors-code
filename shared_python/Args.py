@@ -286,7 +286,18 @@ class Args(object):
         if self.args.output_csv is None:
             self.args.output_csv = input("Output path for the extracted CSV")
         if self.args.scan_types is None:
-            self.args.scan_types = ["notes", "warnings", "summary", "commercial"]
+            self.args.scan_types = [
+                "notes",
+                "warnings",
+                "summary",
+                "commercial",
+                "pairing",
+                "rating",
+                "wordcount",
+            ]
+
+        if self.args.additional_keywords is not None:
+            self.args.additional_keywords = args.additional_keywords
 
         self._print_args(self.args)
         return self.args

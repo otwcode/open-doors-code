@@ -3,14 +3,14 @@ from .messages import Messaging
 
 
 class Parser:
-    def __init__(self, textlines: list, options: list):
+    def __init__(self, keywords, textlines: list, options: list):
         self.textlines = textlines
         self.max = len(self.textlines)
         self.options_dict = {}
         for opt in options:
             self.options_dict.update({opt: ""})
         self.end_message = "***no more lines to preview, press enter to continue***"
-        self.kwords = Keywords()
+        self.keywords = keywords
 
     def detection_loop(self, type: str, i: int):
         m = Messaging(self.textlines[i])
