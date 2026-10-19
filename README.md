@@ -255,6 +255,17 @@ On it we can either type (and press enter):
 Given a comma-separated list of story ids specified in the `story_ids_to_remove` parameter, deletes the corresponding
 rows from the stories table in the final output database.
 
+## Extract notes, summaries, and commercial links from chapters
+
+Extracts notes, summaries, content warnings, and commercial links from story files
+
+Due to the nature of fandom and archives, most are going to be different and have unique keywords. If your archive has additional keywords, you can enter them into a plaintext file for each category and add them to the .yml configuration file (see example.yml)
+
+This is mostly for non-eFiction archives where the author's notes and content warnings are present in the main bodies of work instead of separate fields. If you use this with the 'remove_option' in the properties file populated, the script will create a backup of all works. If you hit an error or KeyboardInterrupt, the script prints out the index of the chapters list you were at. 
+
+note that this does NOT load chapters into the stories table
+
+
 
 ## Parameters
 

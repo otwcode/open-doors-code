@@ -22,7 +22,6 @@ if __name__ == "__main__":
         tw_tags = list(csv.DictReader(csvfile))
         tag_headers = tags.tag_export_map
         total = len(tw_tags)
-
         for cur, row in enumerate(tw_tags):
             tags.update_tag_row(row)
             print_progress(cur, total, "tags")
