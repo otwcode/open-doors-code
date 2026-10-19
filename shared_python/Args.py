@@ -44,9 +44,6 @@ class Args(object):
 
         # General archive-specific settings
         parser.add_argument(
-            "-a", "--archive_type", type=str, choices=["AA"], help="Type of archive: AA"
-        )
-        parser.add_argument(
             "-df", "--default_fandom", type=str, help="Default fandom to use"
         )
         parser.add_argument(
@@ -154,9 +151,6 @@ class Args(object):
             if args.archive_name is None
             else args.archive_name
         )
-
-        while args.archive_type is None or args.archive_type not in ["AA"]:
-            args.archive_type = input("Type of archive (AA): ")
 
         return args
 
