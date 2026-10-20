@@ -36,12 +36,12 @@ class Tags(object):
         """
         try:
             database = self.database if database is None else database
-            self.sql.execute("DROP TABLE IF EXISTS {0}.`tags`".format(database))
+            query = """DROP TABLE IF EXISTS %s"""
+            self.sql.execute(query, [database])
         except OperationalError as e:
             self.log.info("Command skipped: {}".format(e))
-        self.sql.execute(
-            """
-      CREATE TABLE IF NOT EXISTS {0}.`tags` (
+        create_tags_query = """
+      CREATE TABLE IF NOT EXISTS %s.`tags` (
         `id` int(11) AUTO_INCREMENT,
         `original_tagid` int(11) DEFAULT NULL,
         `original_tag` varchar(1024) DEFAULT NULL,
@@ -53,9 +53,8 @@ class Tags(object):
         `ao3_tag_category` VARCHAR(255) DEFAULT NULL,
         `ao3_tag_fandom` VARCHAR(255) DEFAULT NULL,
         PRIMARY KEY (`id`)
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-    """.format(database)
-        )
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;"""
+        self.sql.execute(create_tags_query, [database])
 
     def populate_tag_table(
         self,
@@ -69,19 +68,20 @@ class Tags(object):
         """
         Used only in step 02 for non-eFiction archives
         """
-        self.sql.execute("USE {0}".format(database_name))
+        use_query = """USE %s"""
+        truncate_query = """TRUNCATE %s"""
+        self.sql.execute(use_query, [database_name])
         if truncate:
-            self.sql.execute("TRUNCATE {0}.`tags`".format(database_name))
+            self.sql.execute(truncate_query, [database_name])
 
         tag_columns = (
             tag_col_lookup.keys()
         )  # [d['col'] for d in tag_col_lookup if 'col' in d]
 
         # Get all values from all tag columns in the stories table and load as denormalised values in `tags` table
+        select_query = """SELECT %s, %s FROM %s"""
         data = self.sql.execute_dict(
-            "SELECT {0}, {1} FROM {2}".format(
-                story_id_col_name, ", ".join(tag_columns), table_name
-            )
+            select_query, [story_id_col_name, ", ".join(tag_columns), table_name]
         )
 
         tags_to_insert = {}
@@ -90,46 +90,43 @@ class Tags(object):
             for col in tag_columns:
                 needs_fandom = col in tags_with_fandoms
                 if story_tags_row[col] is not None:
-                    for val in re.split(r", ?", story_tags_row[col]):
-                        if val != "":
-                            if isinstance(
-                                tag_col_lookup[col], str
-                            ):  # Probably AA or a custom archive
-                                cleaned_tag = re.sub(
-                                    r'(?<!\\)"',
-                                    '\\"',
-                                    val.replace("'", "'").strip(),
-                                )
-                                tags_to_story_ids[cleaned_tag].append(
+                    for tag_val in re.split(r", ?", story_tags_row[col]):
+                        if tag_val != "":
+                            if isinstance(tag_col_lookup[col], str):
+                                tags_to_story_ids[tag_val].append(
                                     story_tags_row[story_id_col_name]
                                 )
                                 tags_to_insert[
-                                    cleaned_tag
+                                    tag_val
                                 ] = '("{0}", "{1}", "{2}")'.format(
-                                    cleaned_tag,
+                                    val,
                                     tag_col_lookup[col],
                                     story_tags_row["fandoms"] if needs_fandom else "",
                                 )
 
         if len(tags_to_insert) > 0:
+            # change this, leaving alone for the time being
             self.sql.execute(
                 """
            INSERT INTO tags (original_tag, original_type, ao3_tag_fandom) VALUES {0}
          """.format(", ".join(tags_to_insert.values()))
             )
-
+            # TODO: change this here, it seems like it just formats the string with the tuples which seems like it could cause problems
             tag_data = self.sql.execute_dict("SELECT id, original_tag FROM tags")
             for tag_row in tag_data:
                 story_ids = set(tags_to_story_ids[tag_row["original_tag"]])
                 for story_id in story_ids:
                     self.sql.execute(
-                        """
-                    INSERT INTO item_tags (item_id, item_type, tag_id) VALUES ({0}, "{1}", {2})
-                    """.format(
+                        (
+                            """
+                    INSERT INTO item_tags (item_id, item_type, tag_id) VALUES (%s, %s, %s)
+                    """
+                        ),
+                        [
                             story_id,
-                            "story_link" if table_name == "story_links" else "story",
+                            "story_link" if table_name == "story_linkts" else "story",
                             tag_row["id"],
-                        )
+                        ],
                     )
 
     def distinct_tags(self, database):
@@ -169,7 +166,7 @@ class Tags(object):
         :return: number of newly inserted rows to item_tags
         """
         tag_headers = self.tag_export_map
-        tag = str(row[tag_headers["original_tag"]]).replace("'", r"\'")
+        tag = str(row[tag_headers["original_tag"]])  # .replace("'", r"\'")
         tag_id = row[tag_headers["id"]]
         validate_tag = TagValidator(self.log)
 
@@ -178,8 +175,8 @@ class Tags(object):
         else:
             tagid_filter = f"id={tag_id}"
 
-        fandom = row[tag_headers["ao3_tag_fandom"]].replace("'", r"\'")
-        ao3_tags = row[tag_headers["ao3_tag"]].replace("'", r"\'").split(",")
+        fandom = row[tag_headers["ao3_tag_fandom"]]
+        ao3_tags = row[tag_headers["ao3_tag"]].split(",")
         ao3_tag_types = row[tag_headers["ao3_tag_type"]].split(",")
         number_types = len(ao3_tag_types)
 
@@ -202,38 +199,49 @@ class Tags(object):
 
             if idx > 0:
                 self.sql.execute(
-                    f"""
+                    """
                     INSERT INTO tags (ao3_tag, ao3_tag_type, ao3_tag_category, ao3_tag_fandom,
                     original_tag, original_tagid)
-                    VALUES ('{ao3_tag}', '{ao3_tag_type}', '{row[tag_headers['ao3_tag_category']]}',
-                    '{fandom}', '{tag}', '{tag_id}')
-                    """
+                    VALUES (%s, %s, %s,
+                    %s, %s, %s)
+                    """,
+                    [
+                        ao3_tag,
+                        ao3_tag_type,
+                        row[tag_headers["ao3_tag_category"]],
+                        fandom,
+                        tag,
+                        tag_id,
+                    ],
                 )
                 # get last auto increment tag id
                 sql_dict = self.sql.execute_dict("""select LAST_INSERT_ID();""")
                 new_tag_id = sql_dict[0]["LAST_INSERT_ID()"]
                 # get all associated items from item_tags
                 items = self.sql.execute_dict(
-                    f"""SELECT item_id, item_type
-                        FROM item_tags WHERE tag_id = {row['Original Tag ID']}"""
+                    """SELECT item_id, item_type
+                        FROM item_tags WHERE tag_id = %s""",
+                    [row["Original Tag ID"]],
                 )
 
                 # insert into item_tags table
                 for item in items:
                     item_id, item_type = item["item_id"], item["item_type"]
                     self.sql.execute(
-                        f"""INSERT INTO item_tags (item_id, item_type, tag_id) VALUES ('{item_id}', '{item_type}', '{new_tag_id}')"""
+                        """INSERT INTO item_tags (item_id, item_type, tag_id) VALUES (%s, %s, %s)""",
+                        [item_id, item_type, new_tag_id],
                     )
                     num_insert += 1
             else:
+                query = f"""UPDATE tags SET ao3_tag=%s, ao3_tag_type=%s, ao3_tag_category=%s, ao3_tag_fandom=%s WHERE {tagid_filter}"""
                 self.sql.execute(
-                    f"""
-              UPDATE tags
-              SET ao3_tag='{str(ao3_tag)}', ao3_tag_type='{ao3_tag_type}',
-              ao3_tag_category='{row[tag_headers['ao3_tag_category']]}',
-              ao3_tag_fandom='{fandom}'
-              WHERE {tagid_filter}
-            """
+                    query,
+                    [
+                        str(ao3_tag),
+                        ao3_tag_type,
+                        row[tag_headers["ao3_tag_category"]],
+                        fandom,
+                    ],
                 )
         return num_insert
 
@@ -242,7 +250,8 @@ class Tags(object):
             self.database,
             f"""
                                     SELECT item_id, item_type, GROUP_CONCAT(tag_id) as tag_ids
-                                    FROM item_tags WHERE item_type='{item_type}' GROUP BY item_id, item_type ;""",
+                                    FROM item_tags WHERE item_type=%s GROUP BY item_id, item_type""",
+            (item_type),
         )
         cur = 0
         total = len(story_ids)
@@ -255,7 +264,7 @@ class Tags(object):
             )
             sys.stdout.flush()
             tags = self.sql.execute_dict(
-                f"SELECT * FROM tags WHERE id in ({story_id[2]}) AND ao3_tag != ''"
+                "SELECT * FROM tags WHERE id in %s AND ao3_tag != ''", (story_id[2])
             )
             tags_by_story_id[story_id[0]] = tags
         return tags_by_story_id
