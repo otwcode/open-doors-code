@@ -124,7 +124,7 @@ class Tags(object):
                         ),
                         [
                             story_id,
-                            "story_link" if table_name == "story_linkts" else "story",
+                            "story_link" if table_name == "story_links" else "story",
                             tag_row["id"],
                         ],
                     )
@@ -166,7 +166,7 @@ class Tags(object):
         :return: number of newly inserted rows to item_tags
         """
         tag_headers = self.tag_export_map
-        tag = str(row[tag_headers["original_tag"]])  # .replace("'", r"\'")
+        tag = str(row[tag_headers["original_tag"]])
         tag_id = row[tag_headers["id"]]
         validate_tag = TagValidator(self.log)
 
