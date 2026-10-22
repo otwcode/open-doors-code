@@ -1,4 +1,5 @@
-# encoding: utf-8
+#!/usr/bin/env python3
+
 import os
 
 from shared_python.Args import Args
@@ -19,9 +20,7 @@ if __name__ == "__main__":
             for line in f:
                 story_exclusion_filter = filter + "(" + line + ")"
 
-    command = "DELETE FROM `{}`.`stories` {}".format(
-        args.output_database, story_exclusion_filter
-    )
+    command = f"DELETE FROM `{args.output_database}`.`stories` {story_exclusion_filter}"
     print(command)
     result = sql.execute(command)
     print(result)

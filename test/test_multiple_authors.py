@@ -1,15 +1,16 @@
-from unittest import TestCase
-import unittest
-from shared_python.Logging import logger
-from shared_python.FinalTables import FinalTables
 import argparse
 import datetime
+import unittest
+from unittest import TestCase
+
+from shared_python.FinalTables import FinalTables
+from shared_python.Logging import logger
 
 
 def testArgs():
     args = argparse.Namespace()
-    setattr(args, "temp_db_database", "test_final_open_doors")
-    setattr(args, "output_database", "test_final_open_doors")
+    args.temp_db_database = "test_final_open_doors"
+    args.output_database = "test_final_open_doors"
     return args
 
 

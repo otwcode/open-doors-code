@@ -1,24 +1,23 @@
-from unittest import TestCase
+import argparse
 import unittest
+from unittest import TestCase
 from unittest.mock import MagicMock
 
 from shared_python.Logging import logger
 from shared_python.PopulateTags import PopulateTags
-import argparse
-
 from shared_python.Tags import Tags
 
 
 def testArgs():
     parser = argparse.ArgumentParser(description="Test an archive database")
     args = parser.parse_args([])
-    setattr(args, "archive_type", "AA")
-    setattr(args, "db_host", "localhost")
-    setattr(args, "db_user", "root")
-    setattr(args, "db_password", "")
-    setattr(args, "temp_db_database", "unit_test")
-    setattr(args, "output_database", "unit_test_output")
-    setattr(args, "default_fandom", "Fandom C (TV)")
+    args.archive_type = "AA"
+    args.db_host = "localhost"
+    args.db_user = "root"
+    args.db_password = ""
+    args.temp_db_database = "unit_test"
+    args.output_database = "unit_test_output"
+    args.default_fandom = "Fandom C (TV)"
     return args
 
 
@@ -30,7 +29,7 @@ class TestPopulate_tags(TestCase):
     final = MagicMock()
     populate_tags = PopulateTags(args, sql, log, tags, final)
 
-    basic_tags = {
+    basic_tags = {  # noqa: RUF012
         "fandoms": [
             {"original_tag": "Fandom A", "ao3_tag": "Fandom A (TV)"},
             {"original_tag": "Fandom B", "ao3_tag": "Fandom B (TV)"},

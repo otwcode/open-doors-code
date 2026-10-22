@@ -1,16 +1,16 @@
 import re
+import sys
 from collections import defaultdict
 from html.parser import HTMLParser
 from logging import Logger
 
-import sys
 from pymysql import OperationalError
 
 from shared_python.Sql import Sql
 from shared_python.TagValidator import TagValidator
 
 
-class Tags(object):
+class Tags:
     def __init__(self, args, sql: Sql, log: Logger):
         self.tag_count = 0
         self.sql = sql
@@ -39,7 +39,7 @@ class Tags(object):
             query = """DROP TABLE IF EXISTS %s"""
             self.sql.execute(query, [database])
         except OperationalError as e:
-            self.log.info("Command skipped: {}".format(e))
+            self.log.info(f"Command skipped: {e}")
         create_tags_query = """
       CREATE TABLE IF NOT EXISTS %s.`tags` (
         `id` int(11) AUTO_INCREMENT,
@@ -91,24 +91,21 @@ class Tags(object):
                 needs_fandom = col in tags_with_fandoms
                 if story_tags_row[col] is not None:
                     for tag_val in re.split(r", ?", story_tags_row[col]):
-                        if tag_val != "":
-                            if isinstance(tag_col_lookup[col], str):
-                                tags_to_story_ids[tag_val].append(
-                                    story_tags_row[story_id_col_name]
-                                )
-                                tags_to_insert[
-                                    tag_val
-                                ] = '("{0}", "{1}", "{2}")'.format(
-                                    val,
-                                    tag_col_lookup[col],
-                                    story_tags_row["fandoms"] if needs_fandom else "",
-                                )
+                        if tag_val != "" and isinstance(tag_col_lookup[col], str):
+                            tags_to_story_ids[tag_val].append(
+                                story_tags_row[story_id_col_name]
+                            )
+                            tags_to_insert[tag_val] = '("{}", "{}", "{}")'.format(
+                                tag_val,
+                                tag_col_lookup[col],
+                                story_tags_row["fandoms"] if needs_fandom else "",
+                            )
 
         if len(tags_to_insert) > 0:
             # change this, leaving alone for the time being
             self.sql.execute(
                 """
-           INSERT INTO tags (original_tag, original_type, ao3_tag_fandom) VALUES {0}
+           INSERT INTO tags (original_tag, original_type, ao3_tag_fandom) VALUES {}
          """.format(", ".join(tags_to_insert.values()))
             )
             # TODO: change this here, it seems like it just formats the string with the tuples which seems like it could cause problems
@@ -248,19 +245,17 @@ class Tags(object):
     def tags_by_story_id(self, item_type: str = "story"):
         story_ids = self.sql.execute_and_fetchall(
             self.database,
-            f"""
+            """
                                     SELECT item_id, item_type, GROUP_CONCAT(tag_id) as tag_ids
                                     FROM item_tags WHERE item_type=%s GROUP BY item_id, item_type""",
             (item_type),
         )
-        cur = 0
         total = len(story_ids)
 
         tags_by_story_id = {}
-        for story_id in story_ids:
-            cur += 1
+        for i, story_id in enumerate(story_ids):
             sys.stdout.write(
-                f"\rCollecting tags for {item_type}: {cur}/{total}  (including Do Not Import)"
+                f"\rCollecting tags for {item_type}: {i}/{total}  (including Do Not Import)"
             )
             sys.stdout.flush()
             tags = self.sql.execute_dict(

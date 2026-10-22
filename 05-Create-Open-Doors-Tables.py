@@ -1,4 +1,5 @@
-# encoding: utf-8
+#!/usr/bin/env python3
+
 import os
 
 from shared_python.Args import Args
@@ -15,7 +16,7 @@ def _clean_email(author):
     email = author["email"]
     if email is None or email == "":
         email = (
-            "{0}{1}Archive@ao3.org".format(author["name"], args.archive_name)
+            "{}{}Archive@ao3.org".format(author["name"], args.archive_name)
             .replace(" ", "")
             .replace("'", "")
         )
@@ -28,7 +29,7 @@ def main(args, log):
     sql = Sql(args, log)
     final = FinalTables(args, sql, log)
 
-    log.info("Creating final destination tables in {0}".format(args.output_database))
+    log.info(f"Creating final destination tables in {args.output_database}")
 
     table_names = {
         "authors": "authors",
@@ -50,7 +51,7 @@ def main(args, log):
     if os.path.exists(args.story_ids_to_remove):
         with open(args.story_ids_to_remove, "rt") as f:
             log.info(
-                "Removing {0} Do Not Import stories...".format(
+                "Removing {} Do Not Import stories...".format(
                     sum(line.count(",") for line in f) + 1
                 )
             )
@@ -63,7 +64,7 @@ def main(args, log):
     if args.bookmark_ids_to_remove and os.path.exists(args.bookmark_ids_to_remove):
         with open(args.bookmark_ids_to_remove, "rt") as f:
             log.info(
-                "Removing {0} Do Not Import bookmarks...".format(
+                "Removing {} Do Not Import bookmarks...".format(
                     sum(line.count(",") for line in f) + 1
                 )
             )
@@ -75,25 +76,19 @@ def main(args, log):
     stories_without_tags = final.original_table(
         table_names["stories"], story_exclusion_filter
     )
-    log.info(
-        "Stories without tags after removing DNI: {0}".format(len(stories_without_tags))
-    )
+    log.info(f"Stories without tags after removing DNI: {len(stories_without_tags)}")
     bookmarks_without_tags = final.original_table(
         table_names["story_links"], bookmark_exclusion_filter
     )
     if bookmarks_without_tags:
         log.info(
-            "Bookmarks without tags after removing DNI: {0}".format(
-                len(bookmarks_without_tags)
-            )
+            f"Bookmarks without tags after removing DNI: {len(bookmarks_without_tags)}"
         )
     else:
         log.info("No bookmarks to remove")
 
     # STORIES
-    log.info(
-        "Copying stories to final table {0}.stories...".format(args.output_database)
-    )
+    log.info(f"Copying stories to final table {args.output_database}.stories...")
     final_stories = []
     for story in stories_without_tags:
         story_authors = final.original_table(
@@ -113,9 +108,7 @@ def main(args, log):
     # BOOKMARKS
     if bookmarks_without_tags is not None:
         log.info(
-            "Copying bookmarks to final table {0}.story_links...".format(
-                args.output_database
-            )
+            f"Copying bookmarks to final table {args.output_database}.story_links..."
         )
         final_bookmarks = []
         for bookmark in bookmarks_without_tags:
@@ -132,9 +125,7 @@ def main(args, log):
 
     # AUTHORS
     log.info(
-        "Copying authors to final table {0}.authors, cleaning emails and removing authors with no works...".format(
-            args.output_database
-        )
+        f"Copying authors to final table {args.output_database}.authors, cleaning emails and removing authors with no works..."
     )
     final_authors = []
     authors = final.original_table(table_names["authors"])
@@ -155,30 +146,24 @@ def main(args, log):
     if chapters:
         dest_chapter_table = f"{args.output_database}.{table_names['chapters']}"
         log.info(
-            "Copying chapters table {0} from source chapters table...".format(
-                dest_chapter_table
-            )
+            f"Copying chapters table {dest_chapter_table} from source chapters table..."
         )
-        sql.execute("drop table if exists {0}".format(dest_chapter_table))
+        sql.execute(f"drop table if exists {dest_chapter_table}")
 
         truncate_and_insert = (
-            "create table {0} (unique(id), key(story_id)) select * from {1}.{2}".format(
+            "create table {} (unique(id), key(story_id)) select * from {}.{}".format(
                 dest_chapter_table, args.temp_db_database, table_names["chapters"]
             )
         )
         sql.execute(truncate_and_insert)
 
         add_auto_increment = (
-            "alter table {0} modify id int not null auto_increment".format(
-                dest_chapter_table
-            )
+            f"alter table {dest_chapter_table} modify id int not null auto_increment"
         )
         sql.execute(add_auto_increment)
     else:
         log.info(
-            "Creating chapters table {0}.chapters from source stories table...".format(
-                args.output_database
-            )
+            f"Creating chapters table {args.output_database}.chapters from source stories table..."
         )
         final_chapters = final.dummy_chapters(final_stories)
         final.insert_into_final("chapters", final_chapters)

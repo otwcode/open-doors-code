@@ -1,23 +1,24 @@
-from unittest import TestCase
-import unittest
-from shared_python.Sql import Sql
-from shared_python.Logging import logger
-from shared_python.FinalTables import FinalTables
 import argparse
 import datetime
+import unittest
+from unittest import TestCase
+
+from shared_python.FinalTables import FinalTables
+from shared_python.Logging import logger
+from shared_python.Sql import Sql
 
 
 def testArgs():
     parser = argparse.ArgumentParser(description="Test an archive database")
     args = parser.parse_args()
-    setattr(args, "archive_type", "AA")
-    setattr(args, "db_host", "localhost")
-    setattr(args, "db_user", "root")
-    setattr(args, "db_password", "test")
-    setattr(args, "temp_db_database", "test_final_open_doors")
-    setattr(args, "output_database", "test_final_open_doors")
-    setattr(args, "default_fandom", "Fandom C (TV)")
-    setattr(args, "sql_path", "./shared_python/create-open-doors-tables.sql")
+    args.archive_type = "AA"
+    args.db_host = "localhost"
+    args.db_user = "root"
+    args.db_password = "test"
+    args.temp_db_database = "test_final_open_doors"
+    args.output_database = "test_final_open_doors"
+    args.default_fandom = "Fandom C (TV)"
+    args.sql_path = "./shared_python/create-open-doors-tables.sql"
     return args
 
 

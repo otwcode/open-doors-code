@@ -1,34 +1,39 @@
-class TagValidator(object):
+class TagValidator:
     def __init__(self, log):
         self.log = log
-
-    ## Dictionaries/constants for tag validation
-    IS_TAGTYPE = True
-    dict_tag_type = {
-        "rating": 1,
-        "warnings": 2,
-        "categories": 3,
-        "fandoms": 4,
-        "characters": 5,
-        "relationships": 6,
-        "tags": 7,
-    }
-    dict_rating = {
-        "Not Rated": 1,
-        "General Audiences": 2,
-        "Teen And Up Audiences": 3,
-        "Mature": 4,
-        "Explicit": 5,
-    }
-    dict_warning = {
-        "Choose Not To Use Archive Warnings": 1,
-        "Graphic Depictions Of Violence": 2,
-        "Major Character Death": 3,
-        "No Archive Warnings Apply": 4,
-        "Rape/Non-Con": 5,
-        "Underage": 6,
-    }
-    dict_category = {"Gen": 1, "F/M": 2, "M/M": 3, "F/F": 4, "Multi": 5, "Other": 6}
+        self.dict_tag_type = {
+            "rating": 1,
+            "warnings": 2,
+            "categories": 3,
+            "fandoms": 4,
+            "characters": 5,
+            "relationships": 6,
+            "tags": 7,
+        }
+        self.IS_TAGTYPE = True
+        self.dict_rating = {
+            "Not Rated": 1,
+            "General Audiences": 2,
+            "Teen And Up Audiences": 3,
+            "Mature": 4,
+            "Explicit": 5,
+        }
+        self.dict_warning = {
+            "Choose Not To Use Archive Warnings": 1,
+            "Graphic Depictions Of Violence": 2,
+            "Major Character Death": 3,
+            "No Archive Warnings Apply": 4,
+            "Rape/Non-Con": 5,
+            "Underage": 6,
+        }
+        self.dict_category = {
+            "Gen": 1,
+            "F/M": 2,
+            "M/M": 3,
+            "F/F": 4,
+            "Multi": 5,
+            "Other": 6,
+        }
 
     ## Functions for accessing dictionaries
     def identify_tag_type(self, tag_type):

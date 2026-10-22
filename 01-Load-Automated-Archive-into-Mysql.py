@@ -1,6 +1,8 @@
+#!/usr/bin/env python3
+
+from automated_archive import aa
 from shared_python.Args import Args
 from shared_python.Sql import Sql
-from automated_archive import aa
 
 if __name__ == "__main__":
     args_obj = Args()
@@ -10,8 +12,6 @@ if __name__ == "__main__":
 
     # eg: python 01-Load-Automated-Archive-into-Mysql.py -dh localhost -du root -dt dsa -dd temp_python -a AA -f /path/to/ARCHIVE_DB.pl -o .
     log.info(
-        'Loading Automated Archive file "{0}" into database "{1}"'.format(
-            args.db_input_file, args.temp_db_database
-        )
+        f'Loading Automated Archive file "{args.db_input_file}" into database "{args.temp_db_database}"'
     )
     aa.clean_and_load_data(args, log)

@@ -1,8 +1,10 @@
+#!/usr/bin/env python3
+
 import csv
-from shared_python.Args import Args
-from shared_python.Sql import Sql
 import html
 
+from shared_python.Args import Args
+from shared_python.Sql import Sql
 from shared_python.Tags import Tags
 
 
@@ -39,7 +41,7 @@ if __name__ == "__main__":
     results = tags.distinct_tags(args.temp_db_database)
     write_csv(
         results,
-        "{0}/{1} - tags.csv".format(args.output_folder, args.archive_name),
+        f"{args.output_folder}/{args.archive_name} - tags.csv",
         [
             cols["id"],
             cols["original_tag"],
@@ -73,28 +75,16 @@ if __name__ == "__main__":
 
     results = sql.execute_and_fetchall(
         args.temp_db_database,
-        """
-    SELECT s.{0} as "Story ID", s.title as "Title", s.summary as "Summary", a.{1} as "Creator", a.email as "Creator Email",
+        f"""
+    SELECT s.{story_id} as "Story ID", s.title as "Title", s.summary as "Summary", a.{author_name} as "Creator", a.email as "Creator Email",
     "" as "New Email address", "" as "AO3 Account? (& does email match?)", "" as "Searched/Found", "" as "Work on AO3?",
     "" as "Import status", "" as "importer/inviter", "" as "import/invite date", "" as "AO3 link", "" as "Notes (if any)"
-    FROM {2} ia join {3} a on ia.{4} = a.{5} join {6} s on ia.{7} = s.{8} where ia.item_type = "story";
-    """.format(
-            story_id,
-            author_name,
-            item_authors_table,
-            author_table,
-            ia_author_col,
-            author_id,
-            stories_table,
-            ia_item_col,
-            story_id,
-        ),
+    FROM {item_authors_table} ia join {author_table} a on ia.{ia_author_col} = a.{author_id} join {stories_table} s on ia.{ia_item_col} = s.{story_id} where ia.item_type = "story";
+    """,
     )
     write_csv(
         results,
-        "{0}/{1} - authors with stories.csv".format(
-            args.output_folder, args.archive_name
-        ),
+        f"{args.output_folder}/{args.archive_name} - authors with stories.csv",
         [
             "Story ID",
             "Title",
@@ -117,9 +107,9 @@ if __name__ == "__main__":
     log.debug(
         f"Exporting authors with bookmarks from {args.temp_db_database} to {args.output_folder}"
     )
-    author_table = "{0}.authors".format(args.temp_db_database)
-    bookmarks_table = "{0}.story_links".format(args.temp_db_database)
-    item_authors_table = "{0}.item_authors".format(args.temp_db_database)
+    author_table = f"{args.temp_db_database}.authors"
+    bookmarks_table = f"{args.temp_db_database}.story_links"
+    item_authors_table = f"{args.temp_db_database}.item_authors"
     author_name = "name"
     bookmark_id = "id"
     bookmark_author_col = "author_id"
@@ -130,29 +120,17 @@ if __name__ == "__main__":
 
     results = sql.execute_and_fetchall(
         args.temp_db_database,
-        """
-      SELECT s.{0} as "Bookmark ID", s.title as "Title", s.summary as "Summary", a.{1} as "Creator", a.email as "Creator Email",
+        f"""
+      SELECT s.{bookmark_id} as "Bookmark ID", s.title as "Title", s.summary as "Summary", a.{author_name} as "Creator", a.email as "Creator Email",
       s.url as "URL",
       "" as "New Email address", "" as "AO3 Account? (& does email match?)", "" as "Searched/Found", "" as "Work on AO3?",
       "" as "Import status", "" as "importer/inviter", "" as "import/invite date", "" as "AO3 link", "" as "Notes (if any)"
-      FROM {2} ia join {3} a on ia.{4} = a.{5} join {6} s on ia.{7} = s.{8} where ia.item_type = "story_link";
-    """.format(
-            bookmark_id,
-            author_name,
-            item_authors_table,
-            author_table,
-            ia_author_col,
-            author_id,
-            bookmarks_table,
-            ia_item_col,
-            bookmark_id,
-        ),
+      FROM {item_authors_table} ia join {author_table} a on ia.{ia_author_col} = a.{author_id} join {bookmarks_table} s on ia.{ia_item_col} = s.{bookmark_id} where ia.item_type = "story_link";
+    """,
     )
     write_csv(
         results,
-        "{0}/{1} - authors with bookmarks.csv".format(
-            args.output_folder, args.archive_name
-        ),
+        f"{args.output_folder}/{args.archive_name} - authors with bookmarks.csv",
         [
             "Bookmark ID",
             "Title",

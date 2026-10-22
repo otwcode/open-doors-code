@@ -1,22 +1,23 @@
-from unittest import TestCase
-import unittest
-from shared_python.Sql import Sql
-from shared_python.Logging import logger
-from shared_python.Tags import Tags
 import argparse
+import unittest
+from unittest import TestCase
+
+from shared_python.Logging import logger
+from shared_python.Sql import Sql
+from shared_python.Tags import Tags
 
 
 def testArgs():
     parser = argparse.ArgumentParser(description="Test an archive database")
     args = parser.parse_args()
-    setattr(args, "archive_type", "AA")
-    setattr(args, "db_host", "localhost")
-    setattr(args, "db_user", "root")
-    setattr(args, "db_password", "test")
-    setattr(args, "temp_db_database", "test_working_open_doors")
-    setattr(args, "output_database", "unit_test_output")
-    setattr(args, "default_fandom", "Fandom C (TV)")
-    setattr(args, "sql_path", "./test/test_data/test.sql")
+    args.archive_type = "AA"
+    args.db_host = "localhost"
+    args.db_user = "root"
+    args.db_password = "test"
+    args.temp_db_database = "test_working_open_doors"
+    args.output_database = "unit_test_output"
+    args.default_fandom = "Fandom C (TV)"
+    args.sql_path = "./test/test_data/test.sql"
     return args
 
 
