@@ -1,5 +1,6 @@
 import logging
 import sys
+
 from colorlog import ColoredFormatter
 
 
@@ -14,7 +15,7 @@ def logger(filename):
     log.addHandler(stream)
 
     formatter = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
-    fh = logging.FileHandler("{0}.log".format(filename))
+    fh = logging.FileHandler(f"{filename}.log")
     fh.setFormatter(formatter)
     log.addHandler(fh)
     return log

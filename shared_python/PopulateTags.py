@@ -3,7 +3,7 @@ from collections import defaultdict
 CNTW = "Choose Not To Use Archive Warnings"
 
 
-class PopulateTags(object):
+class PopulateTags:
     def __init__(self, args, db, log, tags, final):
         self.args = args
         self.db = db
@@ -26,10 +26,8 @@ class PopulateTags(object):
         fandoms = []
         for tag_type, tag_type_tags in tags_by_type.items():
             if tag_type is None or tag_type == "":
-                self.log.warn(
-                    "\nStory {2} has a None tag type\n {0} -> {1}".format(
-                        tag_type, tag_type_tags, story_id
-                    )
+                self.log.warning(
+                    f"\nStory {story_id} has a None tag type\n {tag_type} -> {tag_type_tags}"
                 )
             else:
                 tag_list = [
@@ -47,7 +45,7 @@ class PopulateTags(object):
             fandoms = [self.args.default_fandom]
         story_tags["categories"] = ", ".join(set(categories))
         story_tags["fandoms"] = ", ".join(set(fandoms))
-        if "warnings" not in story_tags.keys():
+        if "warnings" not in story_tags:
             story_tags["warnings"] = CNTW
         return story_tags
 
@@ -61,8 +59,8 @@ class PopulateTags(object):
                 tags_by_type[tag["ao3_tag_type"]].append(tag)
 
             story_tags = self.tags_for_story(story_id, tags_by_type)
-
             self.final.populate_story_tags(story_id, output_table, story_tags)
+            # is there a method for this one?
 
     def populate_tags(self):
         self.log.info("Getting all tags per story or story_link...")

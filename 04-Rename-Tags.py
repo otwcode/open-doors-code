@@ -1,11 +1,11 @@
-# encoding: utf-8
+#!/usr/bin/env python3
+
 import csv
 
 from shared_python.Args import Args
 from shared_python.Common import print_progress
 from shared_python.Sql import Sql
 from shared_python.Tags import Tags
-
 
 if __name__ == "__main__":
     """

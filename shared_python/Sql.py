@@ -2,19 +2,17 @@ import re
 import warnings
 
 # ignore unhelpful MySQL warnings
-from pymysql import connect, cursors, OperationalError
+from pymysql import OperationalError, connect, cursors
 
 warnings.filterwarnings("ignore", category=Warning)
 
 
-class Sql(object):
+class Sql:
     def __init__(self, args, log):
         self.tag_count = 0
         conn = connect(host=args.db_host, user=args.db_user, password=args.db_password)
         cursor = conn.cursor()
-        cursor.execute(
-            "CREATE DATABASE IF NOT EXISTS `{0}`".format(args.temp_db_database)
-        )
+        cursor.execute(f"CREATE DATABASE IF NOT EXISTS `{args.temp_db_database}`")
         self.log = log
 
         self.conn = connect(
@@ -55,9 +53,8 @@ class Sql(object):
 
     def run_script_from_file(self, filename, database, initial_load=False):
         # Open and read the file as a single buffer
-        fd = open(filename, "r")
-        sqlFile = fd.read()
-        fd.close()
+        with open(filename, "r") as fd:
+            sqlFile = fd.read()
         self.run_sql_file(sqlFile, database, initial_load)
 
     def run_sql_file(self, sqlFile, database, initial_load=False):
@@ -66,8 +63,8 @@ class Sql(object):
 
         # Start a transaction
         self.cursor.execute("START TRANSACTION")
-        self.cursor.execute("CREATE DATABASE IF NOT EXISTS {0}".format(database))
-        self.cursor.execute("USE {0}".format(database))
+        self.cursor.execute(f"CREATE DATABASE IF NOT EXISTS {database}")
+        self.cursor.execute(f"USE {database}")
 
         # Execute every command from the input file
         for command in sqlCommands:
@@ -79,24 +76,23 @@ class Sql(object):
                 end_command = re.sub(r"(--|#|\/\*).*?\n", "", command)
                 lc_command = end_command.lower().strip().replace("\n", "")
                 if initial_load and (
-                    lc_command.startswith("create database ")
-                    or lc_command.startswith("use ")
+                    lc_command.startswith(("create database ", "use"))
                 ):
-                    self.log.info("Skipping command - {0}".format(lc_command))
+                    self.log.info(f"Skipping command - {lc_command}")
                 elif lc_command is None or lc_command == "":
                     self.log.info(lc_command)
                 else:
                     self.cursor.execute(lc_command)
             except OperationalError as e:
-                self.log.info("Command skipped: {0} [{1}]".format(command, e))
+                self.log.info(f"Command skipped: {command} [{e}]")
 
         self.conn.commit()
 
     def col_exists(self, col, table, database):
         self.cursor.execute(
-            """
-        SELECT * FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = '{0}' AND TABLE_NAME = '{1}' AND COLUMN_NAME = '{2}'
-      """.format(database, table, col)
+            f"""
+        SELECT * FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = '{database}' AND TABLE_NAME = '{table}' AND COLUMN_NAME = '{col}'
+      """
         )
         result = self.cursor.fetchone()
         return result is not None

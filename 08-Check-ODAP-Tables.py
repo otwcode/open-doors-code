@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
+
 from shared_python.Args import Args
 from shared_python.Sql import Sql
 

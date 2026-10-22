@@ -1,10 +1,8 @@
-# -- coding: utf-8 --
-
-from datetime import datetime
 import codecs
-import re
 import html
+import re
 import urllib.request
+from datetime import datetime
 
 from pymysql import connect
 
@@ -27,7 +25,8 @@ def _clean_file(filepath, log):
     )
     if encoding is None or encoding == "":
         encoding = "utf-8"
-    archive_db = codecs.open(filepath, "r", encoding=encoding).read()
+    with codecs.open(filepath, "r", encoding=encoding) as fh:
+        archive_db = fh.read()
 
     # Manually escape single quote entity and reformat file as a Python dictionary
     step1 = html.unescape(archive_db.replace("&#39;", "\\&#39;"))
@@ -58,9 +57,9 @@ def _clean_file(filepath, log):
 
     # List fields in AA db file
     keys = [dict.keys() for dict in archive_db_python.values()]
-    unique_keys = set([val for sublist in keys for val in sublist])
+    unique_keys = {val for sublist in keys for val in sublist}
     log.info(
-        "Fields in ARCHIVE_DB.pl: {0}".format(", ".join(str(e) for e in unique_keys))
+        "Fields in ARCHIVE_DB.pl: {}".format(", ".join(str(e) for e in unique_keys))
     )
 
     return archive_db_python
@@ -142,10 +141,8 @@ def _extract_date(args, record, log):
             dt = datetime.fromtimestamp(int(date_string))
         else:
             dt = datetime.strptime(date_string, "%m/%d/%y")
-    except Exception as e:
-        log.error(
-            f"Failed to parse date value '{date_string}' due to exception: {str(e)}"
-        )
+    except Exception as e:  # noqa: BLE001
+        log.error(f"Failed to parse date value '{date_string}' due to exception: {e!s}")
 
     return dt.strftime("%Y-%m-%d") if dt else ""
 
@@ -156,9 +153,9 @@ def _create_mysql(args, FILES, log):
     DATABASE_NAME = args.temp_db_database
 
     # Use the database and empty all the tables
-    cursor.execute("drop database if exists {0};".format(DATABASE_NAME))
-    cursor.execute("create database {0};".format(DATABASE_NAME))
-    cursor.execute("use {0}".format(DATABASE_NAME))
+    cursor.execute(f"drop database if exists {DATABASE_NAME};")
+    cursor.execute(f"create database {DATABASE_NAME};")
+    cursor.execute(f"use {DATABASE_NAME}")
 
     # Instead of duplicating this file in the repo grab it from the master branch of eFiction
     url = "https://raw.githubusercontent.com/otwcode/open-doors-eFiction/refs/heads/master/opendoors/open-doors-tables-working.sql"
@@ -268,8 +265,8 @@ def _create_mysql(args, FILES, log):
             }
 
             stor = """
-        INSERT INTO {0} (id, fandoms, title, summary, tags, characters, date, url, notes, relationships, rating, warnings)
-        VALUES({1}, '{2}', '{3}', '{4}', '{5}', '{6}', '{7}', '{8}', '{9}', '{10}', '{11}', '{12}');\n""".format(
+        INSERT INTO {} (id, fandoms, title, summary, tags, characters, date, url, notes, relationships, rating, warnings)
+        VALUES({}, '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}');\n""".format(
                 table_name,
                 original_id,
                 final_fandoms.replace(r"\\", "\\"),
@@ -287,24 +284,9 @@ def _create_mysql(args, FILES, log):
             cursor.execute(stor)
         except:
             log.error(
-                "table name: {0}\noriginal id: {1}\nfinal fandoms: '{2}'\ntitle: '{3}'\nsummary: '{4}'\ntags: '{5}'"
-                "\ncharacters: '{6}'\ndate: '{7}'\nfilename: '{8}'\nnotes: '{9}'\npairings: '{10}'\nrating: '{11}'"
-                "\nwarnings: '{12}'\nauthor id: '{13}'".format(
-                    table_name,
-                    original_id,
-                    final_fandoms,
-                    title,
-                    summary,
-                    tags,
-                    characters,
-                    date,
-                    filename,
-                    notes,
-                    pairings,
-                    rating,
-                    warnings,
-                    authorid,
-                )
+                f"table name: {table_name}\noriginal id: {original_id}\nfinal fandoms: '{final_fandoms}'\ntitle: '{title}'\nsummary: '{summary}'\ntags: '{tags}'"
+                f"\ncharacters: '{characters}'\ndate: '{date}'\nfilename: '{filename}'\nnotes: '{notes}'\npairings: '{pairings}'\nrating: '{rating}'"
+                f"\nwarnings: '{warnings}'\nauthor id: '{authorid}'"
             )
             raise
     db.commit()
@@ -313,7 +295,7 @@ def _create_mysql(args, FILES, log):
         try:
             item_auth = """
             INSERT INTO item_authors (author_id, item_id, item_type)
-            VALUES({0}, {1}, '{2}');\n""".format(
+            VALUES({}, {}, '{}');\n""".format(
                 item_info["authorid"], itemid, item_info["itemtype"]
             )
             cursor.execute(item_auth)
@@ -331,5 +313,5 @@ def clean_and_load_data(args, log):
 
 
 if __name__ == "__main__":
-    args = Args().process_args()
+    args = Args.process_args()
     data = _clean_file(args.filepath)

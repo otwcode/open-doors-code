@@ -1,10 +1,11 @@
 import datetime
 import html
 from logging import Logger
+
 from shared_python.Sql import Sql
 
 
-class FinalTables(object):
+class FinalTables:
     def __init__(self, args, sql: Sql, log: Logger):
         self.args = args
         self.sql = sql
@@ -19,9 +20,7 @@ class FinalTables(object):
             original_database = self.original_database
         else:
             original_database = database_name
-        query = "SELECT * FROM `{0}`.`{1}` {2}".format(
-            original_database, table_name, filter
-        )
+        query = f"SELECT * FROM `{original_database}`.`{table_name}` {filter}"
         return self.sql.execute_dict(query)
 
     def _escape_unescape(self, item):
@@ -53,9 +52,7 @@ class FinalTables(object):
             final_database = target_database
         else:
             final_database = self.final_database
-        self.sql.execute(
-            "TRUNCATE `{0}`.`{1}`".format(final_database, output_table_name)
-        )
+        self.sql.execute(f"TRUNCATE `{final_database}`.`{output_table_name}`")
         columns = rows[0].keys()
         values = []
         for row in rows:
@@ -64,7 +61,7 @@ class FinalTables(object):
 
         self.sql.execute(
             f"""
-            INSERT INTO `{final_database}`.`{output_table_name}` ({', '.join(columns)}) VALUES {', '.join(values)}
+            INSERT INTO `{final_database}`.`{output_table_name}` ({", ".join(columns)}) VALUES {", ".join(values)}
           """
         )
 
@@ -72,13 +69,13 @@ class FinalTables(object):
         cols_with_tags = []
         for col, tags in story_tags.items():
             cols_with_tags.append(
-                "{0}='{1}'".format(col, tags.replace("'", "\\'").strip())
+                "{}='{}'".format(col, tags.replace("'", "\\'").strip())
             )
 
         if cols_with_tags:
             self.sql.execute(
                 """
-         UPDATE `{0}`.`{1}` SET {2} WHERE id={3}
+         UPDATE `{}`.`{}` SET {} WHERE id={}
         """.format(
                     self.final_database,
                     output_table_name,

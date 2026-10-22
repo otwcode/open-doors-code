@@ -1,16 +1,15 @@
-# -- coding: utf-8 --
-
 import codecs
 import os
 import re
 
 from pip._vendor.distlib.compat import raw_input
+from pymysql import MySQLError
 
 from shared_python import Common
 
 
 # TODO this code is no longer needed for eFiction and will need to be reviewed for other archive types
-class Chapters(object):
+class Chapters:
     def __init__(self, args, sql, log):
         self.args = args
         self.sql = sql
@@ -38,16 +37,14 @@ class Chapters(object):
                 if has_ids and self._ends_with(filename, extensions):
                     file_path = os.path.join(root, filename)
                     cid = os.path.splitext(filename)[0]
-                    if cid not in file_paths.keys():
+                    if cid not in file_paths:
                         file_paths[cid] = file_path
                     else:
                         duplicate_folder = os.path.split(os.path.split(file_path)[0])[1]
                         messages.append(
                             file_path + " is a duplicate of " + file_paths[cid]
                         )
-                        sql_messages.append(
-                            "SELECT * FROM chapters WHERE id = {0}".format(cid)
-                        )
+                        sql_messages.append(f"SELECT * FROM chapters WHERE id = {cid}")
                         duplicate_chapters[cid] = [
                             {
                                 "folder_name": os.path.split(
@@ -69,30 +66,28 @@ class Chapters(object):
                     file_paths[name] = file_path
 
         if has_duplicates:
-            self.log.warn("\n".join(messages + sql_messages))
-            self.log.warn(duplicate_chapters)
+            self.log.warning("\n".join(messages + sql_messages))
+            self.log.warning(duplicate_chapters)
             folder_name_type = raw_input(
-                "Resolving duplicates: pick the type of the folder name under {0} "
-                "\n1 = author id\n2 = author name\n3 = skip duplicates check\n".format(
-                    chapters_path
-                )
+                f"Resolving duplicates: pick the type of the folder name under {chapters_path} "
+                "\n1 = author id\n2 = author name\n3 = skip duplicates check\n"
             )
             if folder_name_type == "1":
                 for cid, duplicate in duplicate_chapters.items():
                     # look up the author id and add that one to the file_names list
                     sql_author_id = self.sql.execute_and_fetchall(
                         self.sql.database,
-                        "SELECT author_id FROM chapters WHERE id = {0}".format(cid),
+                        ("""SELECT author_id FROM chapters WHERE id = %s""", [cid]),
                     )
                     if len(sql_author_id) > 0:
                         author_id = sql_author_id[0][0]
-                        file_paths[cid] = [
+                        file_paths[cid] = next(
                             dc["path"]
-                            for dc in duplicate_chapters[cid]
+                            for dc in duplicate
                             if dc["folder_name"] == str(author_id)
-                        ][0]
+                        )
             elif folder_name_type == "2":
-                self.log.warn("Not implemented")
+                self.log.warning("Not implemented")
 
         return file_paths
 
@@ -106,7 +101,7 @@ class Chapters(object):
         self.log.info("Processing chapters...")
 
         filenames_are_ids = raw_input("\nChapter file names are chapter ids? Y/N\n")
-        has_ids = True if str.lower(filenames_are_ids) == "y" else False
+        has_ids = str.lower(filenames_are_ids) == "y"
         file_paths = self._gather_and_dedupe(folder, extensions, has_ids)
 
         char_encoding = raw_input(
@@ -128,20 +123,16 @@ class Chapters(object):
                     try:
                         cur = Common.print_progress(cur, total)
                         file_contents = c.read()
-                        query = "UPDATE {0}.chapters SET text=%s WHERE id=%s".format(
-                            self.args.output_database
-                        )
+                        query = f"UPDATE {self.args.output_database}.chapters SET text=%s WHERE id=%s"
                         self.sql.execute(query, (file_contents, int(cid)))
-                    except Exception as e:
+                    except MySQLError as e:
                         self.log.error(
-                            "Error = chapter id: {0} - chapter: {1}\n{2}".format(
-                                cid, chapter_path, str(e)
-                            )
+                            f"Error = chapter id: {cid} - chapter: {chapter_path}\n{e!s}"
                         )
                     finally:
                         pass
         else:
-            for _, chapter_path in file_paths.items():
+            for chapter_path in file_paths.values():
                 path = chapter_path.replace(self.args.chapters_path, "")[1:]
                 if os.sep == "\\":  # if this script is run on windows
                     path = path.replace("\\", "/")
@@ -149,15 +140,11 @@ class Chapters(object):
                     try:
                         cur = Common.print_progress(cur, total)
                         file_contents = c.read()
-                        query = "UPDATE {0}.chapters SET text=%s WHERE url=%s and text=''".format(
-                            self.args.output_database
-                        )
+                        query = f"UPDATE {self.args.output_database}.chapters SET text=%s WHERE url=%s and text=''"
                         self.sql.execute(query, (file_contents, path))
-                    except Exception as e:
+                    except MySQLError as e:
                         self.log.error(
-                            "Error = chapter id: {0} - chapter: {1}\n{2}".format(
-                                path, chapter_path, str(e)
-                            )
+                            f"Error = chapter id: {path} - chapter: {chapter_path}\n{e!s}"
                         )
                     finally:
                         pass

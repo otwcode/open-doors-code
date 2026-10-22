@@ -1,9 +1,10 @@
+#!/usr/bin/env python3
+
 import re
 
 from shared_python.Args import Args
 from shared_python.Sql import Sql
 from shared_python.Tags import Tags
-
 
 if __name__ == "__main__":
     """
@@ -18,9 +19,7 @@ if __name__ == "__main__":
     sql = Sql(args, log)
     tags = Tags(args, sql, log)
     log.info(
-        "Processing tags from stories and bookmarks table in {0}".format(
-            args.temp_db_database
-        )
+        f"Processing tags from stories and bookmarks table in {args.temp_db_database}"
     )
 
     tag_col_list = {}

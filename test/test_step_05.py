@@ -1,13 +1,13 @@
+import argparse
+import importlib
+import os
+import sys
+import unittest
 from collections import defaultdict
 from unittest import TestCase
-import unittest
-from shared_python.Sql import Sql
-from shared_python.Logging import logger
-import argparse
 
-import sys
-import os
-import importlib
+from shared_python.Logging import logger
+from shared_python.Sql import Sql
 
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
@@ -19,16 +19,16 @@ step_05 = importlib.import_module("05-Create-Open-Doors-Tables")
 def testArgs():
     parser = argparse.ArgumentParser(description="Test an archive database")
     args = parser.parse_args()
-    setattr(args, "archive_type", "AA")
-    setattr(args, "db_host", "localhost")
-    setattr(args, "db_user", "root")
-    setattr(args, "db_password", "test")
-    setattr(args, "temp_db_database", "test_working_step_five")
-    setattr(args, "output_database", "unit_test_step_five")
-    setattr(args, "default_fandom", "Fandom C (TV)")
-    setattr(args, "sql_path", "./test/test_data/test_working_tables.sql")
-    setattr(args, "story_ids_to_remove", "")
-    setattr(args, "bookmark_ids_to_remove", "")
+    args.archive_type = "AA"
+    args.db_host = "localhost"
+    args.db_user = "root"
+    args.db_password = "test"
+    args.temp_db_database = "test_working_step_five"
+    args.output_database = "unit_test_step_five"
+    args.default_fandom = "Fandom C (TV)"
+    args.sql_path = "./test/test_data/test_working_tables.sql"
+    args.story_ids_to_remove = ""
+    args.bookmark_ids_to_remove = ""
     return args
 
 
@@ -41,7 +41,7 @@ class TestStepFive(TestCase):
     def test_chapter_table_structure(self):
         step_05.main(self.args, self.log)
 
-        get_indexes = "show index from {}.chapters".format(self.args.output_database)
+        get_indexes = f"show index from {self.args.output_database}.chapters"
         result = self.sql.execute_dict(get_indexes)
 
         col_indexes = defaultdict(list)
@@ -51,9 +51,9 @@ class TestStepFive(TestCase):
         self.assertEqual(len(col_indexes["story_id"]), 1)
 
     def tearDown(self):
-        drop_working = "drop database {}".format(self.args.temp_db_database)
+        drop_working = f"drop database {self.args.temp_db_database}"
         self.sql.execute(drop_working, database=self.args.temp_db_database)
-        drop_final = "drop database {}".format(self.args.output_database)
+        drop_final = f"drop database {self.args.output_database}"
         self.sql.execute(drop_final, database=self.args.output_database)
 
 

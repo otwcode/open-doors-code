@@ -1,10 +1,13 @@
-#!/bin/python3
-from shared_python.Args import Args
-from shared_python.Sql import Sql
+#!/usr/bin/env python3
+
 import re
+
 from prompt_toolkit import print_formatted_text
 from prompt_toolkit.formatted_text import FormattedText
 from prompt_toolkit.shortcuts import clear
+
+from shared_python.Args import Args
+from shared_python.Sql import Sql
 
 # This regex is pulled from the HTML5 spec. Though it is technically not
 # compliant with RFC 5322 ("a willful violation"), it's good enough for our
@@ -53,7 +56,7 @@ def ask_user_for_action(match) -> str:
     while True:
         try:
             return return_from_list(match)
-        except:  # noqa: E722
+        except ListException:
             response = input(
                 f"\n{raw_email} ([W]hitelist, [B]lacklist) ([A]ddress, [D]omain) [C]ontext [R]ewrite domain >\n\t"
             ).lower()
@@ -78,6 +81,10 @@ domains = {}
 addresses = {}
 
 
+class ListException(Exception):
+    pass
+
+
 def return_from_list(match) -> str:
     start, end = match.span()
     raw_email = match.string[start:end]
@@ -94,7 +101,7 @@ def return_from_list(match) -> str:
         return raw_email
     elif domain_entry is False:
         return BAN_TEXT
-    raise Exception("Failed to resolve")
+    raise ListException("Failed to resolve")
 
 
 def escape_for_sql(raw: str) -> str:
@@ -144,7 +151,7 @@ if __name__ == "__main__":
                 addresses[raw_email] = False
             try:
                 return return_from_list(email)
-            except:  # noqa: E722
+            except ListException:
                 return ask_user_for_action(email)
 
         cleared_text = email_regex.sub(replace_func, text)

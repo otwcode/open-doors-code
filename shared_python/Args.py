@@ -1,11 +1,12 @@
-import os
 import argparse
+import os
+
 import yaml
 
 from shared_python.Logging import logger
 
 
-class Args(object):
+class Args:
     def __init__(self):
         self.args = self._process_args()
         self.log = logger(self.args.archive_name)
@@ -142,7 +143,7 @@ class Args(object):
                 else:
                     setattr(args, k, v)
 
-        for arg_name in argdict.keys():
+        for arg_name in argdict:  # noqa: PLC0206
             if getattr(args, arg_name) is None:
                 setattr(args, arg_name, input(argdict[arg_name] + ": "))
 
@@ -157,7 +158,7 @@ class Args(object):
     def _print_args(self, args):
         self.log.info("----------- Open Door Archive Import Parameters --------------")
         for arg in vars(args):
-            self.log.info("{0} = {1}".format(arg, getattr(args, arg)))
+            self.log.info(f"{arg} = {getattr(args, arg)}")
         self.log.info("--------------------------------------------------------------")
 
     def args_for_01(self):
