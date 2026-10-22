@@ -69,22 +69,30 @@ class FinalTables(object):
         )
 
     def populate_story_tags(self, story_id, output_table_name, story_tags):
-        cols_with_tags = []
+        cols_with_tags = {
+            "categories": "",
+            "tags": "",
+            "warnings": "",
+            "characters": "",
+            "fandoms": "",
+            "relationships": "",
+        }
         for col, tags in story_tags.items():
-            cols_with_tags.append(
-                "{0}='{1}'".format(col, tags.replace("'", "\\'").strip())
-            )
+            cols_with_tags.update({col: tags})
 
         if cols_with_tags:
+            query = f"""UPDATE {self.final_database}.{output_table_name} SET categories = %s, tags = %s, warnings = %s, characters = %s, fandoms = %s, relationships = %s WHERE id = %s"""
             self.sql.execute(
-                """
-         UPDATE `{0}`.`{1}` SET {2} WHERE id={3}
-        """.format(
-                    self.final_database,
-                    output_table_name,
-                    ", ".join(cols_with_tags),
-                    story_id,
-                )
+                query,
+                [
+                    cols_with_tags["categories"],
+                    cols_with_tags["tags"],
+                    cols_with_tags["warnings"],
+                    cols_with_tags["characters"],
+                    cols_with_tags["fandoms"],
+                    cols_with_tags["relationships"],
+                    story_id
+                ],
             )
 
     def story_to_final_without_tags(self, story, story_authors, is_story=True):

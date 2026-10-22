@@ -95,8 +95,9 @@ class Sql(object):
     def col_exists(self, col, table, database):
         self.cursor.execute(
             """
-        SELECT * FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = '{0}' AND TABLE_NAME = '{1}' AND COLUMN_NAME = '{2}'
-      """.format(database, table, col)
+        SELECT * FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s AND COLUMN_NAME = %s
+      """,
+            [database, table, col],
         )
         result = self.cursor.fetchone()
         return result is not None
