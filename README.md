@@ -255,6 +255,12 @@ On it we can either type (and press enter):
 Given a comma-separated list of story ids specified in the `story_ids_to_remove` parameter, deletes the corresponding
 rows from the stories table in the final output database.
 
+### Test links in story files
+Note: at the very least, requires links in the story files to be formatted as html, as it uses BeautifulSoup and html parsing to detect links
+
+given chapters filepath and an output file path (which you can specify using the .yml file), writes a csv with each non-relative link, the returned status or error, and the status codes of any automatic redirections
+
+the script prompts the user for the chapter file encoding, so make sure you have run the mojibake tool beforehand!
 
 ## Parameters
 
