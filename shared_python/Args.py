@@ -264,3 +264,20 @@ class Args:
             )
             self._print_args(self.args)
         return self.args
+        
+    def args_for_link_check(self):
+        if self.args.chapters_path is None:
+            self.args.chapters_path = input(
+                "Location of the text files containing the stories:"
+            )
+        if not os.path.exists(self.args.output_folder):
+            os.makedirs(self.args.output_folder)
+        while self.args.output_folder is None or not os.path.isdir(
+            self.args.output_folder
+        ):
+            self.args.output_folder = input("Path for output files: ")
+            if not os.path.exists(self.args.output_folder):
+                os.makedirs(self.args.output_folder)
+        self._print_args(self.args)
+        return self.args
+
