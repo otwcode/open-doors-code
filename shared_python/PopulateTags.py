@@ -63,8 +63,8 @@ class PopulateTags(object):
                 tags_by_type[tag["ao3_tag_type"]].append(tag)
 
             story_tags = self.tags_for_story(story_id, tags_by_type)
+
             self.final.populate_story_tags(story_id, output_table, story_tags)
-            # is there a method for this one?
 
     def populate_tags(self):
         self.log.info("Getting all tags per story or story_link...")
