@@ -13,6 +13,7 @@ def print_progress(cur, total, prog_type="stories"):
     sys.stdout.flush()
     return cur
 
+
 def recursive_story_listdir(main_path):
     storyfiles = [
         x.name for x in os.scandir(main_path) if "html" in x.name or "txt" in x.name

@@ -264,7 +264,7 @@ class Args:
             )
             self._print_args(self.args)
         return self.args
-        
+
     def args_for_link_check(self):
         if self.args.chapters_path is None:
             self.args.chapters_path = input(
@@ -280,4 +280,3 @@ class Args:
                 os.makedirs(self.args.output_folder)
         self._print_args(self.args)
         return self.args
-
